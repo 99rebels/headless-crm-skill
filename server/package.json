@@ -1,0 +1,25 @@
+{
+  "name": "crm-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Headless AI-native CRM — core logic + MCP adapter over Supabase/Postgres",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/mcp/server.ts",
+    "mcp": "tsx --env-file=.env src/mcp/server.ts",
+    "smoke": "tsx --env-file=.env src/smoke.ts",
+    "mcp-smoke": "tsx --env-file=.env src/mcp-smoke.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
