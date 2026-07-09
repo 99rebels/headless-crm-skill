@@ -5,9 +5,11 @@
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { db } from "./core/db.js";
+import { getDb, initDb } from "./core/db.js";
 import { createWorkspace } from "./core/workspace.js";
 import { buildServer } from "./mcp/build.js";
+
+initDb(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
 function ok(label: string, cond: boolean) {
   console.log(`${cond ? "✅" : "❌"} ${label}`);
@@ -88,7 +90,7 @@ async function main() {
     console.log(JSON.stringify(fetched, null, 2));
   } finally {
     await client.close();
-    await db.from("workspace").delete().eq("id", ws.id);
+    await getDb().from("workspace").delete().eq("id", ws.id);
     console.log("\n🧹 cleaned up throwaway workspace");
   }
 

@@ -13,26 +13,45 @@ Supabase / Postgres  ──►  CORE (business logic, interface-agnostic)  ─�
 ```
 
 The **core** knows nothing about MCP or HTTP. All validation, association integrity, and
-(later) guardrails live there, so every interface shares one implementation. Adding a REST
-API or web UI later is a thin adapter, not a rewrite. This is why we build the core first
-and put MCP over it — without prematurely building a full public API.
+(later) guardrails live there, so every interface shares one implementation. There are
+**two adapters over the same core today**: a local **stdio** MCP and a deployed
+**Cloudflare Worker** (what Claude.ai connects to). Tools are registered once in
+`src/mcp/build.ts` (`registerCrmTools`) and reused by both.
 
 ## Layout
 
 ```
 db/migrations/      SQL migrations (apply in Supabase)
+wrangler.jsonc      Cloudflare Worker config (the deployed adapter)
 src/
   core/             the headless CRM: types + logic. No MCP/HTTP awareness.
     types.ts        the domain contract (mirrors the schema)
-  mcp/              the MCP adapter (thin — calls core). server.ts = entry point
+    db.ts           initDb(url,key) / getDb() — env-agnostic so it runs on Node AND Workers
+    person.ts, workspace.ts
+  mcp/
+    build.ts        registerCrmTools(server, workspaceId) — the tools, shared by both adapters
+    server.ts       local stdio entry (Inspector / local clients)
+  worker/
+    index.ts        Cloudflare Worker: OAuth shell + McpAgent, for Claude.ai
+  smoke.ts, mcp-smoke.ts   verification scripts
 ```
 
-## Setup
+## Setup (local)
 
-1. Create a Supabase project (done by Rian).
-2. Apply `db/migrations/0001_init.sql` — Supabase dashboard → SQL Editor → paste → Run.
-3. Copy `.env.example` → `.env` and fill in the values from Supabase (see below).
-4. `npm install`, then `npm run dev`.
+1. Supabase project exists; schema applied (`db/migrations/0001_init.sql` in the SQL Editor).
+2. Copy `.env.example` → `.env`, fill from Supabase (below).
+3. `npm install`. Verify: `npm run smoke` and `npm run mcp-smoke` (both should pass).
+
+## Deploy (Claude.ai)
+
+```
+npm run deploy                              # deploy the Worker to Cloudflare
+npx wrangler secret put SUPABASE_URL        # set once (paste value)
+npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+npm run cf-build                            # dry-run bundle (no deploy) to validate a build
+```
+Live at `headless-crm-mcp.rianoleary.workers.dev/mcp` — add as a custom connector in
+Claude.ai (no OAuth creds to enter; auto-approve). OAuth via `@cloudflare/workers-oauth-provider`.
 
 ## Environment (never commit real values)
 
@@ -46,5 +65,7 @@ enforces `workspace_id` scoping on every query** (RLS policies come later).
 
 ## Status
 
-Phase 1 (walking skeleton) in progress: schema ✔. Next: core CRUD for one object →
-one MCP tool → operate it in Claude, pointed at the live Supabase.
+**Phase 1 complete — live on Claude.ai.** Schema ✔; `contact` tools ✔ (create/find/get/update
+with read-before-write dedup); deployed Worker verified end-to-end (contact created by talking
+to Claude.ai). **Next:** add `organizations` + `deals` + `associations` tools (mirror `person.ts`
+→ `registerCrmTools`), then on-demand enrichment + a dashboard skill. See `../START-HERE.md` §5.

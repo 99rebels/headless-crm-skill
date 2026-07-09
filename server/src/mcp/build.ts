@@ -22,9 +22,9 @@ const text = (obj: unknown) => ({
 });
 const errorText = (msg: string) => ({ ...text(msg), isError: true as const });
 
-export function buildServer(workspaceId: UUID): McpServer {
-  const server = new McpServer({ name: "crm", version: "0.1.0" });
-
+/** Register the CRM tools onto any McpServer, scoped to one workspace. Shared by the
+ *  stdio adapter (buildServer, below) and the Cloudflare Worker adapter. */
+export function registerCrmTools(server: McpServer, workspaceId: UUID): void {
   server.registerTool(
     "create_contact",
     {
@@ -39,7 +39,7 @@ export function buildServer(workspaceId: UUID): McpServer {
         title: z.string().optional(),
         lifecycle_stage: z.string().optional().describe("lead | prospect | client | past"),
         attributes: z
-          .record(z.unknown())
+          .record(z.string(), z.unknown())
           .optional()
           .describe("flexible extra facts, e.g. { preferred_name: 'Kate' }"),
       },
@@ -126,7 +126,7 @@ export function buildServer(workspaceId: UUID): McpServer {
         phone: z.string().optional(),
         title: z.string().optional(),
         lifecycle_stage: z.string().optional(),
-        attributes: z.record(z.unknown()).optional(),
+        attributes: z.record(z.string(), z.unknown()).optional(),
       },
     },
     async (args) => {
@@ -139,6 +139,10 @@ export function buildServer(workspaceId: UUID): McpServer {
       }
     },
   );
+}
 
+export function buildServer(workspaceId: UUID): McpServer {
+  const server = new McpServer({ name: "crm", version: "0.1.0" });
+  registerCrmTools(server, workspaceId);
   return server;
 }

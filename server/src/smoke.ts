@@ -3,8 +3,10 @@
 // It creates a throwaway workspace + contact, exercises read/update/dedup, prints results,
 // then cleans up after itself (deletes the workspace, which cascades to the person).
 
-import { db } from "./core/db.js";
+import { getDb, initDb } from "./core/db.js";
 import { createWorkspace } from "./core/workspace.js";
+
+initDb(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 import {
   createPerson,
   getPerson,
@@ -54,7 +56,7 @@ async function main() {
     console.log(JSON.stringify(updated, null, 2));
   } finally {
     // clean up — deleting the workspace cascades to the person
-    await db.from("workspace").delete().eq("id", ws.id);
+    await getDb().from("workspace").delete().eq("id", ws.id);
     console.log("\n🧹 cleaned up throwaway workspace");
   }
 

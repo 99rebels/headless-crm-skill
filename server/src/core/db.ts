@@ -1,21 +1,28 @@
-// core/db.ts — the single Supabase client for the server.
-// Uses the service-role key (server-only, bypasses RLS). The core layer is responsible
-// for scoping every query by workspace_id until real RLS policies land (auth workstream).
+// core/db.ts — the Supabase client, initialised by each adapter (not from import-time env,
+// so the same core runs on Node/stdio AND on Cloudflare Workers).
+// Uses the service-role key (server-only, bypasses RLS). The core scopes every query by
+// workspace_id until real RLS policies land (auth workstream).
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const url = process.env.SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+let _db: SupabaseClient | null = null;
 
-if (!url || !serviceKey) {
-  throw new Error(
-    "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Copy .env.example to .env and fill them in.",
-  );
+/** Call once at adapter startup with the environment's Supabase URL + service-role key. */
+export function initDb(url: string, serviceKey: string): SupabaseClient {
+  if (!url || !serviceKey) {
+    throw new Error("initDb: missing Supabase URL or service-role key.");
+  }
+  _db = createClient(url, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  return _db;
 }
 
-export const db: SupabaseClient = createClient(url, serviceKey, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+/** Get the initialised client. Throws if an adapter forgot to call initDb first. */
+export function getDb(): SupabaseClient {
+  if (!_db) throw new Error("DB not initialised — call initDb(url, serviceKey) at startup.");
+  return _db;
+}
 
 /** Narrow Supabase's error into a thrown Error so callers can use try/catch uniformly. */
 export function orThrow<T>(res: { data: T | null; error: { message: string } | null }): T {

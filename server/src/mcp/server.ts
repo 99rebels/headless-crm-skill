@@ -4,10 +4,12 @@
 // Claude.ai come later.
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { initDb } from "../core/db.js";
 import { getOrCreateWorkspaceByName } from "../core/workspace.js";
 import { buildServer } from "./build.js";
 
 async function main() {
+  initDb(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const ws = await getOrCreateWorkspaceByName("Dev Workspace");
   const server = buildServer(ws.id);
   const transport = new StdioServerTransport();

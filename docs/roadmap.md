@@ -67,8 +67,11 @@ When both a relevant local Skill and a relevant MCP-served skill exist, which do
 
 ## 5. Phased plan (priority order)
 
+> **⏰ MVP demo sprint (Fri–Sun, for a Mon 2026-07-13 demo).** Near-term ordering differs from the long-term phases below: (1) widen tools to the *demo-necessary* set — organizations + deals + associations + dashboard reads (not exhaustive CRUD); (2) on-demand auto-enrichment (start early — it's the risk + the wow); (3) the dashboard/pipeline view skill; (4) polish + rehearse + fallback recording. See `START-HERE.md` §5 for the detailed steps.
+
+
 - **Phase 0 — ✅ DONE:** data model designed + validated against Salesforce/HubSpot/Attio (`data-model.md`); tenancy = row-level security to start (R3); R1 downgraded (skills-over-MCP is a convenience, file-bundle fallback is fine).
-- **Phase 1 — 🟡 IN PROGRESS (skeleton proven locally):** schema live in Supabase; the headless **core** (`server/src/core/`) + thin **MCP adapter** (`server/src/mcp/`) for the `contact` object are **built and verified** — `npm run smoke` (core→DB) and `npm run mcp-smoke` (client→tools→core→DB, incl. read-before-write dedup) both pass, and the tools work in the MCP Inspector. **Remaining:** deploy the server publicly + add the OAuth handshake so it's reachable from **Claude.ai**, then operate a contact by talking to Claude. *Only after that full path works do we widen (Phase 3).*
+- **Phase 1 — ✅ DONE (live on Claude.ai):** schema live in Supabase; headless **core** + **two adapters** over it (local stdio `src/mcp/` + deployed Cloudflare **Worker** `src/worker/index.ts`, OAuth-wrapped). Verified locally (`npm run smoke`, `npm run mcp-smoke`) *and* end-to-end — **a contact was created by talking to Claude.ai**, writing to Supabase. deploy+OAuth reused Spike A's `@cloudflare/workers-oauth-provider` auto-approve flow. Only `contact` has tools so far.
 - **Phase 2 — self-maintenance spike (EARLY):** prove entity-resolution + safe-write quality on real comms for one flow, client-side, on a scheduled task. The make-or-break. Build on the read-before-write dedup seed already in `server/src/core/person.ts` (against our own DB). If this can't be made reliable, the product is dead — learn it here, cheaply.
 - **Phase 3 — widen:** full data-model CRUD (organizations, deals, interactions, tasks — copy the proven `person` pattern), the view-rendering skills, the approval UX/digest.
 - **Phase 4 — productionize:** multi-tenant hardening, security, compliance gate — before the first paying customer with real data.

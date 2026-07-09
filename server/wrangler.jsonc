@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "headless-crm-mcp",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2025-06-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [{ "name": "MCP_OBJECT", "class_name": "CrmMCP" }]
+  },
+  "kv_namespaces": [
+    { "binding": "OAUTH_KV", "id": "0a0866baf7f84f01bdbb6e691f2d8c72" }
+  ],
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["CrmMCP"] }
+  ],
+  "observability": { "enabled": true }
+}

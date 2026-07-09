@@ -10,16 +10,23 @@
     "smoke": "tsx --env-file=.env src/smoke.ts",
     "mcp-smoke": "tsx --env-file=.env src/mcp-smoke.ts",
     "build": "tsc",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cf-build": "wrangler deploy --dry-run --outdir dist-worker",
+    "cf-dev": "wrangler dev",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
+    "@cloudflare/workers-oauth-provider": "^0.8.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@supabase/supabase-js": "^2.45.0",
-    "zod": "^3.23.0"
+    "agents": "^0.17.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260707.1",
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "wrangler": "^4.107.0"
   }
 }

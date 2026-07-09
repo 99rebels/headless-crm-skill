@@ -4,7 +4,7 @@
 // Note the read-before-write helper `findPeopleByEmail` — it's the seed of the
 // self-maintenance loop's dedup: "does a contact with this email already exist?"
 
-import { db, orThrow } from "./db.js";
+import { getDb, orThrow } from "./db.js";
 import type { Attributes, Person, UUID } from "./types.js";
 
 export interface CreatePersonInput {
@@ -35,7 +35,7 @@ export async function createPerson(
 ): Promise<Person> {
   const { primary_email, emails } = normaliseEmails(input);
   return orThrow(
-    await db
+    await getDb()
       .from("person")
       .insert({
         workspace_id: workspaceId,
@@ -54,7 +54,7 @@ export async function createPerson(
 }
 
 export async function getPerson(workspaceId: UUID, id: UUID): Promise<Person | null> {
-  const { data, error } = await db
+  const { data, error } = await getDb()
     .from("person")
     .select()
     .eq("workspace_id", workspaceId)
@@ -70,7 +70,7 @@ export async function findPeople(
   opts: { limit?: number } = {},
 ): Promise<Person[]> {
   return orThrow(
-    await db
+    await getDb()
       .from("person")
       .select()
       .eq("workspace_id", workspaceId)
@@ -88,7 +88,7 @@ export async function findPeopleByEmail(
   const needles = emails.map((e) => e.trim().toLowerCase()).filter(Boolean);
   if (needles.length === 0) return [];
   return orThrow(
-    await db
+    await getDb()
       .from("person")
       .select()
       .eq("workspace_id", workspaceId)
@@ -115,7 +115,7 @@ export async function updatePerson(
   }
 
   return orThrow(
-    await db
+    await getDb()
       .from("person")
       .update(patch)
       .eq("workspace_id", workspaceId)
