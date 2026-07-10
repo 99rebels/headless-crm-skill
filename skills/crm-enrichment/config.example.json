@@ -22,7 +22,7 @@
 
   "vocab": {
     "_comment": "The CRM's controlled vocabulary, mirrored from workspace.settings so proposals use valid values. Extend as your pipeline evolves.",
-    "lifecycle_stages": ["lead", "prospect", "client", "past"],
+    "lifecycle_stages": ["lead", "prospect", "client", "partner", "past"],
     "deal_stages": ["discovery", "proposal", "verbal", "won", "lost"]
   }
 }

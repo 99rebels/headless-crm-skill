@@ -18,7 +18,7 @@
   },
 
   "vocab": {
-    "lifecycle_stages": ["lead", "prospect", "client", "past"],
+    "lifecycle_stages": ["lead", "prospect", "client", "partner", "past"],
     "deal_stages": ["discovery", "proposal", "verbal", "won", "lost"]
   }
 }

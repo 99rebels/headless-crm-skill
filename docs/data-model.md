@@ -40,7 +40,7 @@
 | emails | text[] | ALL known emails/aliases — load-bearing for dedup in the self-maintenance loop (john@acme.com vs jsmith@…) |
 | phone | text | |
 | title | text | |
-| lifecycle_stage | text | `lead` / `prospect` / `client` / `past` — configurable in `workspace.settings`. Replaces the legacy separate "Lead" object (HubSpot/Attio do this too); people filter by it constantly, so it earns a spine column |
+| lifecycle_stage | text | `lead` / `prospect` / `client` / `partner` / `past` — configurable in `workspace.settings`. Replaces the legacy separate "Lead" object (HubSpot/Attio do this too); people filter by it constantly, so it earns a spine column. (`partner` is really a relationship *type* more than a pipeline stage — pragmatically folded in here, like HubSpot's "Other"; a separate relationship-type field is a future call if it earns one.) |
 | last_interaction_at | timestamptz | denormalised so "who haven't I talked to in a while" is a cheap query |
 | owner_id | uuid | |
 | **attributes** | jsonb | ★ AI-managed facts: `{preferred_name, decision_style, budget_reset, …}` |
