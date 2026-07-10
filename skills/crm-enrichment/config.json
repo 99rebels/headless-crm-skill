@@ -1,0 +1,24 @@
+{
+  "_note": "DEMO config for the email-myself flow. The fixtures are sent from 99rebels.info@gmail.com to itself, so that address goes in `ignore` (not `self`): that stops it being added as a contact while STILL letting the loop read the self-sent fixtures (a `self` address would be filtered out at scope time). In production, put the operator's real address in `self.emails` instead.",
+
+  "self": {
+    "emails": [],
+    "domains": []
+  },
+
+  "scope": {
+    "lookback": "7d",
+    "exclude_label": "crm-processed",
+    "gmail_query_extra": "-category:promotions -category:social -category:updates -in:chats"
+  },
+
+  "ignore": {
+    "senders": ["99rebels.info@gmail.com", "no-reply@", "noreply@", "notifications@", "do-not-reply@", "billing@", "receipts@"],
+    "domains": []
+  },
+
+  "vocab": {
+    "lifecycle_stages": ["lead", "prospect", "client", "past"],
+    "deal_stages": ["discovery", "proposal", "verbal", "won", "lost"]
+  }
+}
