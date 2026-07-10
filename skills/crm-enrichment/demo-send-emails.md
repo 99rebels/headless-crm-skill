@@ -12,8 +12,8 @@ yourself), so they land in the inbox the enrichment loop reads.
 
 ```
 Please send the following FOUR emails, each as a separate message, TO: 99rebels.info@gmail.com.
-Use the exact subject and body given for each — keep the signatures, they matter. If you can only
-create drafts, create all four and tell me.
+No CC and no BCC — just send each one to that address. Use the exact subject and body given for
+each — keep the signatures, they matter. If you can only create drafts, create all four and tell me.
 
 ────────────────────────────────────────────────────────
 EMAIL 1
