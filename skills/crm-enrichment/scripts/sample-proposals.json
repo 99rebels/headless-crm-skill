@@ -1,11 +1,13 @@
 {
-  "_comment": "Sample proposals matching the demo scenario — used to preview/test render_digest.py without running the full loop. Not read by the skill at runtime.",
+  "_comment": "Sample proposals matching the demo scenario — used to preview/test render_digest.py without running the full loop. Not read by the skill at runtime. Shows both email and calendar sources.",
   "emails_reviewed": 4,
+  "events_reviewed": 3,
   "new_contacts": [
     {
       "title": "Priya Nair",
       "subtitle": "CEO · priya@caldergroup.com · lead",
       "detail": "→ works_at Calder & Co (new)",
+      "source": "email",
       "confidence": "high",
       "evidence": {
         "reason": "Introduced to you as a prospect and Cc'd on the thread, so she's a direct contact worth adding as a lead.",
@@ -19,6 +21,7 @@
       "title": "Tom Reyes",
       "subtitle": "CFO · tom@northwind.co",
       "detail": "→ works_at Northwind Logistics (existing)",
+      "source": "email",
       "confidence": "high",
       "evidence": {
         "reason": "New finance contact at Northwind, an existing client — added and linked to the existing company.",
@@ -27,12 +30,26 @@
         "subject": "Re: Q3 numbers",
         "date": "9 Jul 2026"
       }
+    },
+    {
+      "title": "Marcus Webb",
+      "subtitle": "marcus@brightpathpartners.com · lead",
+      "detail": "→ works_at Brightpath Partners (new)",
+      "source": "calendar",
+      "confidence": "high",
+      "evidence": {
+        "reason": "An external attendee on an upcoming intro call — worth adding ahead of the meeting.",
+        "snippet": "Event: Intro call — Brightpath ops · Tue 15 Jul, 3:00pm",
+        "from": "Google Calendar",
+        "date": "upcoming 15 Jul 2026"
+      }
     }
   ],
   "new_organizations": [
     {
       "title": "Calder & Co",
       "subtitle": "caldergroup.com",
+      "source": "email",
       "confidence": "high",
       "evidence": {
         "reason": "Priya's company, named with its domain — no matching org in the CRM, so it's new.",
@@ -47,6 +64,7 @@
       "title": "Calder & Co — fractional ops engagement",
       "subtitle": "discovery · open",
       "detail": "→ Priya Nair as decision_maker",
+      "source": "email",
       "confidence": "low",
       "evidence": {
         "reason": "A possible opportunity — they've expressed a need, but nothing concrete yet, so starting it at discovery.",
@@ -60,6 +78,7 @@
     {
       "title": "Meridian — fractional COO engagement",
       "subtitle": "stage: proposal → verbal · close date set to 1 Sep 2026",
+      "source": "email",
       "confidence": "high",
       "evidence": {
         "reason": "David confirmed budget approval and a start date, so the deal has moved from proposal to a verbal yes.",
@@ -70,10 +89,25 @@
       }
     }
   ],
+  "updates": [
+    {
+      "title": "Sarah Mills",
+      "subtitle": "last interaction → 8 Jul 2026",
+      "source": "calendar",
+      "confidence": "high",
+      "evidence": {
+        "reason": "You had a meeting with Sarah this week, so her last-interaction date is refreshed.",
+        "snippet": "Event: Northwind ops sync · Mon 8 Jul, 10:00am",
+        "from": "Google Calendar",
+        "date": "8 Jul 2026"
+      }
+    }
+  ],
   "conflicts": [
     {
       "title": "David Okafor",
       "field": "title",
+      "source": "email",
       "current": "Founder",
       "proposed": "CEO",
       "evidence": {

@@ -16,33 +16,49 @@ chore and churn — so quality here is the whole ballgame (`concept.md` §8.2–
 
 ## The one architectural decision that shapes everything: it runs client-side
 
-The loop runs **in the user's own Claude**, using **their own Gmail connector**. Raw email is read
-there and **never reaches our server** — only the *approved, structured* CRM updates do. This is the
-single biggest liability-reducing decision in the product: it keeps our compliance surface to
-ordinary CRM records, not raw comms (`roadmap.md` §1). **Never** route raw email content through the
-CRM server. That's why the loop is a *skill* (client-side) and not a server job.
+The loop runs **in the user's own Claude**, using **their own connectors** (Gmail, Google Calendar).
+Raw email/event content is read there and **never reaches our server** — only the *approved,
+structured* CRM updates do. This is the single biggest liability-reducing decision in the product: it
+keeps our compliance surface to ordinary CRM records, not raw comms (`roadmap.md` §1). **Never** route
+raw email/event content through the CRM server. That's why the loop is a *skill* (client-side), not a
+server job.
 
-## The pipeline, and why each stage is shaped the way it is
+## Sources feed one shared core
+
+The second load-bearing decision: **sources are pluggable; the core is shared.** Each source (Gmail,
+Calendar, later Slack/Granola) is a thin *reader* that emits candidate facts. They all flow into one
+source-agnostic **core** — reconcile → digest → approve → write.
 
 ```
-① SCOPE      Gmail query (time window + -label:crm-processed)   cheap metadata only
-② CLASSIFY   find_contacts / find_organizations                 DB reads, no tokens → KNOWN vs NEW
-③ READ       get_thread on survivors only                       the only place body-tokens are spent
-④ EXTRACT    LLM → facts fitting the CRM schema                 the ONLY fuzzy step
-⑤ RECONCILE  diff into new / updates / deal_updates / conflicts deterministic
-⑥ APPROVE    render digest (HTML) → user approves in chat       nothing written yet
-⑦ WRITE      create/update/link via MCP tools                   approved items only
-⑧ CLOSE      label handled threads; offer to grow the ignore-list
+SOURCES (readers, source-specific)          CORE (shared, source-agnostic)
+  Gmail:    scope → classify → read → extract  ┐
+  Calendar: scope → extract attendees/dates    ┼─►  reconcile (dedupe ACROSS sources)
+  (Slack…)                                     ┘        → render digest → approve → write
 ```
 
-- **Token discipline (②③):** we filter on *cheap* Gmail metadata first and only fetch full bodies for
-  survivors. We do **not** gate on "already in the CRM" — discovering *new* people/companies is half
-  the value, so unknown senders must still be read; the CRM lookup only *classifies* create-vs-update
-  and supplies the existing record as context.
-- **Script-heavy split (④ vs the rest):** the LLM does only what's genuinely fuzzy — reading prose
-  and extracting facts. Filtering, existence checks, reconciliation, and rendering are mechanical and
-  live in code. Cheaper *and* more reliable (`roadmap.md` §2.6). The digest renderer
-  (`render_digest.py`) is the clearest example: deterministic, identical every run.
+Why one skill with internal source-split, **not** separate skills per source: (a) Claude skills can't
+share code across bundles — separate skills would duplicate the renderer + reconcile logic; (b)
+**cross-source dedup needs a single reconcile pass** — the same person from an email *and* a calendar
+invite must collapse to one proposal, which is impossible if sources run as isolated skills; (c) one
+calm approval digest is the product's UX, not two. Adding a source = adding a reader module in
+`SKILL.md`; the core is untouched.
+
+- **Token discipline (Gmail):** filter on *cheap* metadata (from/subject/snippet) first; only fetch
+  full bodies for survivors. We do **not** gate on "already in the CRM" — discovering *new*
+  people/companies is half the value; the CRM lookup only *classifies* create-vs-update and supplies
+  the existing record as context.
+- **Calendar's contribution:** attendees → new contacts/orgs (deduped by email/domain), and
+  crucially **`last_interaction_at`** — a past meeting refreshes when you last spoke to someone, which
+  powers the dashboard's "who haven't I talked to in a while." We take *only the timestamp* from
+  calendar for v1; **full interaction/meeting-note records stay deferred** (a single-channel timeline
+  is misleading until more sources land — `data-model.md`). `last_interaction_at` is a special case of
+  the overwrite guardrail: a **more-recent date is an enrichment, never a conflict** (monotonic).
+- **Script-heavy split:** the LLM does only what's genuinely fuzzy — reading prose/events and
+  extracting facts. Filtering, existence checks, reconciliation, and rendering are mechanical and live
+  in code. Cheaper *and* more reliable (`roadmap.md` §2.6). `render_digest.py` is the clearest example:
+  deterministic, identical every run; each proposal carries a `source` so the digest badges it 📧/📅.
+- **Idempotency:** Gmail uses a `crm-processed` label as a watermark. Calendar has no label, and
+  doesn't need one — contacts/orgs dedupe on re-run, and `last_interaction_at` only moves forward.
 
 ## The guardrails (executed, not prose)
 
@@ -64,19 +80,22 @@ Safety comes from rules that *run*, not from the model's self-reported confidenc
 The digest is **skills-as-UI** (the one piece of v1 that carried over): a skill renders a
 self-contained HTML view on demand. **Constraint:** an artifact in Claude.ai **cannot call our tools
 back** (sandbox CSP). So the model is: **display in HTML, decide in chat.** The digest is for
-*reviewing* (grouped changes, evidence in `<details>` dropdowns — an "AI overview" reason + the
-italic email quote); approval happens *conversationally*; then the skill executes the writes. Don't
-design buttons that try to write directly — they can't.
+*reviewing* (changes grouped by *type* — not by source — each with a 📧/📅 source badge and evidence
+in a `<details>` "AI overview" dropdown: a one-line reason + the italic source quote); approval
+happens *conversationally*; then the skill executes the writes. Don't design buttons that try to write
+directly — they can't. (Grouping by change-type keeps related changes together; the per-item badge
+carries provenance without fragmenting the view.)
 
 Two UI surfaces, kept separate: this **approval digest** (part of enrichment) vs. the **pipeline
 dashboard** (a separate view skill). Same technique, different job.
 
 ## Config — the only tuning surface (deliberately small)
 
-`config.example.json`: `self` (identity — never CRM yourself; **mandatory**), `scope` (lookback +
-the `crm-processed` watermark label), `ignore` (senders/domains to never add — grows when the user
-rejects an add), `vocab` (valid lifecycle/deal stages). The shape is open JSON so we add fields
-later without migration; resist growing it until the core loop is proven.
+`config.example.json`: `self` (identity — never CRM yourself; **mandatory**), `scope` (Gmail lookback
++ `crm-processed` watermark label; calendar look-back/ahead windows), `ignore` (senders/domains to
+never add — grows when the user rejects an add), `vocab` (valid lifecycle/deal stages, incl.
+`partner`). The shape is open JSON so we add fields later without migration; resist growing it until
+the core loop is proven.
 
 ## Files
 
@@ -89,10 +108,13 @@ later without migration; resist growing it until the core loop is proven.
 
 ## Status (2026-07-10)
 
-- **Built and locally verified:** digest renderer (full/empty/sparse cases), seed script (idempotent,
-  2/2/2/4), the tool write-path (via `mcp-smoke`). Delivery = bundled skill files.
-- **NOT yet proven — the open risk:** extraction quality on *real* email (stage ④). Everything around
-  the model is proven; the model reading real inboxes and producing correct proposals can only be
-  validated in a live Claude.ai run (Gmail connector on the dedicated demo account). That live test is
-  the immediate next step and the thing to be honest about — feasibility of the scaffolding ≠ quality
-  of the extraction.
+- **Gmail source: live-tested and passing.** A real run on a *noisy* inbox extracted correctly,
+  deduped (no duplicate orgs), fired the guardrails (title conflict flagged; a "did she leave?"
+  inference correctly *not* acted on), and the worthiness filter held — security + Calendly noise were
+  seen and declined, zero junk written. This is the first real evidence the differentiator works.
+  (Feasibility ≠ desirability — proves the mechanism is good, not that customers want it.)
+- **Calendar source: built, not yet live-tested.** Reader + `last_interaction_at` + cross-source
+  dedup are written and the renderer/badges are verified locally; the live Google Calendar run is the
+  next validation.
+- **Locally verified throughout:** digest renderer (full/empty/sparse, source badges), seed script
+  (idempotent, 2/2/2/4), the tool write-path (via `mcp-smoke`). Delivery = bundled skill zip.

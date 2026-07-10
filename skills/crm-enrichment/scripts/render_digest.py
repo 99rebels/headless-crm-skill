@@ -27,12 +27,14 @@ Item = {
   "title":      "Priya Nair",                      # required — the headline
   "subtitle":   "CEO · priya@caldergroup.com",     # optional — one grey line under the title
   "detail":     "→ works_at Calder & Co (existing)",# optional — a second grey line (e.g. links)
+  "source":     "email" | "calendar",             # optional — which source surfaced this (badge)
   "confidence": "high" | "low",                    # optional — "low" shows a 'mentioned only' badge
   "evidence":   Evidence                           # optional — the <details> dropdown
 }
 Conflict = {
   "title": "David Okafor", "field": "title",
   "current": "Founder", "proposed": "CEO",
+  "source": "email" | "calendar",                 # optional — badge
   "evidence": Evidence
 }
 Evidence = {
@@ -57,8 +59,25 @@ SECTIONS = [
 ]
 
 
+SOURCE_LABELS = {"email": "📧 email", "calendar": "📅 calendar"}
+
+
 def esc(v) -> str:
     return html.escape(str(v)) if v is not None else ""
+
+
+def render_badges(item: dict) -> str:
+    """Small chips after a title: which source surfaced it, and (for people) a confidence flag."""
+    out = ""
+    src = item.get("source")
+    if src in SOURCE_LABELS:
+        out += f"<span class='badge badge-source'>{SOURCE_LABELS[src]}</span>"
+    if item.get("confidence") == "low":
+        out += (
+            "<span class='badge badge-low' title='Only mentioned, not a direct correspondent'>"
+            "mentioned only</span>"
+        )
+    return out
 
 
 def render_evidence(ev: dict) -> str:
@@ -79,14 +98,11 @@ def render_evidence(ev: dict) -> str:
 
 
 def render_item(item: dict) -> str:
-    badge = ""
-    if item.get("confidence") == "low":
-        badge = "<span class='badge badge-low' title='Only mentioned in the email body, not a direct correspondent'>mentioned only</span>"
     subtitle = f"<div class='sub'>{esc(item['subtitle'])}</div>" if item.get("subtitle") else ""
     detail = f"<div class='sub detail'>{esc(item['detail'])}</div>" if item.get("detail") else ""
     return (
         "<li class='item'>"
-        f"<div class='title'>{esc(item.get('title', ''))}{badge}</div>"
+        f"<div class='title'>{esc(item.get('title', ''))}{render_badges(item)}</div>"
         f"{subtitle}{detail}"
         f"{render_evidence(item.get('evidence'))}"
         "</li>"
@@ -101,7 +117,7 @@ def render_conflict(c: dict) -> str:
     )
     return (
         "<li class='item conflict'>"
-        f"<div class='title'>{esc(c.get('title', ''))} · <span class='field'>{esc(c.get('field',''))}</span></div>"
+        f"<div class='title'>{esc(c.get('title', ''))} · <span class='field'>{esc(c.get('field',''))}</span>{render_badges(c)}</div>"
         f"<div class='change'>{change}</div>"
         f"{render_evidence(c.get('evidence'))}"
         "</li>"
@@ -123,10 +139,16 @@ def render_section(emoji: str, heading: str, items: list, conflict: bool = False
 
 def render(data: dict) -> str:
     total = sum(len(data.get(k, [])) for k, _, _ in SECTIONS) + len(data.get("conflicts", []))
-    reviewed = data.get("emails_reviewed")
     sub = f"{total} proposed change{'s' if total != 1 else ''}"
-    if reviewed is not None:
-        sub += f" · {reviewed} email{'s' if reviewed != 1 else ''} reviewed"
+    reviewed = []
+    if data.get("emails_reviewed") is not None:
+        e = data["emails_reviewed"]
+        reviewed.append(f"{e} email{'s' if e != 1 else ''}")
+    if data.get("events_reviewed") is not None:
+        v = data["events_reviewed"]
+        reviewed.append(f"{v} calendar event{'s' if v != 1 else ''}")
+    if reviewed:
+        sub += " · " + " + ".join(reviewed) + " reviewed"
 
     body = "".join(render_section(e, h, data.get(k, [])) for k, e, h in SECTIONS)
     body += render_section("⚠️", "Needs your call", data.get("conflicts", []), conflict=True)
@@ -177,6 +199,7 @@ TEMPLATE = """<!doctype html>
   .badge { font-size:11px; font-weight:600; padding:1px 7px; border-radius:999px; margin-left:8px;
     vertical-align:middle; }
   .badge-low { background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line); }
+  .badge-source { background:var(--bg); color:var(--muted); border:1px solid var(--line); font-weight:500; }
   details.ev { margin-top:7px; }
   details.ev summary { cursor:pointer; color:var(--accent); font-size:12.5px; list-style:none;
     display:inline-flex; align-items:center; gap:5px; user-select:none; }

@@ -9,7 +9,9 @@
   "scope": {
     "lookback": "7d",
     "exclude_label": "crm-processed",
-    "gmail_query_extra": "-category:promotions -category:social -category:updates -in:chats"
+    "gmail_query_extra": "-category:promotions -category:social -category:updates -in:chats",
+    "calendar_lookback": "14d",
+    "calendar_lookahead": "7d"
   },
 
   "ignore": {
