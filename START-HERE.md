@@ -9,8 +9,9 @@ what's next. Read it fully, then the referenced docs, before acting.
 1. **[docs/concept.md](docs/concept.md)** — what we're building and why: the product, the user, the bet, the (honest) edge, the simple architecture.
 2. **[docs/roadmap.md](docs/roadmap.md)** — the build plan, phases, **current status**, key decisions, and open research questions.
 3. **[docs/data-model.md](docs/data-model.md)** — the schema and the design rationale (the real source of truth for the schema is `server/db/migrations/0001_init.sql`).
-4. **[docs/validation.md](docs/validation.md)** — the market-validation plan (running in parallel; Rian is doing the conversations).
-5. **[docs/lessons-v1.md](docs/lessons-v1.md)** — the idea we tried first and killed, the traps not to re-walk, and the competitor scan. Don't re-discover this.
+4. **[docs/enrichment-loop.md](docs/enrichment-loop.md)** — the self-maintenance loop (Phase 2, the make-or-break): architecture + rationale behind `skills/crm-enrichment/`. Built, not yet live-tested on real email.
+5. **[docs/validation.md](docs/validation.md)** — the market-validation plan (running in parallel; Rian is doing the conversations).
+6. **[docs/lessons-v1.md](docs/lessons-v1.md)** — the idea we tried first and killed, the traps not to re-walk, and the competitor scan. Don't re-discover this.
 
 ## 2. One-paragraph what-and-why
 We're building a **simple, AI-native CRM that lives inside Claude.ai**, for **solo/small "fractional" operators** (independent consultants, fractional execs, agencies, indie founders) who run a relationship pipeline, live in Claude, and find Salesforce/HubSpot heavy and admin-heavy. It has its **own small Postgres database** (we own the substrate), **maintains itself** by reading the user's comms *client-side* and proposing clean updates for approval, and renders views **on demand** via skills instead of a fixed UI. Per-seat subscription. Indie scale: ~100 customers to validate.

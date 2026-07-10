@@ -1,0 +1,28 @@
+{
+  "_comment": "Copy to config.json and edit. This is the enrichment loop's only tuning surface for v1. Kept deliberately small; the shape is open so we can add fields later without a migration.",
+
+  "self": {
+    "_comment": "Who YOU are — so the loop never adds you as a contact and can tell internal from external. Non-negotiable; fill this in.",
+    "emails": ["you@your-dedicated-demo.com"],
+    "domains": ["your-dedicated-demo.com"]
+  },
+
+  "scope": {
+    "_comment": "Which emails to consider. Time-window is the real mechanism; the exclude_label is the 'already handled' watermark applied after each run.",
+    "lookback": "1d",
+    "exclude_label": "crm-processed",
+    "gmail_query_extra": "-category:promotions -category:social -category:updates -in:chats"
+  },
+
+  "ignore": {
+    "_comment": "Never put these in the CRM. Grows over time: when you reject an 'add', its sender goes here. The single most important knob for keeping the CRM free of junk.",
+    "senders": ["no-reply@", "noreply@", "notifications@", "do-not-reply@", "billing@", "receipts@"],
+    "domains": []
+  },
+
+  "vocab": {
+    "_comment": "The CRM's controlled vocabulary, mirrored from workspace.settings so proposals use valid values. Extend as your pipeline evolves.",
+    "lifecycle_stages": ["lead", "prospect", "client", "past"],
+    "deal_stages": ["discovery", "proposal", "verbal", "won", "lost"]
+  }
+}

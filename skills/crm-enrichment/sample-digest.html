@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposed CRM updates</title>
+<style>
+  :root {
+    --bg:#f7f8fa; --card:#ffffff; --ink:#1a1c20; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#2563eb; --amber-bg:#fff7ed; --amber-line:#fdba74; --amber-ink:#9a3412;
+    --prop:#166534;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0f1115; --card:#171a21; --ink:#e8eaed; --muted:#9aa1ab; --line:#262b35;
+      --accent:#60a5fa; --amber-bg:#2a1c0f; --amber-line:#7c4a1e; --amber-ink:#fdba74;
+      --prop:#4ade80;
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:680px; margin:0 auto; padding:28px 20px 48px; }
+  header h1 { margin:0 0 4px; font-size:20px; font-weight:650; letter-spacing:-0.01em; }
+  header .subtitle { color:var(--muted); font-size:13.5px; margin-bottom:20px; }
+  .section { background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px; margin-bottom:14px; }
+  .section h2 { margin:0 0 10px; font-size:13px; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.04em; color:var(--muted); display:flex; align-items:center; gap:8px; }
+  .count { margin-left:auto; background:var(--line); color:var(--ink); border-radius:999px;
+    padding:1px 9px; font-size:12px; font-weight:600; letter-spacing:0; text-transform:none; }
+  ul { list-style:none; margin:0; padding:0; }
+  .item { padding:10px 0; border-top:1px solid var(--line); }
+  .item:first-child { border-top:none; padding-top:2px; }
+  .title { font-weight:560; }
+  .sub { color:var(--muted); font-size:13.5px; margin-top:1px; }
+  .sub.detail { color:var(--accent); }
+  .badge { font-size:11px; font-weight:600; padding:1px 7px; border-radius:999px; margin-left:8px;
+    vertical-align:middle; }
+  .badge-low { background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line); }
+  details.ev { margin-top:7px; }
+  details.ev summary { cursor:pointer; color:var(--accent); font-size:12.5px; list-style:none;
+    display:inline-flex; align-items:center; gap:5px; user-select:none; }
+  details.ev summary::-webkit-details-marker { display:none; }
+  details.ev summary::before { content:"▸"; font-size:10px; transition:transform .15s; }
+  details.ev[open] summary::before { transform:rotate(90deg); }
+  .ev-reason { color:var(--ink); font-size:13px; margin:8px 0; }
+  .ev-snippet { margin:8px 0 0; padding:8px 12px; border-left:3px solid var(--line);
+    background:var(--bg); border-radius:0 6px 6px 0; color:var(--muted); font-size:13px;
+    font-style:italic; }
+  .ev-attr { color:var(--muted); font-size:11.5px; margin-top:6px; }
+  .conflicts { background:var(--amber-bg); border-color:var(--amber-line); }
+  .conflicts h2 { color:var(--amber-ink); }
+  .item.conflict .change { margin-top:3px; font-size:14px; }
+  .cur { text-decoration:line-through; color:var(--muted); }
+  .arrow { margin:0 8px; color:var(--muted); }
+  .prop { color:var(--prop); font-weight:600; }
+  .field { color:var(--muted); font-weight:400; }
+  .empty p { text-align:center; color:var(--muted); margin:8px 0; }
+  footer { color:var(--muted); font-size:12px; text-align:center; margin-top:18px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Proposed CRM updates</h1>
+      <div class="subtitle">6 proposed changes · 4 emails reviewed</div>
+    </header>
+    <section class='section'><h2>🆕 New contacts <span class='count'>2</span></h2><ul><li class='item'><div class='title'>Priya Nair</div><div class='sub'>CEO · priya@caldergroup.com · lead</div><div class='sub detail'>→ works_at Calder &amp; Co (new)</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>Introduced to you as a prospect and Cc&#x27;d on the thread, so she&#x27;s a direct contact worth adding as a lead.</div><blockquote class='ev-snippet'>Meet Priya Nair, CEO of Calder &amp; Co (caldergroup.com). They&#x27;re scaling fast and need fractional ops support.</blockquote><div class='ev-attr'>— Jordan Blake &lt;jordan@blakeadvisory.com&gt; · intro — Priya @ Calder is looking for ops help · 10 Jul 2026</div></details></li><li class='item'><div class='title'>Tom Reyes</div><div class='sub'>CFO · tom@northwind.co</div><div class='sub detail'>→ works_at Northwind Logistics (existing)</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>New finance contact at Northwind, an existing client — added and linked to the existing company.</div><blockquote class='ev-snippet'>I&#x27;m the new CFO at Northwind, taking over the finance side from Sarah.</blockquote><div class='ev-attr'>— Tom Reyes &lt;tom@northwind.co&gt; · Re: Q3 numbers · 9 Jul 2026</div></details></li></ul></section><section class='section'><h2>🏢 New organisations <span class='count'>1</span></h2><ul><li class='item'><div class='title'>Calder &amp; Co</div><div class='sub'>caldergroup.com</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>Priya&#x27;s company, named with its domain — no matching org in the CRM, so it&#x27;s new.</div><blockquote class='ev-snippet'>Meet Priya Nair, CEO of Calder &amp; Co (caldergroup.com).</blockquote><div class='ev-attr'>— Jordan Blake &lt;jordan@blakeadvisory.com&gt; · intro — Priya @ Calder is looking for ops help</div></details></li></ul></section><section class='section'><h2>💼 New deals <span class='count'>1</span></h2><ul><li class='item'><div class='title'>Calder &amp; Co — fractional ops engagement<span class='badge badge-low' title='Only mentioned in the email body, not a direct correspondent'>mentioned only</span></div><div class='sub'>discovery · open</div><div class='sub detail'>→ Priya Nair as decision_maker</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>A possible opportunity — they&#x27;ve expressed a need, but nothing concrete yet, so starting it at discovery.</div><blockquote class='ev-snippet'>They&#x27;re scaling fast and need fractional ops support.</blockquote><div class='ev-attr'>— Jordan Blake &lt;jordan@blakeadvisory.com&gt; · intro — Priya @ Calder is looking for ops help</div></details></li></ul></section><section class='section'><h2>📈 Deal updates <span class='count'>1</span></h2><ul><li class='item'><div class='title'>Meridian — fractional COO engagement</div><div class='sub'>stage: proposal → verbal · close date set to 1 Sep 2026</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>David confirmed budget approval and a start date, so the deal has moved from proposal to a verbal yes.</div><blockquote class='ev-snippet'>The board approved the engagement at the $30k we discussed. Let&#x27;s aim to start Sept 1.</blockquote><div class='ev-attr'>— David Okafor &lt;david@meridianhealth.com&gt; · Re: proposal · 10 Jul 2026</div></details></li></ul></section><section class='section conflicts'><h2>⚠️ Needs your call <span class='count'>1</span></h2><ul><li class='item conflict'><div class='title'>David Okafor · <span class='field'>title</span></div><div class='change'><span class='cur'>Founder</span><span class='arrow'>→</span><span class='prop'>CEO</span></div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>His signature now reads CEO, but the CRM has him as Founder — flagging rather than overwriting.</div><blockquote class='ev-snippet'>David Okafor, CEO, Meridian Health</blockquote><div class='ev-attr'>— David Okafor &lt;david@meridianhealth.com&gt; · Re: proposal</div></details></li></ul></section>
+    <footer>Nothing is saved until you approve. Reply to approve all, or say which to skip.</footer>
+  </div>
+</body>
+</html>
