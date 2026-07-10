@@ -35,12 +35,15 @@ async function main() {
 
   try {
     const tools = (await client.listTools()).tools.map((t) => t.name).sort();
+    const expectedTools = [
+      "create_contact", "find_contacts", "get_contact", "update_contact",
+      "create_organization", "find_organizations", "get_organization", "update_organization",
+      "create_deal", "find_deals", "get_deal", "update_deal",
+      "link_records", "find_associations", "unlink_records",
+    ];
     ok(
-      `lists 4 tools (${tools.join(", ")})`,
-      tools.length === 4 &&
-        ["create_contact", "find_contacts", "get_contact", "update_contact"].every((n) =>
-          tools.includes(n),
-        ),
+      `lists ${expectedTools.length} tools (${tools.join(", ")})`,
+      tools.length === expectedTools.length && expectedTools.every((n) => tools.includes(n)),
     );
 
     const created = payload(
@@ -85,6 +88,64 @@ async function main() {
 
     const fetched = payload(await client.callTool({ name: "get_contact", arguments: { id } }));
     ok("get_contact returns the updated record", fetched?.id === id && fetched?.lifecycle_stage === "client");
+
+    // ── organization (+ read-before-write dedup via MCP) ───────────────────────────
+    const org = payload(
+      await client.callTool({
+        name: "create_organization",
+        arguments: { name: "Acme Inc", domain: "https://www.Acme.com" },
+      }),
+    );
+    ok("create_organization → created", org?.status === "created");
+    const orgId = org?.organization?.id;
+    ok("org domain normalised via core", org?.organization?.primary_domain === "acme.com");
+    const orgDupe = payload(
+      await client.callTool({
+        name: "create_organization",
+        arguments: { name: "ACME", domain: "acme.com" },
+      }),
+    );
+    ok("create_organization (same domain) → already_exists", orgDupe?.status === "already_exists");
+
+    // ── deal (+ pipeline status filter via MCP) ────────────────────────────────────
+    const deal = payload(
+      await client.callTool({
+        name: "create_deal",
+        arguments: { name: "Acme — annual retainer", stage: "proposal", amount: 24000 },
+      }),
+    );
+    ok("create_deal → created (defaults applied)", deal?.deal?.status === "open" && deal?.deal?.currency === "USD");
+    const dealId = deal?.deal?.id;
+    const openDeals = payload(await client.callTool({ name: "find_deals", arguments: { status: "open" } }));
+    ok("find_deals(open) returns the open deal", openDeals?.deals?.some((d: any) => d.id === dealId));
+
+    // ── associations (link + traverse via MCP) ─────────────────────────────────────
+    const linked = payload(
+      await client.callTool({
+        name: "link_records",
+        arguments: {
+          from_type: "person", from_id: id,
+          to_type: "deal", to_id: dealId,
+          relationship_type: "decision_maker",
+        },
+      }),
+    );
+    ok("link_records → linked", linked?.status === "linked");
+    await client.callTool({
+      name: "link_records",
+      arguments: {
+        from_type: "person", from_id: id,
+        to_type: "organization", to_id: orgId,
+        relationship_type: "works_at",
+      },
+    });
+    const assoc = payload(
+      await client.callTool({
+        name: "find_associations",
+        arguments: { entity_type: "person", entity_id: id },
+      }),
+    );
+    ok("find_associations gathers both of the contact's links", assoc?.count === 2);
 
     console.log("\n📇 Final contact via MCP:");
     console.log(JSON.stringify(fetched, null, 2));

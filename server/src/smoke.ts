@@ -14,6 +14,12 @@ import {
   findPeopleByEmail,
   updatePerson,
 } from "./core/person.js";
+import {
+  createOrganization,
+  findOrganizationsByDomain,
+} from "./core/organization.js";
+import { createDeal, findDeals, updateDeal } from "./core/deal.js";
+import { findAssociationsFor, link } from "./core/association.js";
 
 function ok(label: string, cond: boolean) {
   console.log(`${cond ? "✅" : "❌"} ${label}`);
@@ -51,6 +57,57 @@ async function main() {
 
     const list = await findPeople(ws.id);
     ok("list people", list.length === 1 && list[0].id === kate.id);
+
+    // ── organization + dedup ──────────────────────────────────────────────────────
+    const acme = await createOrganization(ws.id, {
+      name: "Acme Inc",
+      primary_domain: "https://www.Acme.com/about", // dirty on purpose — should normalise to acme.com
+      attributes: { industry: "fintech" },
+    });
+    ok("created organization", !!acme.id);
+    ok("domain normalised (protocol/www/path stripped)", acme.primary_domain === "acme.com");
+    const orgDupe = await findOrganizationsByDomain(ws.id, ["ACME.com"]);
+    ok("org dedup finds by any-case domain", orgDupe.some((o) => o.id === acme.id));
+
+    // ── deal + pipeline filter ────────────────────────────────────────────────────
+    const deal = await createDeal(ws.id, {
+      name: "Acme — annual retainer",
+      stage: "proposal",
+      amount: 24000,
+    });
+    ok("created deal (defaults applied)", deal.status === "open" && deal.currency === "USD");
+    const won = await updateDeal(ws.id, deal.id, { status: "won" });
+    ok("update deal → won", won.status === "won");
+    const openDeals = await findDeals(ws.id, { status: "open" });
+    ok("status filter excludes the won deal", openDeals.every((d) => d.id !== deal.id));
+
+    // ── associations (the graph) ──────────────────────────────────────────────────
+    await link(ws.id, {
+      from_type: "person",
+      from_id: kate.id,
+      to_type: "organization",
+      to_id: acme.id,
+      relationship_type: "works_at",
+    });
+    await link(ws.id, {
+      from_type: "person",
+      from_id: kate.id,
+      to_type: "deal",
+      to_id: deal.id,
+      relationship_type: "decision_maker",
+    });
+    // re-link the same pair — must NOT duplicate (idempotent upsert)
+    await link(ws.id, {
+      from_type: "person",
+      from_id: kate.id,
+      to_type: "organization",
+      to_id: acme.id,
+      relationship_type: "works_at",
+    });
+    const kateLinks = await findAssociationsFor(ws.id, "person", kate.id);
+    ok("kate has exactly 2 links (idempotent re-link didn't duplicate)", kateLinks.length === 2);
+    const dealLinks = await findAssociationsFor(ws.id, "deal", deal.id);
+    ok("traversal finds the link from the deal's side too", dealLinks.length === 1);
 
     console.log("\n📇 Final record:");
     console.log(JSON.stringify(updated, null, 2));

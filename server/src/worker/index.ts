@@ -24,9 +24,13 @@ export class CrmMCP extends McpAgent {
   async init() {
     const env = this.env as Env;
     initDb(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+    // Register tools with a LAZY workspace resolver — do NOT hit the DB here. This keeps the
+    // MCP handshake from depending on a Supabase round-trip at connection time (a DB blip then
+    // can't fail the connection); the workspace is resolved+memoised on the first tool call.
     // MVP: single dev workspace. Real per-user workspace resolution comes with auth.
-    const ws = await getOrCreateWorkspaceByName("Dev Workspace");
-    registerCrmTools(this.server, ws.id);
+    registerCrmTools(this.server, () =>
+      getOrCreateWorkspaceByName("Dev Workspace").then((ws) => ws.id),
+    );
   }
 }
 
