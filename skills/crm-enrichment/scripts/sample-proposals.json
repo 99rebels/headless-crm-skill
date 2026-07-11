@@ -77,11 +77,11 @@
   "deal_updates": [
     {
       "title": "Meridian — fractional COO engagement",
-      "subtitle": "stage: proposal → verbal · close date set to 1 Sep 2026",
+      "subtitle": "stage: proposal → verbal · status stays open",
       "source": "email",
       "confidence": "high",
       "evidence": {
-        "reason": "David confirmed budget approval and a start date, so the deal has moved from proposal to a verbal yes.",
+        "reason": "The board approved the budget (a verbal yes), so the deal moves to the verbal stage — not won, and Sept 1 is a start date, not a close date.",
         "snippet": "The board approved the engagement at the $30k we discussed. Let's aim to start Sept 1.",
         "from": "David Okafor <david@meridianhealth.com>",
         "subject": "Re: proposal",

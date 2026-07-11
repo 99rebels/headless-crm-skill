@@ -107,6 +107,16 @@ Judgment rules:
 - **Evidence, always:** a one-sentence `reason` (brief AI overview — read first), the exact `snippet`
   that supports it (email line, or event title/time), and from/subject/date. The reason is your
   interpretation; the snippet is the raw proof.
+- **Deal dates & stage are precise (the model's most common mistake — get this right):**
+  - `expected_close_date` is when the deal is expected to **close / be decided** — NOT a project
+    start or kickoff date. A stated start date ("start Sept 1", "kick off next month") must **never**
+    be written to `expected_close_date`; leave it empty unless an actual close/decision date is given.
+  - `status: won` means the deal is **actually closed** (signed / agreed to proceed contractually). A
+    verbal yes, board approval, or "budget approved" is the **`verbal` stage with status still
+    `open`** — never `won`. Never mark a deal `won`/`lost` on a verbal or speculative signal; advance
+    the *stage*, keep *status* `open` until it truly closes.
+  - Only create a deal when there's a **concrete opportunity** (a project, engagement, or amount
+    discussed). Don't invent a blank-fielded deal from a vague mention.
 
 ---
 
