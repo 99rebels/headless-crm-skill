@@ -1,0 +1,33 @@
+{
+  "_comment": "Sample dashboard state from the demo scenario — used to preview/test render_dashboard.py. Not read by the skill at runtime (the skill builds this from live CRM reads).",
+  "workspace": "Fractional Ops — Rian",
+  "generated_label": "11 Jul 2026",
+  "currency": "USD",
+  "stats": { "open_pipeline_value": 30000, "open_deals": 2, "relationships": 5, "needs_attention": 3 },
+  "stages": [
+    {
+      "name": "discovery",
+      "deals": [
+        { "name": "Calder & Co — fractional ops", "amount": null, "org": "Calder & Co", "people": ["Priya Nair"] }
+      ]
+    },
+    {
+      "name": "proposal",
+      "deals": []
+    },
+    {
+      "name": "verbal",
+      "deals": [
+        { "name": "Meridian — fractional COO engagement", "amount": 30000, "org": "Meridian Health", "people": ["David Okafor"] }
+      ]
+    }
+  ],
+  "attention": [
+    { "title": "David Okafor", "kind": "prospect", "reason": "Verbal yes — send the paperwork", "detail": "Meridian engagement" },
+    { "title": "Priya Nair", "kind": "lead", "reason": "Warm intro, no meeting booked yet", "detail": "Calder & Co" },
+    { "title": "Tom Reyes", "kind": "client", "reason": "New contact — not yet acknowledged", "detail": "Northwind Logistics" }
+  ],
+  "won": [
+    { "name": "Northwind — Q3 ops retainer", "amount": 18000, "org": "Northwind Logistics" }
+  ]
+}
