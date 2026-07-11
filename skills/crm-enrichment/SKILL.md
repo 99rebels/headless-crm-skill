@@ -1,11 +1,13 @@
 ---
 name: crm-enrichment
 description: >-
-  Keep the CRM current from your email and calendar. Reads recent Gmail and Google Calendar,
-  extracts new contacts, organisations, deal signals, and who you've met, dedupes them against the
-  CRM, then proposes approved updates as one visual digest — nothing is written until you approve.
-  Use when the user wants to update / sync / enrich / "catch up" their CRM from email or calendar,
-  asks "what's new for the CRM", or runs their periodic review.
+  Update the CRM from the user's email and calendar. Reads recent Gmail + Google Calendar, extracts
+  new contacts, companies, deal signals, and who they've met, dedupes against the CRM, and proposes
+  changes for approval — nothing is written until approved. Use when the user wants to catch up /
+  update / sync / enrich their CRM from email or calendar, log recent emails or meetings, add new
+  people they've been talking to, process their inbox into the CRM, tidy or maintain their CRM, or
+  asks "what's new for my CRM" / "anyone new to add". This is the WRITE/ingest side — to only VIEW
+  the pipeline without changing anything, use the crm-dashboard skill instead.
 ---
 
 # CRM enrichment — the self-maintenance loop

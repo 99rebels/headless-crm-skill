@@ -1,10 +1,12 @@
 ---
 name: crm-dashboard
 description: >-
-  Render the CRM pipeline and the relationships that need a nudge as a clean on-demand view.
-  Use when the user asks to see their pipeline, a CRM dashboard, "what's in my pipeline",
-  "who do I need to follow up with / who's gone quiet", deal board, or a pipeline/relationship
-  overview. Read-only — it shows the current state, it does not change anything.
+  Show the current CRM pipeline and the relationships that need a nudge, as a clean read-only view
+  rendered on demand. Use when the user asks to see their pipeline or a CRM dashboard, "what's in my
+  pipeline", "how's my pipeline looking", "show me my deals / deal board", "who do I need to follow
+  up with / who's gone quiet / who should I chase", or wants a pipeline or relationship overview.
+  Read-only — it shows current state and changes nothing. This does NOT read email or add data — to
+  update the CRM from email/calendar, use the crm-enrichment skill instead.
 ---
 
 # CRM pipeline dashboard
