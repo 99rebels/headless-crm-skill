@@ -1,6 +1,6 @@
 # Roadmap — what we're building, in what order
 
-*The working build plan. Read `concept.md` for the why and `validation.md` for the parallel market work. This is the how + the sequence. Status: pre-build, validation running in parallel. Updated 2026-07-09.*
+*The working build plan. Read `concept.md` for the why and `validation.md` for the parallel market work. This is the how + the sequence. Status (2026-07-11): all three demo pillars built; the make-or-break loop live- and stress-tested; skill discovery passed on claude.ai. Remaining before Mon 2026-07-13 demo = Rian's account-gated live tests + rehearsal. Validation running in parallel.*
 
 ---
 
@@ -51,8 +51,8 @@ User's Claude.ai
 
 ## 4. Open research questions (resolve via testing, not assertion)
 
-**R1 — Skill discovery & priority: MCP-served skills vs local/native Claude Skills. [HIGHEST — gates the skill-delivery decision]**
-When both a relevant local Skill and a relevant MCP-served skill exist, which does Claude invoke? Is there source-priority, or pure relevance? Sub-questions:
+**R1 — Skill discovery & priority. [RESOLVED FOR THE DEMO — 2026-07-11]**
+Delivery = **bundled skill zips** (the accepted fallback). Discovery was tested on claude.ai across models (`docs/discovery-test.md`) and **passed on all of them** — Claude reliably finds and invokes the right skill (crm-enrichment vs crm-dashboard) from a natural request, no collisions. The description field + explicit cross-referencing disambiguation was the lever. Still open *longer-term:* central updatability for solo users (bundled zips don't auto-update) and the "bake behaviour into tool output" alternative if discovery ever wobbles at scale. Original open questions kept below for history:
 - Does co-locating CRM tools + skill library on one connector aid discovery or add noise?
 - Is an MCP **Prompt** (or Resource) a better skill-delivery primitive than the `get_skill` **tool** approach used in Spike A?
 - Can the loop *reliably* invoke OUR skill under a scheduled task, not a local one or an improvisation?
@@ -71,10 +71,10 @@ When both a relevant local Skill and a relevant MCP-served skill exist, which do
 
 
 - **Phase 0 — ✅ DONE:** data model designed + validated against Salesforce/HubSpot/Attio (`data-model.md`); tenancy = row-level security to start (R3); R1 downgraded (skills-over-MCP is a convenience, file-bundle fallback is fine).
-- **Phase 1 — ✅ DONE (live on Claude.ai):** schema live in Supabase; headless **core** + **two adapters** over it (local stdio `src/mcp/` + deployed Cloudflare **Worker** `src/worker/index.ts`, OAuth-wrapped). Verified locally (`npm run smoke`, `npm run mcp-smoke`) *and* end-to-end — **a contact was created by talking to Claude.ai**, writing to Supabase. deploy+OAuth reused Spike A's `@cloudflare/workers-oauth-provider` auto-approve flow. Only `contact` has tools so far.
-- **Phase 2 — self-maintenance spike (EARLY):** prove entity-resolution + safe-write quality on real comms for one flow, client-side, on a scheduled task. The make-or-break. Build on the read-before-write dedup seed already in `server/src/core/person.ts` (against our own DB). If this can't be made reliable, the product is dead — learn it here, cheaply.
-- **Phase 3 — widen:** full data-model CRUD (organizations, deals, interactions, tasks — copy the proven `person` pattern), the view-rendering skills, the approval UX/digest.
-- **Phase 4 — productionize:** multi-tenant hardening, security, compliance gate — before the first paying customer with real data.
+- **Phase 1 — ✅ DONE (live on Claude.ai):** schema live in Supabase; headless **core** + **two adapters** (local stdio + deployed Cloudflare **Worker**, OAuth-wrapped). Now the **full relationship model** — contacts + organizations + deals + associations, **15 MCP tools** — not just contacts. Workspace resolves lazily (a DB blip can't break the connection). Verified locally + end-to-end on Claude.ai.
+- **Phase 2 — ✅ DONE + PROVEN (the make-or-break):** the client-side self-maintenance loop (`skills/crm-enrichment/`) over **Gmail + Google Calendar**. **Live-tested on a real noisy inbox** (correct extraction, dedup held, noise filter held, guardrails fired) and **stress-tested** across Haiku 4.5 / Sonnet 5 / Opus 4.8 (`docs/enrichment-eval.md`) — one model-independent bug found + fixed; re-run = zero critical failures. Scheduled-task automation is deferred (on-demand is enough for the demo).
+- **Phase 3 — partially done:** the **pipeline dashboard** view skill (`skills/crm-dashboard/`) and the **approval digest** are built. Still deferred: the *other* objects' tools (interactions, tasks) — not needed for the demo.
+- **Phase 4 — productionize (deferred):** multi-tenant hardening, real auth, security, compliance gate — before the first paying customer with real data.
 
 ## 6. Deliberately deferred (don't let these expand early phases)
 
