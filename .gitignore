@@ -4,3 +4,4 @@ node_modules/
 dist/
 *.log
 skills/crm-enrichment.zip
+skills/crm-enrichment/crm-enrichment.zip
