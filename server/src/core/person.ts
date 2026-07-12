@@ -14,6 +14,7 @@ export interface CreatePersonInput {
   phone?: string;
   title?: string;
   lifecycle_stage?: string;
+  last_interaction_at?: string; // ISO timestamp — the enrichment loop refreshes this after a comm
   owner_id?: UUID;
   attributes?: Attributes;
 }
@@ -45,6 +46,7 @@ export async function createPerson(
         phone: input.phone ?? null,
         title: input.title ?? null,
         lifecycle_stage: input.lifecycle_stage ?? null,
+        last_interaction_at: input.last_interaction_at ?? null,
         owner_id: input.owner_id ?? null,
         attributes: input.attributes ?? {},
       })
@@ -106,6 +108,7 @@ export async function updatePerson(
   if (input.phone !== undefined) patch.phone = input.phone;
   if (input.title !== undefined) patch.title = input.title;
   if (input.lifecycle_stage !== undefined) patch.lifecycle_stage = input.lifecycle_stage;
+  if (input.last_interaction_at !== undefined) patch.last_interaction_at = input.last_interaction_at;
   if (input.owner_id !== undefined) patch.owner_id = input.owner_id;
   if (input.attributes !== undefined) patch.attributes = input.attributes;
   if (input.emails !== undefined || input.primary_email !== undefined) {

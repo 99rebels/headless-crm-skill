@@ -40,6 +40,7 @@ async function main() {
       "create_organization", "find_organizations", "get_organization", "update_organization",
       "create_deal", "find_deals", "get_deal", "update_deal",
       "link_records", "find_associations", "unlink_records",
+      "get_pipeline_summary",
     ];
     ok(
       `lists ${expectedTools.length} tools (${tools.join(", ")})`,

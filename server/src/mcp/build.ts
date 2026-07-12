@@ -20,6 +20,7 @@ import {
 } from "../core/organization.js";
 import { createDeal, findDeals, getDeal, updateDeal } from "../core/deal.js";
 import { findAssociationsFor, link, unlink } from "../core/association.js";
+import { getPipelineSummary } from "../core/summary.js";
 
 /** The record kinds that can participate in the association graph. */
 const ENTITY_TYPES = ["person", "organization", "deal", "interaction", "task"] as const;
@@ -158,6 +159,10 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
         phone: z.string().optional(),
         title: z.string().optional(),
         lifecycle_stage: z.string().optional(),
+        last_interaction_at: z
+          .string()
+          .optional()
+          .describe("ISO timestamp of the most recent contact — refresh this after an email/meeting"),
         attributes: z.record(z.string(), z.unknown()).optional(),
       },
     },
@@ -269,6 +274,7 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
         name: z.string().optional(),
         domain: z.string().optional(),
         domains: z.array(z.string()).optional(),
+        last_interaction_at: z.string().optional().describe("ISO timestamp of the most recent contact"),
         attributes: z.record(z.string(), z.unknown()).optional(),
       },
     },
@@ -373,6 +379,25 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
         const { id, ...rest } = args;
         const deal = await updateDeal(workspaceId, id, rest);
         return text({ status: "updated", deal });
+      } catch (e) {
+        return errorText((e as Error).message);
+      }
+    },
+  );
+
+  // ── dashboard summary (deterministic aggregation for the pipeline view) ────────────
+  server.registerTool(
+    "get_pipeline_summary",
+    {
+      title: "Get pipeline summary",
+      description:
+        "Compute the whole pipeline dashboard in one call: open pipeline value, open/unstaged deal counts, relationship count, deals bucketed by stage (with an 'Unstaged' bucket for stage-less deals), the people roster with real last-contact recency, recently-won deals, and attention 'signals'. All facts, labels, and joins are computed server-side so every render is identical — the caller only adds the human 'Focus' list from the signals. Prefer this over stitching together find_deals/find_contacts/find_associations for the dashboard.",
+      inputSchema: {},
+    },
+    async () => {
+      try {
+        const workspaceId = await getWorkspaceId();
+        return text(await getPipelineSummary(workspaceId));
       } catch (e) {
         return errorText((e as Error).message);
       }

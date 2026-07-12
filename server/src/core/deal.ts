@@ -22,6 +22,7 @@ export interface CreateDealInput {
 export type UpdateDealInput = Partial<CreateDealInput>;
 
 export async function createDeal(workspaceId: UUID, input: CreateDealInput): Promise<Deal> {
+  const status = input.status ?? "open";
   return orThrow(
     await getDb()
       .from("deal")
@@ -29,10 +30,12 @@ export async function createDeal(workspaceId: UUID, input: CreateDealInput): Pro
         workspace_id: workspaceId,
         name: input.name ?? null,
         stage: input.stage ?? null,
-        status: input.status ?? "open",
+        status,
         amount: input.amount ?? null,
         currency: input.currency ?? "USD",
         expected_close_date: input.expected_close_date ?? null,
+        // stamp the close date if the deal is created already-closed
+        closed_at: status === "won" || status === "lost" ? new Date().toISOString() : null,
         owner_id: input.owner_id ?? null,
         attributes: input.attributes ?? {},
       })
@@ -77,7 +80,12 @@ export async function updateDeal(
   const patch: Record<string, unknown> = {};
   if (input.name !== undefined) patch.name = input.name;
   if (input.stage !== undefined) patch.stage = input.stage;
-  if (input.status !== undefined) patch.status = input.status;
+  if (input.status !== undefined) {
+    patch.status = input.status;
+    // keep closed_at in lockstep with status: stamp on close, clear on re-open
+    if (input.status === "won" || input.status === "lost") patch.closed_at = new Date().toISOString();
+    else if (input.status === "open") patch.closed_at = null;
+  }
   if (input.amount !== undefined) patch.amount = input.amount;
   if (input.currency !== undefined) patch.currency = input.currency;
   if (input.expected_close_date !== undefined) patch.expected_close_date = input.expected_close_date;

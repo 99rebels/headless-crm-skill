@@ -68,6 +68,7 @@ export interface Deal {
   amount: number | null;
   currency: string;
   expected_close_date: string | null;
+  closed_at: string | null; // stamped when status flips to won/lost (source of truth for "recently won")
   owner_id: UUID | null;
   attributes: Attributes;
   created_at: string;
