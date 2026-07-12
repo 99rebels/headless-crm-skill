@@ -41,6 +41,38 @@ export async function link(workspaceId: UUID, input: LinkInput): Promise<Associa
   );
 }
 
+/** Batch link: ONE upsert for many associations (same idempotent onConflict as link). Used by bulk
+ *  import to stay within the Worker's per-invocation subrequest budget. Dedups within the batch by
+ *  the conflict key first — Postgres rejects two rows hitting the same conflict target in one
+ *  statement. Returns the upserted rows; empty in → no DB call. */
+export async function linkMany(workspaceId: UUID, inputs: LinkInput[]): Promise<Association[]> {
+  if (inputs.length === 0) return [];
+  const seen = new Set<string>();
+  const rows: Record<string, unknown>[] = [];
+  for (const i of inputs) {
+    const key = `${i.from_type}:${i.from_id}>${i.to_type}:${i.to_id}:${i.relationship_type}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    rows.push({
+      workspace_id: workspaceId,
+      from_type: i.from_type,
+      from_id: i.from_id,
+      to_type: i.to_type,
+      to_id: i.to_id,
+      relationship_type: i.relationship_type,
+      attributes: i.attributes ?? {},
+    });
+  }
+  return orThrow(
+    await getDb()
+      .from("association")
+      .upsert(rows, {
+        onConflict: "workspace_id,from_type,from_id,to_type,to_id,relationship_type",
+      })
+      .select(),
+  );
+}
+
 /** Find every association touching a record, in EITHER direction (it may be the `from` or the
  *  `to` side). This is the traversal an account/deal view uses to gather "everything linked
  *  to this record." */

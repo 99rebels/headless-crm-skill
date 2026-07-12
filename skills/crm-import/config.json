@@ -1,0 +1,59 @@
+{
+  "_note": "Config for the CSV import skill. `vocab` mirrors the workspace's lifecycle/deal stages (keep in sync with crm-enrichment/config.json and workspace.settings). `aliases` maps common export labels onto that vocab so a 'Customer'/'Closed Won' column lands on the right term. `column_hints` are only hints for the model's column-mapping step — not authoritative.",
+
+  "vocab": {
+    "lifecycle_stages": ["lead", "prospect", "client", "partner", "past"],
+    "deal_stages": ["discovery", "proposal", "verbal", "won", "lost"]
+  },
+
+  "aliases": {
+    "lifecycle": {
+      "customer": "client",
+      "customers": "client",
+      "active": "client",
+      "opportunity": "prospect",
+      "mql": "lead",
+      "sql": "prospect",
+      "subscriber": "lead",
+      "churned": "past",
+      "former": "past",
+      "inactive": "past",
+      "vendor": "partner",
+      "reseller": "partner"
+    },
+    "deal_stage": {
+      "new": "discovery",
+      "qualification": "discovery",
+      "qualified": "discovery",
+      "quote": "proposal",
+      "proposal sent": "proposal",
+      "negotiation": "verbal",
+      "contract": "verbal",
+      "closed won": "won",
+      "closed-won": "won",
+      "closed lost": "lost",
+      "closed-lost": "lost"
+    }
+  },
+
+  "default_currency": "USD",
+
+  "public_email_domains": [
+    "gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.uk", "hotmail.com", "outlook.com",
+    "live.com", "icloud.com", "me.com", "aol.com", "proton.me", "protonmail.com", "gmx.com"
+  ],
+
+  "column_hints": {
+    "person.name": ["name", "full name", "contact", "contact name", "first name / last name"],
+    "person.email": ["email", "e-mail", "email address", "work email"],
+    "person.phone": ["phone", "mobile", "tel", "telephone", "cell"],
+    "person.title": ["title", "job title", "role", "position"],
+    "person.lifecycle_stage": ["status", "type", "lifecycle", "stage", "segment", "contact type"],
+    "organization.name": ["company", "organization", "organisation", "account", "employer"],
+    "organization.domain": ["website", "domain", "url", "site", "web"],
+    "deal.name": ["deal", "opportunity", "project", "engagement"],
+    "deal.amount": ["value", "amount", "deal value", "revenue", "arr", "mrr", "budget"],
+    "deal.stage": ["deal stage", "pipeline stage", "opportunity stage", "sales stage"],
+    "deal.expected_close_date": ["close date", "expected close", "target close"]
+  }
+}

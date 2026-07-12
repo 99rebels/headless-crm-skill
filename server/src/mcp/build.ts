@@ -21,6 +21,7 @@ import {
 import { createDeal, findDeals, getDeal, updateDeal } from "../core/deal.js";
 import { findAssociationsFor, link, unlink } from "../core/association.js";
 import { getPipelineSummary } from "../core/summary.js";
+import { bulkImport } from "../core/bulk.js";
 
 /** The record kinds that can participate in the association graph. */
 const ENTITY_TYPES = ["person", "organization", "deal", "interaction", "task"] as const;
@@ -398,6 +399,78 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
       try {
         const workspaceId = await getWorkspaceId();
         return text(await getPipelineSummary(workspaceId));
+      } catch (e) {
+        return errorText((e as Error).message);
+      }
+    },
+  );
+
+  // ── bulk import (create + dedupe + link a whole plan in ONE call) ──────────────────
+  const bulkAttrs = z.record(z.string(), z.unknown()).optional();
+  server.registerTool(
+    "bulk_import",
+    {
+      title: "Bulk import",
+      description:
+        "Create and link many records in ONE call — the write step for the CSV-import skill. Takes a `plan` of contacts, organizations, deals, and links (each record has a local `key` like 'c0'/'o0'/'d0'; links reference those keys). Creates in the right order (orgs → contacts → deals → links), dedupes orgs by domain and contacts by email (reusing matches, never duplicating), and resolves the keys to real ids server-side. Writes are set-based (a few DB ops total, not one per record), so pass the WHOLE plan in a single call — do NOT pre-split it into batches, and do NOT loop create_/link_ per record (that hits the per-turn tool limit). Returns created/reused counts and any per-record errors.",
+      inputSchema: {
+        plan: z.object({
+          contacts: z
+            .array(
+              z.object({
+                key: z.string().describe("stable local id, e.g. 'c0'"),
+                name: z.string().optional(),
+                email: z.string().optional(),
+                emails: z.array(z.string()).optional(),
+                phone: z.string().optional(),
+                title: z.string().optional(),
+                lifecycle_stage: z.string().optional(),
+                attributes: bulkAttrs,
+              }),
+            )
+            .optional(),
+          organizations: z
+            .array(
+              z.object({
+                key: z.string().describe("stable local id, e.g. 'o0'"),
+                name: z.string().optional(),
+                domain: z.string().optional(),
+                domains: z.array(z.string()).optional(),
+                attributes: bulkAttrs,
+              }),
+            )
+            .optional(),
+          deals: z
+            .array(
+              z.object({
+                key: z.string().describe("stable local id, e.g. 'd0'"),
+                name: z.string().optional(),
+                stage: z.string().optional(),
+                status: z.enum(["open", "won", "lost"]).optional(),
+                amount: z.number().optional(),
+                currency: z.string().optional(),
+                expected_close_date: z.string().optional(),
+                attributes: bulkAttrs,
+              }),
+            )
+            .optional(),
+          links: z
+            .array(
+              z.object({
+                from: z.string().describe("local key of the from-record"),
+                to: z.string().describe("local key of the to-record"),
+                relationship_type: z.string().describe("e.g. works_at | primary_contact | account"),
+              }),
+            )
+            .optional(),
+        }),
+      },
+    },
+    async (args) => {
+      try {
+        const workspaceId = await getWorkspaceId();
+        const result = await bulkImport(workspaceId, args.plan);
+        return text({ status: "imported", ...result });
       } catch (e) {
         return errorText((e as Error).message);
       }

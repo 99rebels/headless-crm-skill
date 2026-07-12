@@ -44,6 +44,30 @@ export async function createDeal(workspaceId: UUID, input: CreateDealInput): Pro
   );
 }
 
+/** Batch create: ONE insert for many deals (same status/closed_at logic as createDeal). Used by
+ *  bulk import to stay within the Worker's per-invocation subrequest budget. Returns rows in input
+ *  order; empty in → no DB call. */
+export async function createDeals(workspaceId: UUID, inputs: CreateDealInput[]): Promise<Deal[]> {
+  if (inputs.length === 0) return [];
+  const now = new Date().toISOString();
+  const rows = inputs.map((input) => {
+    const status = input.status ?? "open";
+    return {
+      workspace_id: workspaceId,
+      name: input.name ?? null,
+      stage: input.stage ?? null,
+      status,
+      amount: input.amount ?? null,
+      currency: input.currency ?? "USD",
+      expected_close_date: input.expected_close_date ?? null,
+      closed_at: status === "won" || status === "lost" ? now : null,
+      owner_id: input.owner_id ?? null,
+      attributes: input.attributes ?? {},
+    };
+  });
+  return orThrow(await getDb().from("deal").insert(rows).select());
+}
+
 export async function getDeal(workspaceId: UUID, id: UUID): Promise<Deal | null> {
   const { data, error } = await getDb()
     .from("deal")

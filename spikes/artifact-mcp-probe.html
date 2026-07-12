@@ -1,0 +1,162 @@
+<!doctype html>
+<!--
+  artifact-mcp-probe.html — a THROWAWAY spike to confirm whether artifact JS can call our
+  `headless-crm` MCP tools directly (the "MCP-from-artifact" bridge from docs/artifact-interactivity.md).
+
+  HOW TO RUN (account-gated — must be done by a human on claude.ai):
+    1. Open a claude.ai conversation on a Pro/Max/Team/Enterprise plan with the `headless-crm`
+       connector enabled.
+    2. Paste this whole file and say: "Render this exactly as an HTML artifact, unchanged."
+    3. Click the buttons top-to-bottom. Approve any consent prompt Claude shows.
+    4. Copy the whole on-page log back to the builder.
+
+  It answers the three unknowns from the doc:
+    (a) the real JS call signature   → the "Detect" dump + which strategy the Read/Write buttons hit
+    (b) is our connector reachable   → the Read button (find_deals) returning data
+    (c) the consent-prompt behavior  → what happens the first time Write runs
+
+  The Write step is deliberately safe + idempotent: it upserts ONE contact
+  (spike-test@example.com, "TEST — delete me") via bulk_import, so re-running never duplicates.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP-from-artifact probe</title>
+<style>
+  :root{
+    --bg:#f3f0e8; --surface:#fffdf7; --ink:#221f18; --muted:#77705f; --line:#e7e0d1;
+    --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9; --bad:#9d4a3b; --good:#216b57;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root{
+    --bg:#14120d; --surface:#1d1a13; --ink:#ece6d8; --muted:#9c9280; --line:#2b2619;
+    --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129; --bad:#cf7462; --good:#4fae90;
+  }}
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--sans); }
+  .wrap{ max-width:760px; margin:0 auto; padding:28px 20px 48px; }
+  h1{ font-size:20px; margin:0 0 4px; }
+  p.sub{ color:var(--muted); margin:0 0 20px; font-size:13px; }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  button{ font:600 13px/1 var(--sans); color:#fff; background:var(--accent); border:none;
+    border-radius:9px; padding:11px 15px; cursor:pointer; }
+  button.ghost{ color:var(--accent-ink); background:var(--accent-soft); }
+  button:active{ transform:translateY(1px); }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+  .card h2{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin:0 0 10px; }
+  pre#log{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px;
+    font:12px/1.55 var(--mono); white-space:pre-wrap; word-break:break-word; margin:0; max-height:520px; overflow:auto; }
+  .ok{ color:var(--good); } .err{ color:var(--bad); } .dim{ color:var(--muted); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>MCP-from-artifact probe</h1>
+    <p class="sub">Confirms whether this artifact can call the <b>headless-crm</b> MCP tools directly.
+      Click in order. Copy the log back.</p>
+
+    <div class="card">
+      <h2>Step 1 — Detect the API surface</h2>
+      <div class="row">
+        <button onclick="detect()">Detect window.claude</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Step 2 — Read (safe): find_deals</h2>
+      <div class="row">
+        <button class="ghost" onclick="doRead()">Call find_deals(open, limit 5)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Step 3 — Write (idempotent): bulk_import one test contact</h2>
+      <div class="row">
+        <button onclick="doWrite()">Upsert “TEST — delete me”</button>
+      </div>
+    </div>
+
+    <pre id="log"><span class="dim">log output appears here…</span></pre>
+  </div>
+
+<script>
+const logEl = document.getElementById("log");
+let first = true;
+function log(msg, cls){
+  if (first){ logEl.textContent = ""; first = false; }
+  const line = document.createElement("span");
+  if (cls) line.className = cls;
+  line.textContent = (typeof msg === "string" ? msg : JSON.stringify(msg, null, 2)) + "\n";
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// Dump the shape of window.claude so we learn the REAL API even if our guessed call shapes miss.
+function detect(){
+  try {
+    const c = window.claude;
+    log("typeof window.claude = " + typeof c, c ? "ok" : "err");
+    if (!c) { log("→ no window.claude in this sandbox. MCP-from-artifact not available here.", "err"); return; }
+    log("Object.keys(window.claude) = " + JSON.stringify(Object.keys(c)));
+    for (const k of Object.keys(c)) log("  • window.claude." + k + " : " + typeof c[k]);
+    if (c.mcp) {
+      log("Object.keys(window.claude.mcp) = " + JSON.stringify(Object.keys(c.mcp)));
+      for (const k of Object.keys(c.mcp)) log("  • window.claude.mcp." + k + " : " + typeof c.mcp[k]);
+    }
+    // also surface anything that looks tool-ish on window
+    const winHits = Object.keys(window).filter(k => /mcp|tool|connector|claude/i.test(k));
+    log("window keys matching /mcp|tool|connector|claude/ = " + JSON.stringify(winHits), "dim");
+  } catch (e) { log("detect threw: " + (e && e.message || e), "err"); }
+}
+
+// Try several plausible call signatures; report which one works. `arguments` is the MCP tool input.
+async function tryCall(tool, args){
+  const c = window.claude;
+  if (!c) throw new Error("window.claude is undefined");
+  const strategies = [
+    ["window.claude.mcp.callTool({name,arguments})", () => c.mcp && c.mcp.callTool && c.mcp.callTool({ name: tool, arguments: args })],
+    ["window.claude.mcp.callTool(name,args)",        () => c.mcp && c.mcp.callTool && c.mcp.callTool(tool, args)],
+    ["window.claude.mcp.call({server,name,arguments})", () => c.mcp && c.mcp.call && c.mcp.call({ server: "headless-crm", name: tool, arguments: args })],
+    ["window.claude.mcp.call('headless-crm',name,args)", () => c.mcp && c.mcp.call && c.mcp.call("headless-crm", tool, args)],
+    ["window.claude.callTool({name,arguments})",     () => c.callTool && c.callTool({ name: tool, arguments: args })],
+    ["window.claude.callMcpTool({name,arguments})",  () => c.callMcpTool && c.callMcpTool({ name: tool, arguments: args })],
+    ["window.claude.tools.call(name,args)",          () => c.tools && c.tools.call && c.tools.call(tool, args)],
+  ];
+  for (const [label, fn] of strategies){
+    let out;
+    try { out = fn(); } catch (e) { log("  · " + label + " → threw synchronously: " + (e.message||e), "dim"); continue; }
+    if (out === undefined || out === false || out === null) { log("  · " + label + " → not present", "dim"); continue; }
+    log("  · " + label + " → present, awaiting…", "dim");
+    try {
+      const res = await out;
+      return { via: label, result: res };
+    } catch (e) {
+      return { via: label + "  [call existed but rejected]", error: String(e && e.message || e) };
+    }
+  }
+  throw new Error("no known call signature matched — copy the Step-1 Detect output back so we can see the real shape");
+}
+
+async function doRead(){
+  log("\n── Step 2: find_deals ──");
+  try {
+    const r = await tryCall("find_deals", { status: "open", limit: 5 });
+    if (r.error){ log("via " + r.via, "err"); log(r.error, "err"); }
+    else { log("✓ worked via " + r.via, "ok"); log(r.result); }
+  } catch (e) { log("✗ " + (e.message||e), "err"); }
+}
+
+async function doWrite(){
+  log("\n── Step 3: bulk_import (upsert one test contact) ──");
+  const plan = { contacts: [{ key: "c0", name: "TEST — delete me", email: "spike-test@example.com", lifecycle_stage: "lead" }] };
+  try {
+    const r = await tryCall("bulk_import", { plan });
+    if (r.error){ log("via " + r.via, "err"); log(r.error, "err"); }
+    else { log("✓ worked via " + r.via, "ok"); log(r.result); log("\n(clean up later: delete the 'TEST — delete me' contact, or npm run reset-demo)", "dim"); }
+  } catch (e) { log("✗ " + (e.message||e), "err"); }
+}
+</script>
+</body>
+</html>

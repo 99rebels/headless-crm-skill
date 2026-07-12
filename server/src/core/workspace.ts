@@ -29,3 +29,23 @@ export async function getOrCreateWorkspaceByName(name: string): Promise<Workspac
   if (error) throw new Error(error.message);
   return data ?? (await createWorkspace(name));
 }
+
+/** Merge a partial settings object into workspace.settings (the CRM vocabulary/config home:
+ *  pipeline stages, lifecycle values, default_currency, self.emails). Shallow-merges over the
+ *  existing settings so you can set one key without clobbering the rest. Used by provisioning a
+ *  new tenant; the summary tool reads these (falling back to defaults when a key is absent). */
+export async function updateWorkspaceSettings(
+  id: UUID,
+  patch: Record<string, unknown>,
+): Promise<Workspace> {
+  const current = await getWorkspace(id);
+  if (!current) throw new Error(`No workspace with id ${id}`);
+  return orThrow(
+    await getDb()
+      .from("workspace")
+      .update({ settings: { ...(current.settings ?? {}), ...patch } })
+      .eq("id", id)
+      .select()
+      .single(),
+  );
+}

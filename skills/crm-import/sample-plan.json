@@ -1,0 +1,445 @@
+{
+  "rows_reviewed": 8,
+  "plan": {
+    "contacts": [
+      {
+        "key": "c0",
+        "name": "Priya Nair",
+        "email": "priya@caldergroup.com",
+        "phone": "+1 415 555 0142",
+        "title": "CEO",
+        "lifecycle_stage": "client",
+        "attributes": {
+          "notes": "Met at SaaStr"
+        }
+      },
+      {
+        "key": "c1",
+        "name": "David Okafor",
+        "email": "david.okafor@meridian.io",
+        "title": "Head of Ops",
+        "lifecycle_stage": "prospect",
+        "attributes": {
+          "notes": "Intro via Sarah"
+        }
+      },
+      {
+        "key": "c2",
+        "name": "Sarah Chen",
+        "email": "sarah@nimbus-labs.com",
+        "phone": "415-555-0199",
+        "title": "Founder",
+        "lifecycle_stage": "prospect"
+      },
+      {
+        "key": "c3",
+        "name": "Tom Bradley",
+        "email": "tom@gmail.com",
+        "title": "Consultant",
+        "lifecycle_stage": "lead",
+        "attributes": {
+          "notes": "Newsletter signup"
+        }
+      },
+      {
+        "key": "c4",
+        "name": "Jordan Vega",
+        "email": "jordan@meridian.io",
+        "title": "CFO",
+        "lifecycle_stage": "prospect",
+        "attributes": {
+          "notes": "Decision maker"
+        }
+      },
+      {
+        "key": "c5",
+        "name": "Amara Nwosu",
+        "email": "amara@brightpath.org",
+        "phone": "+44 20 7946 0000",
+        "title": "Director",
+        "lifecycle_stage": "partner",
+        "attributes": {
+          "notes": "Partner org"
+        }
+      },
+      {
+        "key": "c6",
+        "name": "Lee, Marcus",
+        "email": "marcus@northwind.co",
+        "title": "VP Sales",
+        "lifecycle_stage": "past",
+        "emails": [
+          "m.lee@northwind.co"
+        ],
+        "attributes": {
+          "notes": "Left last year"
+        }
+      }
+    ],
+    "organizations": [
+      {
+        "key": "o0",
+        "name": "Calder & Co",
+        "domain": "caldergroup.com"
+      },
+      {
+        "key": "o1",
+        "name": "Meridian",
+        "domain": "meridian.io"
+      },
+      {
+        "key": "o2",
+        "name": "Nimbus Labs",
+        "domain": "nimbus-labs.com"
+      },
+      {
+        "key": "o3",
+        "name": "BrightPath",
+        "domain": "brightpath.org"
+      },
+      {
+        "key": "o4",
+        "name": "Northwind",
+        "domain": "northwind.co"
+      }
+    ],
+    "deals": [
+      {
+        "key": "d0",
+        "name": "Calder retainer",
+        "stage": "won",
+        "status": "won",
+        "amount": 24000.0,
+        "currency": "USD"
+      },
+      {
+        "key": "d1",
+        "name": "Meridian pilot",
+        "stage": "verbal",
+        "amount": 12000.0,
+        "currency": "USD",
+        "status": "open"
+      },
+      {
+        "key": "d2",
+        "name": "Nimbus platform",
+        "stage": "proposal",
+        "amount": 45000.0,
+        "currency": "USD",
+        "status": "open"
+      },
+      {
+        "key": "d3",
+        "name": "Northwind expansion",
+        "stage": "lost",
+        "status": "lost",
+        "amount": 8500.0,
+        "currency": "USD"
+      }
+    ],
+    "links": [
+      {
+        "from": "c0",
+        "to": "d0",
+        "relationship_type": "primary_contact"
+      },
+      {
+        "from": "c0",
+        "to": "o0",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "c1",
+        "to": "d1",
+        "relationship_type": "primary_contact"
+      },
+      {
+        "from": "c1",
+        "to": "o1",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "c2",
+        "to": "d2",
+        "relationship_type": "primary_contact"
+      },
+      {
+        "from": "c2",
+        "to": "o2",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "c4",
+        "to": "d1",
+        "relationship_type": "primary_contact"
+      },
+      {
+        "from": "c4",
+        "to": "o1",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "c5",
+        "to": "o3",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "c6",
+        "to": "d3",
+        "relationship_type": "primary_contact"
+      },
+      {
+        "from": "c6",
+        "to": "o4",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "d0",
+        "to": "o0",
+        "relationship_type": "account"
+      },
+      {
+        "from": "d1",
+        "to": "o1",
+        "relationship_type": "account"
+      },
+      {
+        "from": "d2",
+        "to": "o2",
+        "relationship_type": "account"
+      },
+      {
+        "from": "d3",
+        "to": "o4",
+        "relationship_type": "account"
+      }
+    ]
+  },
+  "digest": {
+    "rows_reviewed": 8,
+    "source_file": "sample-contacts.csv",
+    "counts": {
+      "contacts": 7,
+      "organizations": 5,
+      "deals": 4,
+      "links": 15
+    },
+    "mapping": [
+      {
+        "sources": [
+          "Full Name"
+        ],
+        "field": "Contact name"
+      },
+      {
+        "sources": [
+          "Email"
+        ],
+        "field": "Email"
+      },
+      {
+        "sources": [
+          "Job Title"
+        ],
+        "field": "Title"
+      },
+      {
+        "sources": [
+          "Phone"
+        ],
+        "field": "Phone"
+      },
+      {
+        "sources": [
+          "Status"
+        ],
+        "field": "Lifecycle"
+      },
+      {
+        "sources": [
+          "Company"
+        ],
+        "field": "Organisation"
+      },
+      {
+        "sources": [
+          "Website"
+        ],
+        "field": "Domain"
+      },
+      {
+        "sources": [
+          "Deal"
+        ],
+        "field": "Deal"
+      },
+      {
+        "sources": [
+          "Deal Value"
+        ],
+        "field": "Amount"
+      },
+      {
+        "sources": [
+          "Deal Stage"
+        ],
+        "field": "Deal stage"
+      },
+      {
+        "sources": [
+          "Notes"
+        ],
+        "field": "Note"
+      }
+    ],
+    "skipped_columns": [
+      "Owner"
+    ],
+    "value_aliases": [
+      {
+        "from": "Customer",
+        "to": "client"
+      },
+      {
+        "from": "Closed Won",
+        "to": "won"
+      },
+      {
+        "from": "Opportunity",
+        "to": "prospect"
+      },
+      {
+        "from": "Negotiation",
+        "to": "verbal"
+      },
+      {
+        "from": "Proposal Sent",
+        "to": "proposal"
+      },
+      {
+        "from": "Vendor",
+        "to": "partner"
+      },
+      {
+        "from": "Churned",
+        "to": "past"
+      },
+      {
+        "from": "Closed Lost",
+        "to": "lost"
+      }
+    ],
+    "contacts": [
+      {
+        "name": "Priya Nair",
+        "initials": "PN",
+        "title": "CEO",
+        "email": "priya@caldergroup.com",
+        "lifecycle": "Client"
+      },
+      {
+        "name": "David Okafor",
+        "initials": "DO",
+        "title": "Head of Ops",
+        "email": "david.okafor@meridian.io",
+        "lifecycle": "Prospect"
+      },
+      {
+        "name": "Sarah Chen",
+        "initials": "SC",
+        "title": "Founder",
+        "email": "sarah@nimbus-labs.com",
+        "lifecycle": "Prospect"
+      },
+      {
+        "name": "Tom Bradley",
+        "initials": "TB",
+        "title": "Consultant",
+        "email": "tom@gmail.com",
+        "lifecycle": "Lead"
+      },
+      {
+        "name": "Jordan Vega",
+        "initials": "JV",
+        "title": "CFO",
+        "email": "jordan@meridian.io",
+        "lifecycle": "Prospect"
+      },
+      {
+        "name": "Amara Nwosu",
+        "initials": "AN",
+        "title": "Director",
+        "email": "amara@brightpath.org",
+        "lifecycle": "Partner"
+      },
+      {
+        "name": "Lee, Marcus",
+        "initials": "LM",
+        "title": "VP Sales",
+        "email": "marcus@northwind.co",
+        "lifecycle": "Past"
+      }
+    ],
+    "organizations": [
+      {
+        "name": "Calder & Co",
+        "initial": "C",
+        "domain": "caldergroup.com"
+      },
+      {
+        "name": "Meridian",
+        "initial": "M",
+        "domain": "meridian.io"
+      },
+      {
+        "name": "Nimbus Labs",
+        "initial": "N",
+        "domain": "nimbus-labs.com"
+      },
+      {
+        "name": "BrightPath",
+        "initial": "B",
+        "domain": "brightpath.org"
+      },
+      {
+        "name": "Northwind",
+        "initial": "N",
+        "domain": "northwind.co"
+      }
+    ],
+    "deals": [
+      {
+        "name": "Nimbus platform",
+        "amount_display": "$45,000",
+        "stage": "Proposal",
+        "status": "open"
+      },
+      {
+        "name": "Calder retainer",
+        "amount_display": "$24,000",
+        "stage": "Won",
+        "status": "won"
+      },
+      {
+        "name": "Meridian pilot",
+        "amount_display": "$12,000",
+        "stage": "Verbal",
+        "status": "open"
+      },
+      {
+        "name": "Northwind expansion",
+        "amount_display": "$8,500",
+        "stage": "Lost",
+        "status": "lost"
+      }
+    ],
+    "aggregates": {
+      "open_total": 57000.0,
+      "won_total": 24000.0,
+      "open_display": "$57,000",
+      "won_display": "$24,000",
+      "people_with_deal": 5
+    },
+    "notes": []
+  }
+}

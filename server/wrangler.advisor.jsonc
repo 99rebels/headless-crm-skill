@@ -1,0 +1,55 @@
+// wrangler.advisor.jsonc — a SECOND deployment of the exact same Worker code, pinned to the
+// advisor's own workspace. This is "Path A" isolation: one trusted design-partner gets an
+// isolated instance without building real auth/multi-tenancy yet. Same DB, different workspace;
+// the WORKSPACE_NAME var is the only functional difference from wrangler.jsonc.
+//
+// ┌─ BEFORE DEPLOYING (Rian, when you have the advisor's details) ────────────────────────────┐
+// │ 1. Fill the three <<PLACEHOLDER>> values below.                                            │
+// │ 2. Create a KV namespace for this Worker's OAuth store and paste its id:                   │
+// │        cd server && npx wrangler kv namespace create OAUTH_KV --config wrangler.advisor.jsonc
+// │    (or `wrangler kv namespace create ADVISOR_OAUTH_KV` and use that id)                    │
+// │ 3. Set the PROD Supabase secrets on THIS Worker (per-Worker; point at the PROD project so   │
+// │    his real data never lands in the dev DB you seed/wipe):                                 │
+// │        npx wrangler secret put SUPABASE_URL --config wrangler.advisor.jsonc                │
+// │        npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config wrangler.advisor.jsonc   │
+// │ 4. Provision the workspace row IN PROD:  npm run provision:prod -- "<<ADVISOR_WORKSPACE_NAME>>" │
+// │ 5. Deploy:  npx wrangler deploy --config wrangler.advisor.jsonc                            │
+// │ 6. Give the advisor the resulting  https://<<name>>.<subdomain>.workers.dev/mcp  URL to    │
+// │    add as a custom connector, and upload the three skill zips on his account.              │
+// └────────────────────────────────────────────────────────────────────────────────────────────┘
+//
+// NOTE: the /mcp URL is an UNGUESSABLE CAPABILITY — there is no login. Fine for one trusted
+// advisor; NOT for real customers. Real auth + Postgres RLS is the deferred multi-tenant workstream.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // <<PLACEHOLDER 1>> — a distinct Worker name → distinct *.workers.dev URL. Keep it obvious,
+  // e.g. "headless-crm-mcp-advisor" or "headless-crm-mcp-<advisorname>".
+  "name": "headless-crm-mcp-advisor",
+
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2025-06-20",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // <<PLACEHOLDER 2>> — the advisor's workspace name. This is the ONE line that isolates his data
+  // from dev. Must match what you pass to `npm run provision -- "<name>"`.
+  "vars": {
+    "WORKSPACE_NAME": "Advisor Workspace"
+  },
+
+  "durable_objects": {
+    "bindings": [{ "name": "MCP_OBJECT", "class_name": "CrmMCP" }]
+  },
+
+  "kv_namespaces": [
+    // <<PLACEHOLDER 3>> — replace with the id printed by `wrangler kv namespace create` (step 2).
+    // Do NOT reuse the dev Worker's KV id; give this deployment its own OAuth store.
+    { "binding": "OAUTH_KV", "id": "REPLACE_WITH_ADVISOR_KV_NAMESPACE_ID" }
+  ],
+
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["CrmMCP"] }
+  ],
+
+  "observability": { "enabled": true }
+}

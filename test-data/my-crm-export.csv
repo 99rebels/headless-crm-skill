@@ -1,0 +1,17 @@
+First Name,Last Name,Email,Job Title,Company,Website,Lifecycle Stage,Deal Name,Amount,Deal Stage,Phone,Notes,Record ID
+Priya,Nair,priya@caldergroup.com,CEO,Calder & Co,https://www.caldergroup.com,Customer,Calder ops retainer,"$24,000",Closed Won,+1 415 555 0142,Met at SaaStr; renews Q1,1001
+David,Okafor,david.okafor@meridian.io,Head of Ops,Meridian,meridian.io,Opportunity,Meridian pilot,"12,000",Negotiation,,Intro via Sarah,1002
+Jordan,Vega,jordan@meridian.io,CFO,Meridian,meridian.io,Opportunity,Meridian pilot,12000,Negotiation,,Budget holder,1003
+Sarah,Chen,sarah@nimbus-labs.com,Founder,Nimbus Labs,nimbus-labs.com,Prospect,Nimbus platform build,45000,Proposal Sent,415-555-0199,Warm; decision by March,1004
+Tom,Bradley,tom.bradley@gmail.com,Independent Consultant,,,Lead,,,,,Newsletter signup,1005
+Amara,Nwosu,amara@brightpath.org,Partnerships Director,BrightPath,brightpath.org,Vendor,,,,+44 20 7946 0000,Referral partner,1006
+Marcus,Lee,marcus@northwind.co; m.lee@northwind.co,VP Sales,Northwind,northwind.co,Churned,Northwind expansion,"$8,500",Closed Lost,,Left last year; maybe revisit,1007
+Elena,Rossi,elena@vela.studio,Creative Director,Vela Studio,vela.studio,Opportunity,Vela brand sprint,"$15,000",Proposal Sent,,Fast mover,1008
+priya@caldergroup.com,,priya@caldergroup.com,,Calder & Co,,Customer,,,,,dupe row from old export,1009
+Ken,Adeyemi,ken@summitpartners.vc,Partner,Summit Partners,summitpartners.vc,Prospect,,,,+1 212 555 0170,Investor; quarterly catch-up,1010
+Rachel,Green,rachel@harborhealth.com,COO,Harbor Health,harborhealth.com,Customer,Harbor fractional COO,"$36,000",Closed Won,,Ongoing engagement,1011
+Sam,Patel,sam@driftwood.co,Owner,Driftwood,driftwood.co,Opportunity,Driftwood advisory,"9,000",Negotiation,,3-month advisory,1012
+Nadia,Rahman,nadia@lumen.co,Product Lead,Lumen,lumen.co,Evangelist,Lumen rollout,"$20,000",Negotiation/Review,,Champion internally; refers us,1013
+Oscar,Diaz,oscar@fairwind.io,Director,Fairwind,fairwind.io,Sales Qualified Lead,Fairwind assessment,"$6,500",Value Proposition,,Referred by Ken,1014
+Bianca,Ferrari,bianca@orenda.co,COO,Orenda,orenda.co,Marketing Qualified Lead,,,,+1 305 555 0188,Downloaded whitepaper,1015
+Wesley,Kim,wesley@tallpine.co,Founder,Tall Pine,tallpine.co,Customer,Tall Pine retainer,"$28,000",Contract Sent,,Verbal yes; paper out for signature,1016

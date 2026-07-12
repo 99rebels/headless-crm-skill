@@ -59,6 +59,29 @@ export async function createOrganization(
   );
 }
 
+/** Batch create: ONE insert for many organizations (same normalisation as createOrganization).
+ *  Used by bulk import to stay within the Worker's per-invocation subrequest budget. Returns rows
+ *  in input order; empty in → no DB call. */
+export async function createOrganizations(
+  workspaceId: UUID,
+  inputs: CreateOrganizationInput[],
+): Promise<Organization[]> {
+  if (inputs.length === 0) return [];
+  const rows = inputs.map((input) => {
+    const { primary_domain, domains } = normaliseDomains(input);
+    return {
+      workspace_id: workspaceId,
+      name: input.name ?? null,
+      primary_domain: primary_domain ?? null,
+      domains,
+      last_interaction_at: input.last_interaction_at ?? null,
+      owner_id: input.owner_id ?? null,
+      attributes: input.attributes ?? {},
+    };
+  });
+  return orThrow(await getDb().from("organization").insert(rows).select());
+}
+
 export async function getOrganization(workspaceId: UUID, id: UUID): Promise<Organization | null> {
   const { data, error } = await getDb()
     .from("organization")

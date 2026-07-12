@@ -15,6 +15,10 @@ import { registerCrmTools } from "../mcp/build.js";
 interface Env {
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
+  // Which workspace this deployment is bound to. Absent on the dev Worker (→ "Dev Workspace").
+  // A per-tenant deployment (e.g. wrangler.advisor.jsonc) sets this to that tenant's workspace
+  // name — the lightweight isolation used before the real multi-tenant auth workstream lands.
+  WORKSPACE_NAME?: string;
   OAUTH_PROVIDER: any;
 }
 
@@ -27,9 +31,12 @@ export class CrmMCP extends McpAgent {
     // Register tools with a LAZY workspace resolver — do NOT hit the DB here. This keeps the
     // MCP handshake from depending on a Supabase round-trip at connection time (a DB blip then
     // can't fail the connection); the workspace is resolved+memoised on the first tool call.
-    // MVP: single dev workspace. Real per-user workspace resolution comes with auth.
+    // The workspace name is pinned per-deployment via WORKSPACE_NAME (dev Worker → "Dev
+    // Workspace"; a per-tenant Worker → that tenant's workspace). Real multi-tenant resolution
+    // from the connection identity comes with the auth workstream.
+    const workspaceName = env.WORKSPACE_NAME ?? "Dev Workspace";
     registerCrmTools(this.server, () =>
-      getOrCreateWorkspaceByName("Dev Workspace").then((ws) => ws.id),
+      getOrCreateWorkspaceByName(workspaceName).then((ws) => ws.id),
     );
   }
 }

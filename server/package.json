@@ -10,12 +10,17 @@
     "smoke": "tsx --env-file=.env src/smoke.ts",
     "mcp-smoke": "tsx --env-file=.env src/mcp-smoke.ts",
     "seed": "tsx --env-file=.env src/seed-demo.ts",
+    "reset-demo:wipe": "tsx --env-file=.env src/reset-demo.ts",
+    "reset-demo": "tsx --env-file=.env src/reset-demo.ts && tsx --env-file=.env src/seed-demo.ts",
+    "provision": "tsx --env-file=.env src/provision-workspace.ts",
+    "provision:prod": "tsx --env-file=.env.prod src/provision-workspace.ts",
     "inspect": "tsx --env-file=.env src/inspect.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "cf-build": "wrangler deploy --dry-run --outdir dist-worker",
     "cf-dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "deploy:advisor": "wrangler deploy --config wrangler.advisor.jsonc"
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "^0.8.1",

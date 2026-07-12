@@ -1,0 +1,20 @@
+{
+  "columns": {
+    "Full Name": "person.name",
+    "Email": "person.email",
+    "Job Title": "person.title",
+    "Company": "organization.name",
+    "Website": "organization.domain",
+    "Status": "person.lifecycle_stage",
+    "Deal": "deal.name",
+    "Deal Value": "deal.amount",
+    "Deal Stage": "deal.stage",
+    "Phone": "person.phone",
+    "Notes": "person.attr.notes",
+    "Owner": "ignore"
+  },
+  "options": {
+    "create_deals": true,
+    "default_currency": "USD"
+  }
+}

@@ -40,7 +40,7 @@ async function main() {
       "create_organization", "find_organizations", "get_organization", "update_organization",
       "create_deal", "find_deals", "get_deal", "update_deal",
       "link_records", "find_associations", "unlink_records",
-      "get_pipeline_summary",
+      "get_pipeline_summary", "bulk_import",
     ];
     ok(
       `lists ${expectedTools.length} tools (${tools.join(", ")})`,
@@ -147,6 +147,61 @@ async function main() {
       }),
     );
     ok("find_associations gathers both of the contact's links", assoc?.count === 2);
+
+    // ── bulk_import (one-shot, SET-BASED create + dedupe + link) ───────────────────
+    // Multiple NEW records of each type so the batch inserts + key→id order-mapping are exercised
+    // (not just a single-row insert). c2/o2 are existing → must dedupe, not duplicate.
+    const bulk = payload(
+      await client.callTool({
+        name: "bulk_import",
+        arguments: {
+          plan: {
+            organizations: [
+              { key: "o0", name: "Zephyr Inc", domain: "zephyr.test" },
+              { key: "o1", name: "Bramble Co", domain: "bramble.test" },
+              { key: "o2", name: "Acme (dupe)", domain: "acme.com" }, // existing → reuse
+            ],
+            contacts: [
+              { key: "c0", name: "Rae Lin", email: "rae@zephyr.test", lifecycle_stage: "prospect" },
+              { key: "c1", name: "Bo Vance", email: "bo@bramble.test", lifecycle_stage: "lead" },
+              { key: "c2", name: "Kate Dup", email: "kate@acme.com" }, // existing → reuse
+            ],
+            deals: [
+              { key: "d0", name: "Zephyr rollout", stage: "won", status: "won", amount: 1000 },
+              { key: "d1", name: "Bramble pilot", stage: "proposal", amount: 500 },
+            ],
+            links: [
+              { from: "c0", to: "o0", relationship_type: "works_at" },
+              { from: "c1", to: "o1", relationship_type: "works_at" }, // 2nd-new-of-each: catches order bugs
+              { from: "c1", to: "d1", relationship_type: "primary_contact" },
+            ],
+          },
+        },
+      }),
+    );
+    ok(
+      "bulk_import created 2 new orgs + 2 new contacts + 2 deals (multi-row batch inserts)",
+      bulk?.created?.organizations === 2 && bulk?.created?.contacts === 2 && bulk?.created?.deals === 2,
+    );
+    ok(
+      "bulk_import reused existing org + contact by dedup (no duplicates)",
+      bulk?.reused?.organizations === 1 && bulk?.reused?.contacts === 1,
+    );
+    ok(
+      "bulk_import resolved all 3 links via local keys",
+      bulk?.created?.links === 3 && (bulk?.errors?.length ?? 0) === 0,
+    );
+    // Prove the 2ND new contact's keys mapped to the RIGHT rows (order-correct after batch insert).
+    const bo = payload(await client.callTool({ name: "find_contacts", arguments: { email: "bo@bramble.test" } }));
+    const boAssoc = payload(
+      await client.callTool({ name: "find_associations", arguments: { entity_type: "person", entity_id: bo?.contacts?.[0]?.id } }),
+    );
+    ok(
+      "bulk_import mapped 2nd-new-record keys correctly (c1 linked to o1 + d1)",
+      boAssoc?.count === 2 &&
+        boAssoc?.associations?.some((a: any) => a.relationship_type === "works_at") &&
+        boAssoc?.associations?.some((a: any) => a.relationship_type === "primary_contact"),
+    );
 
     console.log("\n📇 Final contact via MCP:");
     console.log(JSON.stringify(fetched, null, 2));

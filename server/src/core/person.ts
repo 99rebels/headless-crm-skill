@@ -55,6 +55,32 @@ export async function createPerson(
   );
 }
 
+/** Batch create: ONE insert for many people (same normalisation as createPerson). Used by bulk
+ *  import so a large file stays within the Worker's per-invocation subrequest budget — a loop of
+ *  createPerson would be one subrequest per row. Returns rows in input order; empty in → no DB call. */
+export async function createPeople(
+  workspaceId: UUID,
+  inputs: CreatePersonInput[],
+): Promise<Person[]> {
+  if (inputs.length === 0) return [];
+  const rows = inputs.map((input) => {
+    const { primary_email, emails } = normaliseEmails(input);
+    return {
+      workspace_id: workspaceId,
+      name: input.name ?? null,
+      primary_email: primary_email ?? null,
+      emails,
+      phone: input.phone ?? null,
+      title: input.title ?? null,
+      lifecycle_stage: input.lifecycle_stage ?? null,
+      last_interaction_at: input.last_interaction_at ?? null,
+      owner_id: input.owner_id ?? null,
+      attributes: input.attributes ?? {},
+    };
+  });
+  return orThrow(await getDb().from("person").insert(rows).select());
+}
+
 export async function getPerson(workspaceId: UUID, id: UUID): Promise<Person | null> {
   const { data, error } = await getDb()
     .from("person")
