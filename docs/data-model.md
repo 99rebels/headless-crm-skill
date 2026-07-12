@@ -27,7 +27,7 @@
 |---|---|---|
 | id | uuid | |
 | name | text | |
-| settings | jsonb | per-workspace config with no schema change — e.g. pipeline stages, displayed term for "deal", defaults |
+| settings | jsonb | per-workspace config with no schema change. **Now load-bearing for `get_pipeline_summary`** — the canonical home for the CRM *vocabulary* (data, not code): `pipeline` (open stage names, in order), `lifecycle_stages`, `default_currency`, and `self.emails` (the operator's own addresses, so the dashboard can exclude their own record). Adding a stage/lifecycle value is a settings edit, never a code change. |
 | created_at | timestamptz | |
 
 ### person
@@ -69,10 +69,13 @@
 | status | text | `open` / `won` / `lost` |
 | amount | numeric | |
 | currency | text | default `USD` |
-| expected_close_date | date | |
+| expected_close_date | date | the *expected* close (forecasting) — set while the deal is open |
+| closed_at | timestamptz | the *actual* close, stamped by the core when `status` flips to `won`/`lost` (migration `0002`). Source of truth for "recently won"; nullable. |
 | owner_id | uuid | |
 | **attributes** | jsonb | ★ |
 | created_at / updated_at / archived_at | timestamptz | |
+
+*A stage-less open deal (`stage = null`) is legitimate — `get_pipeline_summary` buckets it under **"Unstaged"** and still counts it, rather than dropping or guessing (the case that used to make different models show different pipelines).*
 
 *Deals link to their org(s) and people via the **association** table (e.g. `decision_maker`, `champion`), not fixed FKs — keeps the graph consistent. (Option we could add later: a convenience `primary_organization_id` for the common single-account case.)*
 
