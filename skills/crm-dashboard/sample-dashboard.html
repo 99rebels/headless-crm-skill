@@ -3,134 +3,468 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pipeline</title>
+<title>Dashboard — Fractional Ops — Rian</title>
 <style>
-  /* ---- Harbor: a calm ledger palette. One accent (teal), semantic state kept separate. ---- */
-  :root {
-    --bg:#f4f6f4; --surface:#ffffff; --ink:#1a231e; --muted:#657069;
-    --line:#e4e8e4; --line-strong:#d3d9d3;
-    --accent:#12756a; --accent-ink:#0c5049; --accent-soft:#e3efec;
-    --warn:#9a6a16; --warn-soft:#f5ecd9; --bad:#9d4a3b;
-    --shadow:0 1px 2px rgba(20,40,35,.05), 0 3px 12px rgba(20,40,35,.05);
-    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  :root{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6;
+    --cool:#3f6f86; --cool-ink:#2c5266; --cool-soft:#e4eef3; --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05); --shadow-lg:0 8px 40px rgba(40,32,16,.18);
+    --serif:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg:#0e1311; --surface:#151c19; --ink:#e7ece8; --muted:#8a958e;
-      --line:#232b27; --line-strong:#313a35;
-      --accent:#3fb0a0; --accent-ink:#c3e8e0; --accent-soft:#16302b;
-      --warn:#d6a34d; --warn-soft:#2a2413; --bad:#cf7462;
-      --shadow:0 1px 2px rgba(0,0,0,.32), 0 3px 12px rgba(0,0,0,.28);
-    }
+  @media (prefers-color-scheme: dark){ :root{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413;
+    --cool:#7fb0c9; --cool-ink:#a7cede; --cool-soft:#17272f; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30); --shadow-lg:0 10px 44px rgba(0,0,0,.55);
+  }}
+  :root[data-theme="light"]{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6;
+    --cool:#3f6f86; --cool-ink:#2c5266; --cool-soft:#e4eef3; --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05); --shadow-lg:0 8px 40px rgba(40,32,16,.18);
   }
-  :root[data-theme="light"] {
-    --bg:#f4f6f4; --surface:#ffffff; --ink:#1a231e; --muted:#657069;
-    --line:#e4e8e4; --line-strong:#d3d9d3;
-    --accent:#12756a; --accent-ink:#0c5049; --accent-soft:#e3efec;
-    --warn:#9a6a16; --warn-soft:#f5ecd9; --bad:#9d4a3b;
-    --shadow:0 1px 2px rgba(20,40,35,.05), 0 3px 12px rgba(20,40,35,.05);
-  }
-  :root[data-theme="dark"] {
-    --bg:#0e1311; --surface:#151c19; --ink:#e7ece8; --muted:#8a958e;
-    --line:#232b27; --line-strong:#313a35;
-    --accent:#3fb0a0; --accent-ink:#c3e8e0; --accent-soft:#16302b;
-    --warn:#d6a34d; --warn-soft:#2a2413; --bad:#cf7462;
-    --shadow:0 1px 2px rgba(0,0,0,.32), 0 3px 12px rgba(0,0,0,.28);
+  :root[data-theme="dark"]{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413;
+    --cool:#7fb0c9; --cool-ink:#a7cede; --cool-soft:#17272f; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30); --shadow-lg:0 10px 44px rgba(0,0,0,.55);
   }
 
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
-    font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased; }
-  .wrap { max-width:940px; margin:0 auto; padding:34px 24px 56px; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:900px; margin:0 auto; padding:32px 22px 64px; }
+  .kicker{ font:600 11px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
 
-  .kicker { display:block; font-size:11px; font-weight:600; letter-spacing:.14em;
-    text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+  .topbar{ display:flex; justify-content:flex-end; margin-bottom:10px; }
+  .themebar{ display:inline-flex; background:var(--raise); border:1px solid var(--line); border-radius:999px; padding:3px; gap:2px; }
+  .themebar button{ font:600 11px/1 var(--sans); color:var(--muted); background:none; border:none; border-radius:999px; padding:6px 11px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+  .themebar button[aria-pressed="true"]{ color:var(--accent-ink); background:var(--surface); box-shadow:var(--shadow); }
+  .themebar button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 
-  /* masthead */
-  .masthead { display:flex; justify-content:space-between; align-items:flex-end; gap:24px;
-    padding-bottom:20px; border-bottom:1px solid var(--line-strong); margin-bottom:26px; }
-  .mast-left .kicker { margin-bottom:6px; }
-  .mast-title { font-family:var(--serif); font-weight:600; font-size:30px; line-height:1.05;
-    margin:0; letter-spacing:-.01em; text-wrap:balance; }
-  .mast-right { text-align:right; }
-  .mast-date { font-size:12.5px; color:var(--muted); }
-  .mast-summary { font-size:13.5px; color:var(--ink); margin-top:3px; }
+  .masthead{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px;
+    padding-bottom:18px; border-bottom:1px solid var(--line-strong); }
+  .mast-title{ font-family:var(--serif); font-weight:600; font-size:29px; line-height:1.04; margin:8px 0 0; letter-spacing:-.01em; }
+  .mast-date{ font:12.5px/1.35 var(--mono); color:var(--muted); text-align:right; }
 
-  /* stat tiles */
-  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:32px; }
-  .tile { background:var(--surface); border:1px solid var(--line); border-radius:12px;
-    padding:16px 18px; box-shadow:var(--shadow); }
-  .tile-label { font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
-  .figure { font-family:var(--serif); font-size:30px; font-weight:600; margin-top:8px;
-    font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
-  .tile-warn { border-color:var(--warn); background:var(--warn-soft); }
-  .tile-warn .figure { color:var(--warn); }
+  .toolbar{ margin-top:20px; }
+  .search{ position:relative; }
+  .search input{ width:100%; font:14px/1 var(--sans); color:var(--ink); background:var(--surface);
+    border:1px solid var(--line-strong); border-radius:10px; padding:11px 34px 11px 36px; outline:none; }
+  .search input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+  .search input::placeholder{ color:var(--faint); }
+  .search::before{ content:"\2315"; position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:17px; }
+  .search-clear{ position:absolute; right:8px; top:50%; transform:translateY(-50%); border:none; background:none;
+    color:var(--faint); cursor:pointer; font-size:15px; padding:4px; display:none; }
+  .search.has-val .search-clear{ display:block; }
 
-  /* pipeline board */
-  .board-wrap { margin-bottom:32px; }
-  .board { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(240px,1fr); gap:14px;
-    overflow-x:auto; padding-bottom:6px; }
-  .col { background:transparent; }
-  .col-head { display:flex; align-items:baseline; gap:8px; padding:0 2px 10px;
-    border-bottom:2px solid var(--accent); margin-bottom:12px; }
-  .col-name { font-size:12.5px; font-weight:650; letter-spacing:.06em; text-transform:uppercase;
-    color:var(--ink); }
-  .col-count { font-size:11px; font-weight:600; color:var(--accent-ink); background:var(--accent-soft);
-    border-radius:999px; padding:1px 8px; }
-  .col-subtotal { margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--muted);
-    font-variant-numeric:tabular-nums; }
-  .col-body { display:flex; flex-direction:column; gap:10px; }
+  .tabswitch{ position:absolute; opacity:0; pointer-events:none; }
+  .tabs{ display:flex; justify-content:center; gap:4px; margin:18px 0 26px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .tabs label{ font:600 13px/1 var(--sans); color:var(--muted); padding:11px 15px; border-bottom:2px solid transparent;
+    cursor:pointer; margin-bottom:-1px; display:inline-flex; align-items:center; gap:7px; border-radius:8px 8px 0 0;
+    transition:color .15s, border-color .15s, background .15s; }
+  .tabs label:hover{ color:var(--ink); background:var(--raise); }
+  .tabs label .tcount{ font:600 11px/1 var(--mono); color:var(--muted); background:var(--line); border-radius:999px; padding:2px 7px; }
+  #t-focus:checked ~ .tabs label[for="t-focus"], #t-pipe:checked ~ .tabs label[for="t-pipe"], #t-ppl:checked ~ .tabs label[for="t-ppl"], #t-mom:checked ~ .tabs label[for="t-mom"]{ color:var(--accent-ink); border-bottom-color:var(--accent); }
+  #t-focus:checked ~ .tabs label[for="t-focus"] .tcount, #t-pipe:checked ~ .tabs label[for="t-pipe"] .tcount, #t-ppl:checked ~ .tabs label[for="t-ppl"] .tcount{ color:var(--accent-ink); background:var(--accent-soft); }
+  .tabswitch:focus-visible + .tabs label{ outline:2px solid var(--accent); outline-offset:2px; }
+  .panel{ display:none; }
+  #t-focus:checked ~ .panels .panel-focus, #t-pipe:checked ~ .panels .panel-pipe, #t-ppl:checked ~ .panels .panel-ppl, #t-mom:checked ~ .panels .panel-mom{ display:block; animation:fade .2s ease; }
+  @keyframes fade{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:none;} }
 
-  .deal { background:var(--surface); border:1px solid var(--line); border-radius:11px;
-    padding:13px 14px; box-shadow:var(--shadow); transition:transform .12s ease, border-color .12s ease; }
-  .deal:hover { transform:translateY(-1px); border-color:var(--line-strong); }
-  .deal-top { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
-  .deal-name { font-family:var(--serif); font-size:16px; font-weight:600; margin:0; line-height:1.2;
-    text-wrap:balance; }
-  .deal-amount { font-family:var(--mono); font-size:13.5px; color:var(--accent-ink);
-    font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .deal-meta { font-size:12.5px; color:var(--muted); margin-top:6px; }
-  .deal-org { color:var(--ink); font-weight:500; }
-  .deal-foot { margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); }
-  .deal-close { font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; }
-  .stage-empty { font-size:12.5px; color:var(--muted); font-style:italic; padding:6px 2px; }
+  .sec-title{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+    margin:0 0 14px; display:flex; justify-content:space-between; align-items:center; }
+  .sec-title.mt{ margin-top:32px; }
+  .sec-note{ font-size:12px; color:var(--faint); font-style:italic; margin:-9px 0 14px; }
 
-  /* needs a nudge */
-  .attention { background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--warn);
-    border-radius:12px; padding:18px 20px; box-shadow:var(--shadow); margin-bottom:24px; }
-  .att-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
-  .att-row { display:flex; justify-content:space-between; align-items:center; gap:16px;
-    padding:12px 0; border-top:1px solid var(--line); }
-  .att-row:first-child { border-top:none; padding-top:2px; }
-  .att-main { display:flex; flex-direction:column; gap:2px; }
-  .att-nameline { display:flex; align-items:baseline; gap:9px; }
-  .att-name { font-family:var(--serif); font-size:16px; font-weight:600; }
-  .att-kind { font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
-    color:var(--muted); border:1px solid var(--line-strong); border-radius:999px; padding:1px 8px; }
-  .att-detail { font-size:12px; color:var(--muted); }
-  .att-reason { font-size:12.5px; color:var(--warn); text-align:right; white-space:nowrap; }
-  .attention-clear { margin:0; font-size:13.5px; color:var(--muted); }
+  .brief{ font-family:var(--serif); font-size:20px; line-height:1.45; margin:0 0 26px; color:var(--ink); text-wrap:balance; }
+  .brief .hl{ color:var(--accent-ink); font-weight:600; } .brief .warnhl{ color:var(--warn); font-weight:600; }
 
-  /* recently won */
-  .won { margin-top:6px; }
-  .won-row { display:flex; flex-wrap:wrap; gap:8px; }
-  .won-chip { font-size:12.5px; color:var(--ink); background:var(--accent-soft);
-    border:1px solid var(--accent-soft); border-radius:999px; padding:4px 11px; }
-  .won-amt { font-family:var(--mono); color:var(--accent-ink); font-variant-numeric:tabular-nums; }
+  .actions{ display:flex; flex-direction:column; gap:11px; }
+  .action{ display:block; width:100%; text-align:left; font:inherit; color:inherit; cursor:pointer;
+    background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--type-color);
+    border-radius:12px; padding:14px 16px; box-shadow:var(--shadow); transition:transform .12s ease, border-color .12s ease; }
+  .action:hover{ transform:translateY(-1px); }
+  .action:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .action.t-opp{ --type-color:var(--accent); } .action.t-follow{ --type-color:var(--cool); } .action.t-cool{ --type-color:var(--warn); }
+  .a-head{ display:flex; align-items:baseline; gap:10px; justify-content:space-between; }
+  .a-namewrap{ display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
+  .a-name{ font-family:var(--serif); font-size:16.5px; font-weight:600; }
+  .a-tag{ font:600 10px/1 var(--sans); text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:999px; white-space:nowrap; }
+  .t-opp .a-tag{ color:var(--accent-ink); background:var(--accent-soft); }
+  .t-follow .a-tag{ color:var(--cool-ink); background:var(--cool-soft); }
+  .t-cool .a-tag{ color:var(--warn-ink); background:var(--warn-soft); }
+  .a-meta{ font:12.5px/1 var(--mono); color:var(--muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .a-why{ font:13px/1.45 var(--sans); color:var(--muted); margin-top:5px; }
+  .a-do{ font:600 13.5px/1.4 var(--sans); color:var(--accent-ink); margin-top:9px; display:inline-flex; align-items:center; gap:8px; }
+  .a-do::before{ content:"\2192"; color:var(--type-color); font-weight:700; }
 
-  @media (max-width:640px) {
-    .tiles { grid-template-columns:repeat(2,1fr); }
-    .masthead { flex-direction:column; align-items:flex-start; }
-    .mast-right { text-align:left; }
+  .won-strip{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; padding:14px 16px;
+    background:var(--raise); border:1px solid var(--line); border-radius:12px; }
+  .won-lead{ font:600 10.5px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .won-chip{ font:12.5px/1 var(--sans); color:var(--ink); background:var(--accent-soft); border:1px solid var(--accent-soft);
+    border-radius:999px; padding:6px 12px; }
+  .won-chip b{ font-family:var(--mono); color:var(--accent-ink); font-weight:600; font-variant-numeric:tabular-nums; }
+
+  .tiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .tile{ background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:15px 16px; box-shadow:var(--shadow); }
+  .tile-label{ font:600 11px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .figure{ font-family:var(--serif); font-size:28px; font-weight:600; margin-top:9px; font-variant-numeric:tabular-nums; letter-spacing:-.01em; line-height:1; }
+  .tile-sub{ font:11.5px/1.3 var(--sans); color:var(--faint); margin-top:6px; }
+  .tilelink{ cursor:pointer; text-align:left; font:inherit; color:inherit; width:100%; display:block; position:relative; transition:transform .12s ease, border-color .12s ease; }
+  .tilelink:hover{ transform:translateY(-1px); border-color:var(--accent); }
+  .tilelink:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .tilelink::after{ content:"\203A"; position:absolute; top:11px; right:14px; color:var(--faint); font-size:17px; line-height:1; }
+
+  .stagebars{ background:var(--surface); border:1px solid var(--line); border-radius:13px; box-shadow:var(--shadow); padding:18px 20px; }
+  .sb-row{ display:grid; grid-template-columns:96px 1fr 132px; align-items:center; gap:16px; padding:9px 0; }
+  .sb-row + .sb-row{ border-top:1px solid var(--line); }
+  .sb-name{ font:600 11px/1.2 var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--ink); }
+  .sb-track{ height:22px; background:var(--bg); border-radius:6px; overflow:hidden; }
+  .sb-fill{ height:100%; background:var(--accent); border-radius:6px; min-width:3px; }
+  .sb-fill.empty{ background:repeating-linear-gradient(45deg,var(--line) 0 6px,transparent 6px 12px); }
+  .sb-fill.pending{ background:var(--accent-soft); border:1px solid var(--accent); }
+  .sb-val{ text-align:right; font:13px/1 var(--mono); color:var(--accent-ink); font-variant-numeric:tabular-nums; }
+  .sb-val .cnt{ display:block; font:11px/1.4 var(--sans); color:var(--muted); }
+  .forecast{ display:flex; justify-content:space-between; align-items:baseline; margin-top:14px; padding-top:14px; border-top:1px solid var(--line-strong); }
+  .forecast .fc-label{ font:600 11px/1 var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+  .forecast .fc-val{ font-family:var(--mono); font-size:16px; color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums; }
+
+  .board{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax(240px,1fr); gap:14px; overflow-x:auto; padding-bottom:6px; }
+  .col-head{ display:flex; align-items:baseline; gap:8px; padding:0 2px 10px; border-bottom:2px solid var(--accent); margin-bottom:12px; }
+  .col-name{ font:650 12px/1 var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--ink); }
+  .col-count{ font:600 11px/1 var(--mono); color:var(--accent-ink); background:var(--accent-soft); border-radius:999px; padding:2px 8px; }
+  .col-sub{ margin-left:auto; font:12px/1 var(--mono); color:var(--muted); font-variant-numeric:tabular-nums; }
+  .col-body{ display:flex; flex-direction:column; gap:10px; min-height:20px; }
+  .deal{ background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:13px 14px; box-shadow:var(--shadow);
+    cursor:pointer; transition:transform .12s ease, border-color .12s ease; text-align:left; width:100%; font:inherit; color:inherit; display:block; }
+  .deal:hover{ transform:translateY(-1px); border-color:var(--accent); }
+  .deal:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .deal-top{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .deal-name{ font-family:var(--serif); font-size:15.5px; font-weight:600; margin:0; line-height:1.2; text-wrap:balance; }
+  .deal-amount{ font:13px/1 var(--mono); color:var(--accent-ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .deal-meta{ font:12.5px/1.4 var(--sans); color:var(--muted); margin-top:6px; }
+  .deal-meta .org{ color:var(--ink); font-weight:500; }
+  .deal-foot{ margin-top:9px; padding-top:8px; border-top:1px dashed var(--line); }
+  .deal-close{ font:11.5px/1 var(--mono); color:var(--muted); font-variant-numeric:tabular-nums; }
+  .stage-empty{ font:12.5px/1 var(--sans); color:var(--faint); font-style:italic; padding:6px 2px; }
+
+  .rec{ background:var(--surface); border:1px solid var(--line); border-radius:13px; box-shadow:var(--shadow); padding:6px 18px; }
+  .rowlink{ cursor:pointer; }
+  .rec-row{ display:grid; grid-template-columns:1fr 150px 96px; align-items:center; gap:14px; padding:13px 10px; border-top:1px solid var(--line); margin:0 -10px; border-radius:8px; transition:background .12s ease; }
+  .rec-row:hover{ background:var(--raise); }
+  .rec-row:first-child{ border-top:none; }
+  .rec-row:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+  .rec-name{ font-family:var(--serif); font-size:15px; font-weight:600; }
+  .rec-org{ font:12px/1.3 var(--sans); color:var(--muted); margin-top:1px; }
+  .rec-track{ height:8px; border-radius:999px; background:var(--bg); overflow:hidden; }
+  .rec-fill{ height:100%; border-radius:999px; }
+  .rec-when{ text-align:right; font:12px/1 var(--mono); font-variant-numeric:tabular-nums; }
+  .fresh .rec-fill{ background:var(--accent); } .fresh .rec-when{ color:var(--accent-ink); }
+  .warm .rec-fill{ background:var(--cool); } .warm .rec-when{ color:var(--cool-ink); }
+  .stale .rec-fill{ background:var(--warn); } .stale .rec-when{ color:var(--warn); }
+  .new-r .rec-fill{ background:repeating-linear-gradient(45deg,var(--line-strong) 0 5px,transparent 5px 10px); } .new-r .rec-when{ color:var(--faint); }
+  .rec-legend{ display:flex; gap:16px; flex-wrap:wrap; margin:12px 0 4px; font-size:11.5px; color:var(--muted); }
+  .rec-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .dot{ width:9px; height:9px; border-radius:999px; display:inline-block; }
+  .filterbtn{ font:600 10px/1 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--muted);
+    background:none; border:1px solid var(--line-strong); border-radius:999px; padding:5px 11px; cursor:pointer; }
+  .filterbtn[aria-pressed="true"]{ color:var(--warn-ink); background:var(--warn-soft); border-color:var(--warn-line); }
+
+  .empty-msg{ padding:24px 8px; text-align:center; color:var(--faint); font-size:13px; font-style:italic; display:none; }
+
+  .mom-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:13px; box-shadow:var(--shadow); padding:18px 20px; }
+  .card h4{ margin:0 0 3px; font:600 11px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .card .big{ font-family:var(--serif); font-size:32px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.01em; margin-top:6px; }
+  .card .big small{ font:12px/1 var(--sans); color:var(--muted); font-weight:400; letter-spacing:0; }
+  .chart-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .rangebtns{ display:flex; gap:4px; }
+  .rangebtns button{ font:600 10px/1 var(--mono); color:var(--muted); background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:5px 8px; cursor:pointer; }
+  .rangebtns button[aria-pressed="true"]{ color:var(--accent-ink); background:var(--accent-soft); border-color:var(--accent); }
+  .chart-holder{ position:relative; }
+  .chart{ width:100%; height:auto; display:block; margin-top:8px; overflow:visible; }
+  .chart .grid{ stroke:var(--line); stroke-width:1; }
+  .chart .area{ fill:var(--accent); opacity:.12; }
+  .chart .line{ fill:none; stroke:var(--accent); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .chart .dot{ fill:var(--surface); stroke:var(--accent); stroke-width:2; }
+  .chart .hl{ fill:var(--accent); }
+  .chart .vline{ stroke:var(--line-strong); stroke-width:1; stroke-dasharray:3 3; }
+  .tip{ position:absolute; pointer-events:none; background:var(--ink); color:var(--bg); font:600 11px/1.3 var(--mono);
+    padding:6px 9px; border-radius:7px; transform:translate(-50%,-120%); white-space:nowrap; opacity:0; transition:opacity .12s; box-shadow:var(--shadow); }
+  .tip.on{ opacity:1; }
+  .caxis{ display:flex; justify-content:space-between; font:10px var(--mono); color:var(--faint); margin-top:4px; }
+  .won-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+
+  .scrim{ position:fixed; inset:0; background:rgba(20,16,8,.4); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:40; }
+  .scrim.on{ opacity:1; pointer-events:auto; }
+  .drawer{ position:fixed; top:0; right:0; height:100%; width:min(400px,92vw); background:var(--surface);
+    border-left:1px solid var(--line-strong); box-shadow:var(--shadow-lg); z-index:50; transform:translateX(100%);
+    transition:transform .24s cubic-bezier(.4,0,.2,1); overflow-y:auto; padding:24px 24px 40px; }
+  .drawer.on{ transform:none; }
+  .dr-close{ position:absolute; top:16px; right:16px; border:none; background:var(--raise); color:var(--muted);
+    width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:16px; line-height:1; }
+  .dr-close:hover{ color:var(--ink); }
+  .dr-kind{ font:600 10.5px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .dr-title{ font-family:var(--serif); font-size:23px; font-weight:600; margin:8px 0 2px; letter-spacing:-.01em; }
+  .dr-subtitle{ font:13px/1.4 var(--sans); color:var(--muted); }
+  .dr-facts{ margin:20px 0 0; }
+  .dr-fact{ display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid var(--line); }
+  .dr-fact:first-child{ border-top:none; }
+  .dr-fact dt{ font:12px/1.4 var(--sans); color:var(--muted); }
+  .dr-fact dd{ margin:0; font:13px/1.4 var(--sans); color:var(--ink); text-align:right; font-weight:500; }
+  .dr-fact dd.mono{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  .dr-sec{ font:600 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:22px 0 10px; }
+  .dr-link{ display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--raise); border:1px solid var(--line); border-radius:10px; margin-bottom:8px; font-size:13px; }
+  .dr-link b{ font-weight:600; } .dr-link .r{ margin-left:auto; font:11px/1 var(--mono); color:var(--muted); }
+  .dr-note{ font:12.5px/1.5 var(--sans); color:var(--ink); background:var(--accent-soft); border-radius:10px; padding:12px 14px; margin-top:18px; }
+  .dr-hint{ font:11.5px/1.45 var(--sans); color:var(--faint); text-align:center; margin-top:20px; font-style:italic; }
+  .dr-back{ font:600 12px/1 var(--sans); color:var(--accent); background:none; border:none; cursor:pointer; padding:4px 0; margin-bottom:6px; display:inline-flex; align-items:center; gap:5px; }
+  .dr-back:hover{ color:var(--accent-ink); }
+  #drList{ margin-top:18px; }
+  .dr-listrow{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; font:inherit; color:inherit;
+    background:var(--raise); border:1px solid var(--line); border-radius:10px; padding:12px 13px; margin-bottom:8px; cursor:pointer;
+    transition:border-color .12s ease, transform .12s ease; }
+  .dr-listrow:hover{ border-color:var(--accent); transform:translateY(-1px); }
+  .dr-listrow:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .dl-main{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .dl-name{ font-family:var(--serif); font-weight:600; font-size:14px; }
+  .dl-meta{ font:11.5px/1.3 var(--sans); color:var(--muted); }
+  .dl-amt{ margin-left:auto; font:12.5px/1 var(--mono); color:var(--accent-ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
+
+  @media (max-width:640px){
+    .tiles{ grid-template-columns:1fr 1fr; } .masthead{ flex-direction:column; align-items:flex-start; } .mast-date{ text-align:left; }
+    .sb-row{ grid-template-columns:80px 1fr 96px; gap:10px; } .rec-row{ grid-template-columns:1fr 90px 66px; gap:10px; }
   }
-  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
 </style>
 </head>
 <body>
-  <main class="wrap">
-    <header class='masthead'><div class='mast-left'><span class='kicker'>Pipeline</span><h1 class='mast-title'>Fractional Ops — Rian</h1></div><div class='mast-right'><div class='mast-date'>11 Jul 2026</div><div class='mast-summary'>$30,000 across 2 open deals · 3 relationships to nudge</div></div></header><section class='tiles'><div class='tile'><div class='tile-label'>Open pipeline</div><div class='figure serif'>$30,000</div></div><div class='tile'><div class='tile-label'>Open deals</div><div class='figure serif'>2</div></div><div class='tile'><div class='tile-label'>Relationships</div><div class='figure serif'>5</div></div><div class='tile tile-warn'><div class='tile-label'>Needs a nudge</div><div class='figure serif'>3</div></div></section><section class='board-wrap'><span class='kicker'>Open pipeline</span><div class='board'><div class='col'><div class='col-head'><span class='col-name'>discovery</span><span class='col-count'>1</span><span class='col-subtotal'>$0</span></div><div class='col-body'><article class='deal'><div class='deal-top'><h3 class='deal-name'>Calder &amp; Co — fractional ops</h3><span class='deal-amount'>—</span></div><div class='deal-meta'><span class='deal-org'>Calder &amp; Co</span> · <span class='deal-people'>Priya Nair</span></div></article></div></div><div class='col'><div class='col-head'><span class='col-name'>proposal</span><span class='col-count'>0</span><span class='col-subtotal'>$0</span></div><div class='col-body'><p class='stage-empty'>Nothing here</p></div></div><div class='col'><div class='col-head'><span class='col-name'>verbal</span><span class='col-count'>1</span><span class='col-subtotal'>$30,000</span></div><div class='col-body'><article class='deal'><div class='deal-top'><h3 class='deal-name'>Meridian — fractional COO engagement</h3><span class='deal-amount'>$30,000</span></div><div class='deal-meta'><span class='deal-org'>Meridian Health</span> · <span class='deal-people'>David Okafor</span></div></article></div></div></div></section><section class='attention'><span class='kicker'>Needs a nudge</span><ul class='att-list'><li class='att-row'><div class='att-main'><div class='att-nameline'><span class='att-name'>David Okafor</span><span class='att-kind'>prospect</span></div><div class='att-detail'>Meridian engagement</div></div><div class='att-reason'>Verbal yes — send the paperwork</div></li><li class='att-row'><div class='att-main'><div class='att-nameline'><span class='att-name'>Priya Nair</span><span class='att-kind'>lead</span></div><div class='att-detail'>Calder &amp; Co</div></div><div class='att-reason'>Warm intro, no meeting booked yet</div></li><li class='att-row'><div class='att-main'><div class='att-nameline'><span class='att-name'>Tom Reyes</span><span class='att-kind'>client</span></div><div class='att-detail'>Northwind Logistics</div></div><div class='att-reason'>New contact — not yet acknowledged</div></li></ul></section><section class='won'><span class='kicker'>Recently won</span><div class='won-row'><span class='won-chip'>Northwind — Q3 ops retainer <span class='won-amt'>$18,000</span></span></div></section>
-  </main>
+<div class="wrap">
+  <div class="topbar">
+    <div class="themebar" role="group" aria-label="Colour theme">
+      <button type="button" data-set="light">&#9728; Light</button>
+      <button type="button" data-set="dark">&#9790; Dark</button>
+    </div>
+  </div>
+  <header class="masthead">
+    <div><span class="kicker">Dashboard</span><h1 class="mast-title">Fractional Ops — Rian</h1></div>
+    <div class="mast-date">Saturday<br>11 Jul 2026</div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search" id="searchBox">
+      <input id="q" type="search" placeholder="Search deals &amp; people&hellip;" autocomplete="off" aria-label="Search deals and people">
+      <button class="search-clear" id="qClear" aria-label="Clear search">&#10005;</button>
+    </div>
+  </div>
+
+  <input class="tabswitch" type="radio" name="tab" id="t-focus" checked>
+  <input class="tabswitch" type="radio" name="tab" id="t-pipe">
+  <input class="tabswitch" type="radio" name="tab" id="t-ppl">
+  <input class="tabswitch" type="radio" name="tab" id="t-mom">
+  <nav class="tabs" role="tablist">
+    <label for="t-focus">Focus <span class="tcount">4</span></label>
+    <label for="t-pipe">Pipeline <span class="tcount">3</span></label>
+    <label for="t-ppl">People <span class="tcount">5</span></label>
+    <label for="t-mom">Momentum</label>
+  </nav>
+
+  <div class="panels">
+    <section class="panel panel-focus">
+      <p class="brief">You have <span class='hl'>$54,000</span> in open pipeline across 3 open deals, and <span class='warnhl'>4 things</span> that need your attention.</p>
+      <h2 class="sec-title">Needs you now</h2>
+      <div class="actions"><button class='action t-opp rowlink' data-rec='26ebda7b-95fe-46c2-bbd2-b61741bd857f' data-search='david okafor meridian'><div class='a-head'><div class='a-namewrap'><span class='a-name'>David Okafor</span><span class='a-tag'>Opportunity</span></div><span class='a-meta'>$30,000</span></div><div class='a-why'>The board approved the budget — a verbal yes on the Meridian COO engagement.</div><div class='a-do'>Send the engagement paperwork</div></button><button class='action t-cool rowlink' data-rec='8fb0f985-baf8-46b0-9c80-462a70a76e2c' data-search='jordan blake advisory'><div class='a-head'><div class='a-namewrap'><span class='a-name'>Jordan Blake</span><span class='a-tag'>Going quiet</span></div><span class='a-meta'>31 days</span></div><div class='a-why'>No contact in a month — and he sent you the Calder intro that&#x27;s now in your pipeline.</div><div class='a-do'>Thank him for the introduction</div></button><button class='action t-follow rowlink' data-rec='7252e2a8-d65c-4450-bf3c-5e208a80644e' data-search='priya nair calder'><div class='a-head'><div class='a-namewrap'><span class='a-name'>Priya Nair</span><span class='a-tag'>Follow up</span></div><span class='a-meta'>new lead</span></div><div class='a-why'>Warm intro via Blake Advisory; no meeting logged yet.</div><div class='a-do'>Book a discovery call</div></button><button class='action t-follow rowlink' data-rec='8ed9a72a-a147-45fb-baf0-e678874f9fec' data-search='acme retainer'><div class='a-head'><div class='a-namewrap'><span class='a-name'>Acme retainer</span><span class='a-tag'>Unstaged</span></div><span class='a-meta'>$24,000</span></div><div class='a-why'>This open deal has no stage, so it isn&#x27;t tracked anywhere in your pipeline.</div><div class='a-do'>Give it a stage</div></button></div>
+      <div class='won-strip'><span class='won-lead'>Recently won</span><span class='won-chip'>Northwind — Q3 ops retainer <b>$18,000</b></span></div>
+    </section>
+
+    <section class="panel panel-pipe">
+      <div class="tiles"><div class='tile'><div class='tile-label'>Open pipeline</div><div class='figure'>$54,000</div><div class='tile-sub'>value of open deals</div></div><button class='tile tilelink' data-list='open'><div class='tile-label'>Open deals</div><div class='figure'>3</div><div class='tile-sub'>1 unstaged — tap to triage</div></button><div class='tile'><div class='tile-label'>Relationships</div><div class='figure'>5</div><div class='tile-sub'>people you're tracking</div></div></div>
+      <h2 class="sec-title mt">Pipeline by stage</h2>
+      <div class="stagebars"><div class='sb-row'><div class='sb-name'>discovery</div><div class='sb-track'><div class='sb-fill pending' style='width:22%'></div></div><div class='sb-val'>value TBD<span class='cnt'>1 deal</span></div></div><div class='sb-row'><div class='sb-name'>proposal</div><div class='sb-track'><div class='sb-fill empty' style='width:100%'></div></div><div class='sb-val'>—<span class='cnt'>0 deals</span></div></div><div class='sb-row'><div class='sb-name'>verbal</div><div class='sb-track'><div class='sb-fill' style='width:100%'></div></div><div class='sb-val'>$30,000<span class='cnt'>1 deal</span></div></div><div class='sb-row'><div class='sb-name'>unstaged</div><div class='sb-track'><div class='sb-fill' style='width:80%'></div></div><div class='sb-val'>$24,000<span class='cnt'>1 deal</span></div></div></div>
+      <h2 class="sec-title mt">Open deals</h2>
+      <div class="board" id="board"><div class='col' data-stage='discovery'><div class='col-head'><span class='col-name'>discovery</span><span class='col-count'>1</span><span class='col-sub'>value TBD</span></div><div class='col-body'><button class='deal rowlink' data-rec='fd36ff67-e076-457a-a0ad-86c344adf72b' data-search='calder &amp; co — fractional ops  priya nair'><div class='deal-top'><h3 class='deal-name'>Calder &amp; Co — fractional ops</h3><span class='deal-amount'>—</span></div><div class='deal-meta'>Priya Nair</div></button></div></div><div class='col' data-stage='proposal'><div class='col-head'><span class='col-name'>proposal</span><span class='col-count'>0</span><span class='col-sub'>—</span></div><div class='col-body'><p class='stage-empty'>Nothing here yet</p></div></div><div class='col' data-stage='verbal'><div class='col-head'><span class='col-name'>verbal</span><span class='col-count'>1</span><span class='col-sub'>$30,000</span></div><div class='col-body'><button class='deal rowlink' data-rec='26ebda7b-95fe-46c2-bbd2-b61741bd857f' data-search='meridian — fractional coo engagement  david okafor'><div class='deal-top'><h3 class='deal-name'>Meridian — fractional COO engagement</h3><span class='deal-amount'>$30,000</span></div><div class='deal-meta'>David Okafor</div><div class='deal-foot'><span class='deal-close'>start 2026-09-01</span></div></button></div></div><div class='col' data-stage='unstaged'><div class='col-head'><span class='col-name'>unstaged</span><span class='col-count'>1</span><span class='col-sub'>$24,000</span></div><div class='col-body'><button class='deal rowlink' data-rec='8ed9a72a-a147-45fb-baf0-e678874f9fec' data-search='acme retainer acme'><div class='deal-top'><h3 class='deal-name'>Acme retainer</h3><span class='deal-amount'>$24,000</span></div><div class='deal-meta'><span class='org'>Acme</span></div></button></div></div></div>
+      <p class="empty-msg" id="emptyPipe">No deals match &ldquo;<span class="qecho"></span>&rdquo;.</p>
+    </section>
+
+    <section class="panel panel-ppl">
+      <h2 class="sec-title">Last contact <button class="filterbtn" id="filterQuiet" aria-pressed="false">Only gone quiet</button></h2>
+      <p class="sec-note">Recency by last-interaction date. Fresh &rarr; cooling &rarr; gone quiet.</p>
+      <div class="rec" id="recList"><div class='rec-row fresh rowlink' data-rec='c59488cd-f042-4e1d-b820-e3a89cfab25d' data-quiet='0' data-search='sarah mills northwind logistics client'><div><div class='rec-name'>Sarah Mills</div><div class='rec-org'>Northwind Logistics · client</div></div><div class='rec-track'><div class='rec-fill' style='width:91%'></div></div><div class='rec-when'>3 days</div></div><div class='rec-row fresh rowlink' data-rec='e52d2bfe-219d-432b-9bfb-247074b63da5' data-quiet='0' data-search='david okafor meridian health prospect'><div><div class='rec-name'>David Okafor</div><div class='rec-org'>Meridian Health · prospect</div></div><div class='rec-track'><div class='rec-fill' style='width:94%'></div></div><div class='rec-when'>2 days</div></div><div class='rec-row warm rowlink' data-rec='de5c4e0e-72e6-4440-acdb-531462d7bb53' data-quiet='0' data-search='tom reyes northwind logistics client'><div><div class='rec-name'>Tom Reyes</div><div class='rec-org'>Northwind Logistics · client</div></div><div class='rec-track'><div class='rec-fill' style='width:73%'></div></div><div class='rec-when'>9 days</div></div><div class='rec-row new-r rowlink' data-rec='7252e2a8-d65c-4450-bf3c-5e208a80644e' data-quiet='1' data-search='priya nair calder &amp; co lead'><div><div class='rec-name'>Priya Nair</div><div class='rec-org'>Calder &amp; Co · lead</div></div><div class='rec-track'><div class='rec-fill' style='width:100%'></div></div><div class='rec-when'>—</div></div><div class='rec-row stale rowlink' data-rec='8fb0f985-baf8-46b0-9c80-462a70a76e2c' data-quiet='1' data-search='jordan blake blake advisory partner'><div><div class='rec-name'>Jordan Blake</div><div class='rec-org'>Blake Advisory · partner</div></div><div class='rec-track'><div class='rec-fill' style='width:8%'></div></div><div class='rec-when'>31 days</div></div></div>
+      <div class="rec-legend">
+        <span><i class="dot" style="background:var(--accent)"></i> Fresh &lt; 7 days</span>
+        <span><i class="dot" style="background:var(--cool)"></i> Cooling 1&ndash;3 wks</span>
+        <span><i class="dot" style="background:var(--warn)"></i> Gone quiet &gt; 3 wks</span>
+        <span><i class="dot" style="background:var(--line-strong)"></i> No contact yet</span>
+      </div>
+      <p class="empty-msg" id="emptyPpl">No one matches &ldquo;<span class="qecho"></span>&rdquo;.</p>
+    </section>
+
+    <section class="panel panel-mom">
+      <p class="sec-note" style="margin-top:0">The trend line is illustrative until there's enough history; won totals are your real closed deals.</p>
+      <div class="mom-grid">
+        <div class='card'><h4>Won this quarter</h4><div class='big'>$18,000 </div><div class='won-row'><span class='won-chip'>Northwind — Q3 ops retainer <b>$18,000</b></span></div></div>
+        <div class="card">
+          <div class="chart-head"><h4>Open pipeline</h4>
+            <div class="rangebtns"><button data-range="4">4w</button><button data-range="8" aria-pressed="true">8w</button><button data-range="13">13w</button></div>
+          </div>
+          <div class="chart-holder" id="chartHolder">
+            <svg class="chart" id="chart" viewBox="0 0 320 120" preserveAspectRatio="none" role="img" aria-label="Open pipeline value over time">
+              <line class="grid" x1="0" y1="30" x2="320" y2="30"></line>
+              <line class="grid" x1="0" y1="70" x2="320" y2="70"></line>
+              <line class="grid" x1="0" y1="110" x2="320" y2="110"></line>
+              <path class="area" id="cArea"></path>
+              <path class="line" id="cLine"></path>
+              <line class="vline" id="cVline" x1="0" y1="0" x2="0" y2="120" style="opacity:0"></line>
+              <circle class="dot" id="cEnd" r="3.5"></circle>
+              <circle class="hl" id="cHl" r="3.5" style="opacity:0"></circle>
+            </svg>
+            <div class="tip" id="tip"></div>
+          </div>
+          <div class="caxis"><span id="axL"></span><span id="axR"></span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drTitle">
+  <button class="dr-close" id="drClose" aria-label="Close">&#10005;</button>
+  <button class="dr-back" id="drBack" style="display:none">&larr; Back</button>
+  <div class="dr-kind" id="drKind"></div>
+  <h2 class="dr-title" id="drTitle"></h2>
+  <div class="dr-subtitle" id="drSub"></div>
+  <div id="drList"></div>
+  <dl class="dr-facts" id="drFacts"></dl>
+  <div id="drLinks"></div>
+  <div class="dr-note" id="drNote"></div>
+  <p class="dr-hint" id="drHint">To act on this &mdash; log a note, move the stage, draft the follow-up &mdash; just ask Claude in the chat.</p>
+</aside>
+
+<script>
+(function(){
+  "use strict";
+
+  (function(){
+    var root=document.documentElement;
+    var tbtns=Array.prototype.slice.call(document.querySelectorAll(".themebar button"));
+    function media(){ return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+    function apply(t){ root.setAttribute("data-theme",t);
+      tbtns.forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-set")===t ? "true":"false"); }); }
+    apply(root.getAttribute("data-theme") || media());
+    tbtns.forEach(function(b){ b.addEventListener("click",function(){ apply(b.getAttribute("data-set")); }); });
+  })();
+
+  var REC = {"fd36ff67-e076-457a-a0ad-86c344adf72b": {"kind": "Deal · Discovery", "title": "Calder & Co — fractional ops", "sub": null, "facts": [["Stage", "Discovery"], ["Amount", "—", "mono"], ["Status", "Open"]], "links": [["Priya Nair", "decision maker", "→"]], "note": "Amount TBD; stated need for fractional ops support"}, "26ebda7b-95fe-46c2-bbd2-b61741bd857f": {"kind": "Deal · Verbal", "title": "Meridian — fractional COO engagement", "sub": null, "facts": [["Stage", "Verbal"], ["Amount", "$30,000", "mono"], ["Start date", "2026-09-01", "mono"], ["Status", "Open"]], "links": [["David Okafor", "decision maker", "→"]], "note": "Board approved $30k; awaiting paperwork"}, "8ed9a72a-a147-45fb-baf0-e678874f9fec": {"kind": "Deal · Unstaged", "title": "Acme retainer", "sub": "Acme", "facts": [["Stage", "Unstaged"], ["Amount", "$24,000", "mono"], ["Status", "Open"]], "links": [], "note": ""}, "c59488cd-f042-4e1d-b820-e3a89cfab25d": {"kind": "Person · Client", "title": "Sarah Mills", "sub": "COO · Northwind Logistics", "facts": [["Company", "Northwind Logistics"], ["Last contact", "3 days ago", "mono"], ["Email", "sarah@northwind.co"]], "links": [["Northwind — Q3 ops retainer", "won · $18,000", "→"]], "note": ""}, "e52d2bfe-219d-432b-9bfb-247074b63da5": {"kind": "Person · Prospect", "title": "David Okafor", "sub": "CEO · Meridian Health", "facts": [["Company", "Meridian Health"], ["Last contact", "2 days ago", "mono"], ["Email", "david@meridianhealth.com"]], "links": [["Meridian — fractional COO engagement", "verbal · $30,000", "→"]], "note": ""}, "de5c4e0e-72e6-4440-acdb-531462d7bb53": {"kind": "Person · Client", "title": "Tom Reyes", "sub": "CFO · Northwind Logistics", "facts": [["Company", "Northwind Logistics"], ["Last contact", "9 days ago", "mono"], ["Email", "tom@northwind.co"]], "links": [], "note": "Point of contact for budgets and renewals; took over finance from Sarah"}, "7252e2a8-d65c-4450-bf3c-5e208a80644e": {"kind": "Person · Lead", "title": "Priya Nair", "sub": "CEO · Calder & Co", "facts": [["Company", "Calder & Co"], ["Last contact", "No recent contact", "mono"], ["Email", "priya@caldergroup.com"]], "links": [["Calder & Co — fractional ops", "discovery", "→"]], "note": "Warm intro via Blake Advisory; looking for fractional ops support"}, "8fb0f985-baf8-46b0-9c80-462a70a76e2c": {"kind": "Person · Partner", "title": "Jordan Blake", "sub": "Blake Advisory", "facts": [["Company", "Blake Advisory"], ["Last contact", "31 days ago", "mono"]], "links": [], "note": "Introduced Priya Nair / Calder & Co; no email in thread"}};
+  var LISTS = {"open": {"kind": "Pipeline", "title": "Open deals", "sub": "$54,000 open", "rows": [{"id": "fd36ff67-e076-457a-a0ad-86c344adf72b", "name": "Calder & Co — fractional ops", "meta": "Discovery", "amt": "—"}, {"id": "26ebda7b-95fe-46c2-bbd2-b61741bd857f", "name": "Meridian — fractional COO engagement", "meta": "Verbal", "amt": "$30,000"}, {"id": "8ed9a72a-a147-45fb-baf0-e678874f9fec", "name": "Acme retainer", "meta": "Unstaged · Acme", "amt": "$24,000"}]}};
+  var SERIES = {"4": [26, 28, 29, 30], "8": [22, 23, 21, 26, 27, 28, 29, 30], "13": [15, 17, 16, 18, 19, 21, 22, 24, 25, 26, 28, 29, 30]};
+  var LABELS = {"4": ["20 Jun", "today"], "8": ["8 wks ago", "today"], "13": ["13 wks ago", "today"]};
+
+  var $=function(s,r){return (r||document).querySelector(s);};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+
+  var drawer=$("#drawer"), scrim=$("#scrim"), lastFocus=null;
+  function fact(f){ return "<div class='dr-fact'><dt>"+f[0]+"</dt><dd class='"+(f[2]||"")+"'>"+f[1]+"</dd></div>"; }
+  function link(l){ return "<div class='dr-link'><b>"+l[0]+"</b><span class='r'>"+l[1]+"</span><span>"+(l[2]||"")+"</span></div>"; }
+  function recordMode(isRecord){
+    ["#drFacts","#drLinks","#drNote","#drHint"].forEach(function(s){ $(s).style.display=isRecord?"":"none"; });
+    $("#drList").style.display=isRecord?"none":"";
+  }
+  function ensureOpen(){ if(!drawer.classList.contains("on")){ lastFocus=document.activeElement; }
+    drawer.classList.add("on"); scrim.classList.add("on"); $("#drClose").focus(); }
+  function openRec(id, backKey){ var r=REC[id]; if(!r) return;
+    ensureOpen(); recordMode(true);
+    var back=$("#drBack");
+    if(backKey && LISTS[backKey]){ back.style.display=""; back.textContent="← "+LISTS[backKey].title; back.onclick=function(){ openList(backKey); }; }
+    else back.style.display="none";
+    $("#drKind").textContent=r.kind; $("#drTitle").textContent=r.title; $("#drSub").textContent=r.sub;
+    $("#drFacts").innerHTML=(r.facts||[]).map(fact).join("");
+    $("#drLinks").innerHTML=(r.links&&r.links.length?"<div class='dr-sec'>Linked</div>"+r.links.map(link).join(""):"");
+    $("#drNote").textContent=r.note||"";
+  }
+  function openList(key){ var L=LISTS[key]; if(!L) return;
+    ensureOpen(); recordMode(false);
+    $("#drBack").style.display="none";
+    $("#drKind").textContent=L.kind; $("#drTitle").textContent=L.title; $("#drSub").textContent=L.sub;
+    $("#drList").innerHTML=(L.rows||[]).map(function(r){
+      return "<button class='dr-listrow' data-rec='"+r.id+"'><span class='dl-main'><span class='dl-name'>"+r.name+"</span><span class='dl-meta'>"+r.meta+"</span></span><span class='dl-amt'>"+r.amt+"</span></button>";
+    }).join("");
+    $$("#drList .dr-listrow").forEach(function(b){ b.addEventListener("click",function(){ openRec(b.getAttribute("data-rec"), key); }); });
+  }
+  function closeRec(){ drawer.classList.remove("on"); scrim.classList.remove("on"); if(lastFocus) lastFocus.focus(); }
+  $$(".rowlink").forEach(function(el){
+    if(el.tagName!=="BUTTON"){ el.setAttribute("tabindex","0"); el.setAttribute("role","button"); }
+    el.addEventListener("click",function(){ openRec(el.getAttribute("data-rec")); });
+    el.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openRec(el.getAttribute("data-rec")); }});
+  });
+  $$("[data-list]").forEach(function(el){ el.addEventListener("click",function(){ openList(el.getAttribute("data-list")); }); });
+  $("#drClose").addEventListener("click",closeRec); scrim.addEventListener("click",closeRec);
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeRec(); });
+
+  var q=$("#q"), sb=$("#searchBox");
+  function applySearch(){
+    var term=q.value.trim().toLowerCase();
+    sb.classList.toggle("has-val",!!term);
+    $$(".qecho").forEach(function(n){ n.textContent=q.value; });
+    [["pipe","emptyPipe"],["ppl","emptyPpl"]].forEach(function(p){
+      var rows=$$(".panel-"+p[0]+" [data-search]"), shown=0;
+      rows.forEach(function(r){ var hit=!term||r.getAttribute("data-search").indexOf(term)>-1;
+        r.style.display=hit?"":"none"; if(hit) shown++; });
+      $("#"+p[1]).style.display=(term&&shown===0)?"block":"none";
+    });
+    $$("#board .col").forEach(function(col){
+      var vis=$$(".deal",col).filter(function(d){return d.style.display!=="none";}).length;
+      $(".col-count",col).textContent=vis;
+    });
+  }
+  q.addEventListener("input",applySearch);
+  $("#qClear").addEventListener("click",function(){ q.value=""; applySearch(); q.focus(); });
+
+  var fq=$("#filterQuiet");
+  fq.addEventListener("click",function(){
+    var on=fq.getAttribute("aria-pressed")!=="true"; fq.setAttribute("aria-pressed",on?"true":"false");
+    $$("#recList .rec-row").forEach(function(r){ r.style.display=(!on||r.getAttribute("data-quiet")==="1")?"":"none"; });
+  });
+
+  var W=320,H=120,PAD=6, pts=[];
+  function buildChart(range){
+    var s=SERIES[range]; if(!s||!s.length) return;
+    var max=Math.max.apply(null,s), min=Math.min.apply(null,s), span=(max-min)||1;
+    pts=s.map(function(v,i){ var x=(i/(s.length-1))*W; var y=H-PAD-((v-min)/span)*(H-2*PAD); return {x:x,y:y,v:v}; });
+    var d=pts.map(function(p,i){ return (i?"L":"M")+p.x.toFixed(1)+","+p.y.toFixed(1); }).join(" ");
+    $("#cLine").setAttribute("d",d); $("#cArea").setAttribute("d",d+" L"+W+","+H+" L0,"+H+" Z");
+    var last=pts[pts.length-1]; $("#cEnd").setAttribute("cx",last.x); $("#cEnd").setAttribute("cy",last.y);
+    var lab=LABELS[range]||["",""];
+    $("#axL").textContent=lab[0]; $("#axR").textContent=lab[1]+" · $"+s[s.length-1]+"k";
+  }
+  $$(".rangebtns button").forEach(function(b){
+    b.addEventListener("click",function(){
+      $$(".rangebtns button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+      b.setAttribute("aria-pressed","true"); buildChart(b.getAttribute("data-range"));
+    });
+  });
+  var holder=$("#chartHolder"), svg=$("#chart"), tip=$("#tip"), hl=$("#cHl"), vline=$("#cVline");
+  function moveTip(clientX){
+    if(!pts.length) return;
+    var box=svg.getBoundingClientRect(); var rel=(clientX-box.left)/box.width; rel=Math.max(0,Math.min(1,rel));
+    var idx=Math.round(rel*(pts.length-1)), p=pts[idx];
+    var px=(p.x/W)*box.width, py=(p.y/H)*box.height;
+    hl.style.opacity=1; hl.setAttribute("cx",p.x); hl.setAttribute("cy",p.y);
+    vline.style.opacity=.7; vline.setAttribute("x1",p.x); vline.setAttribute("x2",p.x);
+    tip.classList.add("on"); tip.style.left=px+"px"; tip.style.top=py+"px"; tip.textContent="$"+p.v+"k";
+  }
+  holder.addEventListener("mousemove",function(e){ moveTip(e.clientX); });
+  holder.addEventListener("mouseleave",function(){ tip.classList.remove("on"); hl.style.opacity=0; vline.style.opacity=0; });
+  holder.addEventListener("touchmove",function(e){ if(e.touches[0]) moveTip(e.touches[0].clientX); },{passive:true});
+  buildChart("8");
+})();
+</script>
 </body>
 </html>

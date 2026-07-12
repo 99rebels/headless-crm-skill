@@ -5,70 +5,149 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Proposed CRM updates</title>
 <style>
-  :root {
-    --bg:#f7f8fa; --card:#ffffff; --ink:#1a1c20; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#2563eb; --amber-bg:#fff7ed; --amber-line:#fdba74; --amber-ink:#9a3412;
-    --prop:#166534;
+  :root{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6;
+    --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05);
+    --serif:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg:#0f1115; --card:#171a21; --ink:#e8eaed; --muted:#9aa1ab; --line:#262b35;
-      --accent:#60a5fa; --amber-bg:#2a1c0f; --amber-line:#7c4a1e; --amber-ink:#fdba74;
-      --prop:#4ade80;
-    }
+  @media (prefers-color-scheme: dark){ :root{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30);
+  }}
+  :root[data-theme="light"]{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6; --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05);
   }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink);
-    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
-  .wrap { max-width:680px; margin:0 auto; padding:28px 20px 48px; }
-  header h1 { margin:0 0 4px; font-size:20px; font-weight:650; letter-spacing:-0.01em; }
-  header .subtitle { color:var(--muted); font-size:13.5px; margin-bottom:20px; }
-  .section { background:var(--card); border:1px solid var(--line); border-radius:12px;
-    padding:14px 16px; margin-bottom:14px; }
-  .section h2 { margin:0 0 10px; font-size:13px; font-weight:600; text-transform:uppercase;
-    letter-spacing:0.04em; color:var(--muted); display:flex; align-items:center; gap:8px; }
-  .count { margin-left:auto; background:var(--line); color:var(--ink); border-radius:999px;
-    padding:1px 9px; font-size:12px; font-weight:600; letter-spacing:0; text-transform:none; }
-  ul { list-style:none; margin:0; padding:0; }
-  .item { padding:10px 0; border-top:1px solid var(--line); }
-  .item:first-child { border-top:none; padding-top:2px; }
-  .title { font-weight:560; }
-  .sub { color:var(--muted); font-size:13.5px; margin-top:1px; }
-  .sub.detail { color:var(--accent); }
-  .badge { font-size:11px; font-weight:600; padding:1px 7px; border-radius:999px; margin-left:8px;
-    vertical-align:middle; }
-  .badge-low { background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line); }
-  .badge-source { background:var(--bg); color:var(--muted); border:1px solid var(--line); font-weight:500; }
-  details.ev { margin-top:7px; }
-  details.ev summary { cursor:pointer; color:var(--accent); font-size:12.5px; list-style:none;
-    display:inline-flex; align-items:center; gap:5px; user-select:none; }
-  details.ev summary::-webkit-details-marker { display:none; }
-  details.ev summary::before { content:"▸"; font-size:10px; transition:transform .15s; }
-  details.ev[open] summary::before { transform:rotate(90deg); }
-  .ev-reason { color:var(--ink); font-size:13px; margin:8px 0; }
-  .ev-snippet { margin:8px 0 0; padding:8px 12px; border-left:3px solid var(--line);
-    background:var(--bg); border-radius:0 6px 6px 0; color:var(--muted); font-size:13px;
-    font-style:italic; }
-  .ev-attr { color:var(--muted); font-size:11.5px; margin-top:6px; }
-  .conflicts { background:var(--amber-bg); border-color:var(--amber-line); }
-  .conflicts h2 { color:var(--amber-ink); }
-  .item.conflict .change { margin-top:3px; font-size:14px; }
-  .cur { text-decoration:line-through; color:var(--muted); }
-  .arrow { margin:0 8px; color:var(--muted); }
-  .prop { color:var(--prop); font-weight:600; }
-  .field { color:var(--muted); font-weight:400; }
-  .empty p { text-align:center; color:var(--muted); margin:8px 0; }
-  footer { color:var(--muted); font-size:12px; text-align:center; margin-top:18px; }
+  :root[data-theme="dark"]{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30);
+  }
+
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:640px; margin:0 auto; padding:32px 20px 40px; }
+  .kicker{ font:600 11px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
+
+  .topbar{ display:flex; justify-content:flex-end; margin-bottom:10px; }
+  .themebar{ display:inline-flex; background:var(--raise); border:1px solid var(--line); border-radius:999px; padding:3px; gap:2px; }
+  .themebar button{ font:600 11px/1 var(--sans); color:var(--muted); background:none; border:none; border-radius:999px; padding:6px 11px; cursor:pointer; }
+  .themebar button[aria-pressed="true"]{ color:var(--accent-ink); background:var(--surface); box-shadow:var(--shadow); }
+  .themebar button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  header{ padding-bottom:20px; border-bottom:1px solid var(--line-strong); margin-bottom:22px; }
+  header h1{ font-family:var(--serif); font-weight:600; font-size:27px; line-height:1.06; margin:8px 0 0; letter-spacing:-.01em; }
+  .subline{ font-size:13px; color:var(--muted); margin-top:6px; }
+  .tally{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+  .pill{ font:12px/1 var(--sans); color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:8px 12px; }
+  .pill b{ font-family:var(--mono); color:var(--ink); font-weight:700; margin-right:4px; }
+  .pill-warn{ background:var(--warn-soft); border-color:var(--warn-line); color:var(--warn-ink); }
+  .pill-warn b{ color:var(--warn-ink); }
+  .reassure{ display:inline-flex; align-items:center; gap:7px; margin-top:14px; font:600 12px/1 var(--sans);
+    color:var(--accent-ink); background:var(--accent-soft); border-radius:999px; padding:7px 13px; }
+  .reassure::before{ content:""; width:7px; height:7px; border-radius:999px; background:var(--accent); }
+
+  .section{ background:var(--surface); border:1px solid var(--line); border-radius:13px; box-shadow:var(--shadow);
+    padding:4px 18px 6px; margin-bottom:13px; }
+  .section > h2{ display:flex; align-items:center; gap:9px; margin:15px 0 3px; font:600 10.5px/1 var(--sans);
+    letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+  .section > h2 .count{ font:600 11px/1 var(--mono); color:var(--accent-ink); background:var(--accent-soft); border-radius:999px; padding:2px 8px; }
+  .section > h2 .hint{ margin-left:auto; font:400 11px/1 var(--sans); letter-spacing:0; text-transform:none; color:var(--faint); font-style:italic; }
+
+  ul{ list-style:none; margin:0; padding:0; }
+  .item{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:13px; align-items:start;
+    padding:14px 0; border-top:1px solid var(--line); }
+  .item:first-child{ border-top:none; }
+
+  .ava{ width:36px; height:36px; flex:none; display:grid; place-items:center; font-family:var(--serif); font-weight:600; font-size:13.5px; margin-top:1px; }
+  .ava-person{ border-radius:999px; background:var(--accent-soft); color:var(--accent-ink); }
+  .ava-org{ border-radius:9px; background:var(--raise); color:var(--ink); border:1px solid var(--line-strong); }
+  .ava-deal{ border-radius:999px; background:transparent; color:var(--accent-ink); border:1.5px solid var(--accent); font-size:12px; }
+
+  .item-main{ min-width:0; }
+  .title{ font-family:var(--serif); font-weight:600; font-size:15.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; line-height:1.25; }
+  .badge{ font:600 10px/1.4 var(--sans); padding:2px 8px; border-radius:999px; letter-spacing:.03em; }
+  .badge-src{ color:var(--muted); background:var(--raise); border:1px solid var(--line); font-weight:500; }
+  .badge-low{ color:var(--warn-ink); background:var(--warn-soft); border:1px solid var(--warn-line); }
+  .sub{ font:13px/1.45 var(--sans); color:var(--muted); margin-top:3px; }
+  .detail{ font:12.5px/1.45 var(--mono); color:var(--accent-ink); margin-top:4px; }
+
+  .chip{ font:600 11px/1.3 var(--sans); border-radius:999px; padding:5px 11px; white-space:nowrap; margin-top:2px; }
+  .chip-kind{ color:var(--muted); background:var(--raise); border:1px solid var(--line-strong); }
+  .chip-stage{ color:var(--accent-ink); background:var(--accent-soft); }
+
+  details.ev{ margin-top:10px; grid-column:2 / -1; }
+  details.ev summary{ cursor:pointer; color:var(--accent); font:600 12px/1 var(--sans); list-style:none;
+    display:inline-flex; align-items:center; gap:6px; user-select:none; padding:2px 0; }
+  details.ev summary::-webkit-details-marker{ display:none; }
+  details.ev summary::before{ content:"\25B8"; font-size:10px; transition:transform .15s ease; }
+  details.ev[open] summary::before{ transform:rotate(90deg); }
+  .ev-reason{ color:var(--ink); font-size:13px; line-height:1.5; margin:9px 0 0; }
+  .ev-snippet{ margin:9px 0 0; padding:9px 13px; border-left:3px solid var(--line-strong); background:var(--raise);
+    border-radius:0 8px 8px 0; color:var(--muted); font-size:12.5px; font-style:italic; line-height:1.5; }
+  .ev-attr{ color:var(--faint); font:11.5px/1.4 var(--mono); margin-top:8px; }
+
+  .section.conflicts{ background:var(--warn-soft); border-color:var(--warn-line); border-left:4px solid var(--warn); }
+  .section.conflicts > h2{ color:var(--warn-ink); }
+  .section.conflicts > h2 .count{ color:var(--warn-ink); background:var(--warn-line); }
+  .section.conflicts .item{ border-top-color:var(--warn-line); }
+  .section.conflicts .ava-person{ background:var(--warn-soft); color:var(--warn-ink); border:1.5px solid var(--warn-line); }
+  .field{ color:var(--muted); font-weight:400; font-size:13px; }
+  .change{ margin-top:7px; font:16px/1.2 var(--serif); display:flex; align-items:center; gap:2px; flex-wrap:wrap; }
+  .cur{ text-decoration:line-through; color:var(--muted); }
+  .arrow{ margin:0 10px; color:var(--warn-ink); }
+  .prop{ color:var(--good); font-weight:700; }
+  .conflicts details.ev summary{ color:var(--warn-ink); }
+  .conflicts .ev-snippet{ border-left-color:var(--warn-line); }
+
+  .approve{ margin-top:20px; padding:16px 18px; background:var(--surface); border:1px solid var(--line-strong);
+    border-radius:13px; box-shadow:var(--shadow); }
+  .approve .lead{ font-family:var(--serif); font-size:16px; font-weight:600; }
+  .approve .how{ font:13px/1.5 var(--sans); color:var(--muted); margin-top:5px; }
+  .approve .say{ font-family:var(--mono); font-size:12.5px; color:var(--ink); background:var(--raise); border:1px solid var(--line); border-radius:8px; padding:3px 8px; }
+
+  @media (max-width:460px){ .item{ grid-template-columns:auto minmax(0,1fr); } .chip{ grid-column:2; justify-self:start; } }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
 </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="topbar">
+      <div class="themebar" role="group" aria-label="Colour theme">
+        <button type="button" data-set="light">&#9728; Light</button>
+        <button type="button" data-set="dark">&#9790; Dark</button>
+      </div>
+    </div>
     <header>
-      <h1>Proposed CRM updates</h1>
-      <div class="subtitle">8 proposed changes · 4 emails + 3 calendar events reviewed</div>
+      <span class="kicker">Enrichment</span>
+      <h1>Proposed updates to your CRM</h1>
+      <div class="subline">Read from 4 emails and 3 calendar events over the last few days.</div>
+      <div class="tally"><span class='pill'><b>3</b> new people</span><span class='pill'><b>2</b> new records</span><span class='pill'><b>2</b> updates</span><span class='pill pill-warn'><b>1</b> to review</span></div>
+      <span class="reassure">Nothing is saved until you approve</span>
     </header>
-    <section class='section'><h2>🆕 New contacts <span class='count'>3</span></h2><ul><li class='item'><div class='title'>Priya Nair<span class='badge badge-source'>📧 email</span></div><div class='sub'>CEO · priya@caldergroup.com · lead</div><div class='sub detail'>→ works_at Calder &amp; Co (new)</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>Introduced to you as a prospect and Cc&#x27;d on the thread, so she&#x27;s a direct contact worth adding as a lead.</div><blockquote class='ev-snippet'>Meet Priya Nair, CEO of Calder &amp; Co (caldergroup.com). They&#x27;re scaling fast and need fractional ops support.</blockquote><div class='ev-attr'>— Jordan Blake &lt;jordan@blakeadvisory.com&gt; · intro — Priya @ Calder is looking for ops help · 10 Jul 2026</div></details></li><li class='item'><div class='title'>Tom Reyes<span class='badge badge-source'>📧 email</span></div><div class='sub'>CFO · tom@northwind.co</div><div class='sub detail'>→ works_at Northwind Logistics (existing)</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>New finance contact at Northwind, an existing client — added and linked to the existing company.</div><blockquote class='ev-snippet'>I&#x27;m the new CFO at Northwind, taking over the finance side from Sarah.</blockquote><div class='ev-attr'>— Tom Reyes &lt;tom@northwind.co&gt; · Re: Q3 numbers · 9 Jul 2026</div></details></li><li class='item'><div class='title'>Marcus Webb<span class='badge badge-source'>📅 calendar</span></div><div class='sub'>marcus@brightpathpartners.com · lead</div><div class='sub detail'>→ works_at Brightpath Partners (new)</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>An external attendee on an upcoming intro call — worth adding ahead of the meeting.</div><blockquote class='ev-snippet'>Event: Intro call — Brightpath ops · Tue 15 Jul, 3:00pm</blockquote><div class='ev-attr'>— Google Calendar · upcoming 15 Jul 2026</div></details></li></ul></section><section class='section'><h2>🏢 New organisations <span class='count'>1</span></h2><ul><li class='item'><div class='title'>Calder &amp; Co<span class='badge badge-source'>📧 email</span></div><div class='sub'>caldergroup.com</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>Priya&#x27;s company, named with its domain — no matching org in the CRM, so it&#x27;s new.</div><blockquote class='ev-snippet'>Meet Priya Nair, CEO of Calder &amp; Co (caldergroup.com).</blockquote><div class='ev-attr'>— Jordan Blake &lt;jordan@blakeadvisory.com&gt; · intro — Priya @ Calder is looking for ops help</div></details></li></ul></section><section class='section'><h2>💼 New deals <span class='count'>1</span></h2><ul><li class='item'><div class='title'>Calder &amp; Co — fractional ops engagement<span class='badge badge-source'>📧 email</span><span class='badge badge-low' title='Only mentioned, not a direct correspondent'>mentioned only</span></div><div class='sub'>discovery · open</div><div class='sub detail'>→ Priya Nair as decision_maker</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>A possible opportunity — they&#x27;ve expressed a need, but nothing concrete yet, so starting it at discovery.</div><blockquote class='ev-snippet'>They&#x27;re scaling fast and need fractional ops support.</blockquote><div class='ev-attr'>— Jordan Blake &lt;jordan@blakeadvisory.com&gt; · intro — Priya @ Calder is looking for ops help</div></details></li></ul></section><section class='section'><h2>📈 Deal updates <span class='count'>1</span></h2><ul><li class='item'><div class='title'>Meridian — fractional COO engagement<span class='badge badge-source'>📧 email</span></div><div class='sub'>stage: proposal → verbal · status stays open</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>The board approved the budget (a verbal yes), so the deal moves to the verbal stage — not won, and Sept 1 is a start date, not a close date.</div><blockquote class='ev-snippet'>The board approved the engagement at the $30k we discussed. Let&#x27;s aim to start Sept 1.</blockquote><div class='ev-attr'>— David Okafor &lt;david@meridianhealth.com&gt; · Re: proposal · 10 Jul 2026</div></details></li></ul></section><section class='section'><h2>✨ Enrichments to existing records <span class='count'>1</span></h2><ul><li class='item'><div class='title'>Sarah Mills<span class='badge badge-source'>📅 calendar</span></div><div class='sub'>last interaction → 8 Jul 2026</div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>You had a meeting with Sarah this week, so her last-interaction date is refreshed.</div><blockquote class='ev-snippet'>Event: Northwind ops sync · Mon 8 Jul, 10:00am</blockquote><div class='ev-attr'>— Google Calendar · 8 Jul 2026</div></details></li></ul></section><section class='section conflicts'><h2>⚠️ Needs your call <span class='count'>1</span></h2><ul><li class='item conflict'><div class='title'>David Okafor · <span class='field'>title</span><span class='badge badge-source'>📧 email</span></div><div class='change'><span class='cur'>Founder</span><span class='arrow'>→</span><span class='prop'>CEO</span></div><details class='ev'><summary>AI overview</summary><div class='ev-reason'>His signature now reads CEO, but the CRM has him as Founder — flagging rather than overwriting.</div><blockquote class='ev-snippet'>David Okafor, CEO, Meridian Health</blockquote><div class='ev-attr'>— David Okafor &lt;david@meridianhealth.com&gt; · Re: proposal</div></details></li></ul></section>
-    <footer>Nothing is saved until you approve. Reply to approve all, or say which to skip.</footer>
+    <section class='section'><h2>New contacts <span class='count'>3</span> </h2><ul><li class='item'><span class='ava ava-person'>PN</span><div class='item-main'><div class='title'>Priya Nair <span class='badge badge-src'>email</span></div><div class='sub'>CEO · priya@caldergroup.com</div><div class='detail'>→ works at Calder &amp; Co (new)</div><details class='ev'><summary>Why this?</summary><div class='ev-reason'>Introduced to you as a prospect and Cc&#x27;d on the thread, so she&#x27;s a direct contact worth adding as a lead.</div><blockquote class='ev-snippet'>Meet Priya Nair, CEO of Calder &amp; Co (caldergroup.com). They&#x27;re scaling fast and need fractional ops support.</blockquote><div class='ev-attr'>— Jordan Blake · intro — Priya @ Calder is looking for ops help · 10 Jul 2026</div></details></div><span class='chip chip-kind'>Lead</span></li><li class='item'><span class='ava ava-person'>TR</span><div class='item-main'><div class='title'>Tom Reyes <span class='badge badge-src'>email</span></div><div class='sub'>CFO · tom@northwind.co</div><div class='detail'>→ works at Northwind Logistics (existing)</div><details class='ev'><summary>Why this?</summary><div class='ev-reason'>New finance contact at Northwind, an existing client — added and linked to the existing company.</div><blockquote class='ev-snippet'>I&#x27;m the new CFO at Northwind, taking over the finance side from Sarah.</blockquote><div class='ev-attr'>— Tom Reyes · Re: Q3 numbers · 9 Jul 2026</div></details></div></li><li class='item'><span class='ava ava-person'>MW</span><div class='item-main'><div class='title'>Marcus Webb <span class='badge badge-src'>calendar</span></div><div class='sub'>marcus@brightpathpartners.com</div><div class='detail'>→ works at Brightpath Partners (new)</div><details class='ev'><summary>Why this?</summary><div class='ev-reason'>An external attendee on an upcoming intro call — worth adding ahead of the meeting.</div><blockquote class='ev-snippet'>Event: Intro call — Brightpath ops · Tue 15 Jul, 3:00pm</blockquote><div class='ev-attr'>— Google Calendar · upcoming 15 Jul 2026</div></details></div><span class='chip chip-kind'>Lead</span></li></ul></section><section class='section'><h2>New records <span class='count'>2</span> </h2><ul><li class='item'><span class='ava ava-org'>C</span><div class='item-main'><div class='title'>Calder &amp; Co <span class='badge badge-src'>email</span></div><div class='sub'>Organisation · caldergroup.com</div><details class='ev'><summary>Why this?</summary><div class='ev-reason'>Priya&#x27;s company, named with its domain — no matching org in the CRM, so it&#x27;s new.</div><blockquote class='ev-snippet'>Meet Priya Nair, CEO of Calder &amp; Co (caldergroup.com).</blockquote><div class='ev-attr'>— Jordan Blake · intro — Priya @ Calder is looking for ops help</div></details></div></li><li class='item'><span class='ava ava-deal'>C</span><div class='item-main'><div class='title'>Calder &amp; Co — fractional ops <span class='badge badge-src'>email</span><span class='badge badge-low' title='Only mentioned, not a direct correspondent'>mentioned only</span></div><div class='sub'>Deal · Priya Nair as decision maker</div><details class='ev'><summary>Why this?</summary><div class='ev-reason'>A possible opportunity — they&#x27;ve expressed a need, but nothing concrete yet, so starting it at discovery.</div><blockquote class='ev-snippet'>They&#x27;re scaling fast and need fractional ops support.</blockquote><div class='ev-attr'>— Jordan Blake · intro — Priya @ Calder is looking for ops help</div></details></div><span class='chip chip-stage'>Discovery</span></li></ul></section><section class='section'><h2>Updates <span class='count'>2</span> <span class='hint'>to records you already have</span></h2><ul><li class='item'><span class='ava ava-deal'>M</span><div class='item-main'><div class='title'>Meridian — fractional COO engagement <span class='badge badge-src'>email</span></div><div class='sub'>Deal moved · status stays open</div><details class='ev'><summary>Why this?</summary><div class='ev-reason'>The board approved the budget (a verbal yes), so the deal moves to the verbal stage — not won, and Sept 1 is a start date, not a close date.</div><blockquote class='ev-snippet'>The board approved the engagement at the $30k we discussed. Let&#x27;s aim to start Sept 1.</blockquote><div class='ev-attr'>— David Okafor · Re: proposal · 10 Jul 2026</div></details></div><span class='chip chip-stage'>proposal → verbal</span></li><li class='item'><span class='ava ava-person'>SM</span><div class='item-main'><div class='title'>Sarah Mills <span class='badge badge-src'>calendar</span></div><div class='sub'>Last interaction refreshed → 8 Jul 2026</div><details class='ev'><summary>Why this?</summary><div class='ev-reason'>You had a meeting with Sarah this week, so her last-interaction date is refreshed.</div><blockquote class='ev-snippet'>Event: Northwind ops sync · Mon 8 Jul, 10:00am</blockquote><div class='ev-attr'>— Google Calendar · 8 Jul 2026</div></details></div></li></ul></section><section class='section conflicts'><h2>Needs your call <span class='count'>1</span> <span class='hint'>existing value would change</span></h2><ul><li class='item'><span class='ava ava-person'>DO</span><div class='item-main'><div class='title'>David Okafor <span class='field'>· title</span> <span class='badge badge-src'>email</span></div><div class='change'><span class='cur'>Founder</span><span class='arrow'>→</span><span class='prop'>CEO</span></div><details class='ev'><summary>Why this?</summary><div class='ev-reason'>His signature now reads CEO, but the CRM has him as Founder — flagging rather than overwriting.</div><blockquote class='ev-snippet'>David Okafor, CEO, Meridian Health</blockquote><div class='ev-attr'>— David Okafor · Re: proposal</div></details></div></li></ul></section>
+    <div class='approve'><div class='lead'>Ready when you are.</div><div class='how'>Reply <span class='say'>approve</span> to save all 8 — or tell me which to skip (e.g. <span class='say'>approve all but the title change</span>). Anything flagged <b>Needs your call</b> won’t be touched unless you say so.</div></div>
   </div>
+  <script>
+  (function(){
+    var root=document.documentElement;
+    var btns=Array.prototype.slice.call(document.querySelectorAll(".themebar button"));
+    function media(){ return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+    function apply(t){ root.setAttribute("data-theme",t);
+      btns.forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-set")===t ? "true":"false"); }); }
+    apply(root.getAttribute("data-theme") || media());
+    btns.forEach(function(b){ b.addEventListener("click",function(){ apply(b.getAttribute("data-set")); }); });
+  })();
+  </script>
 </body>
 </html>

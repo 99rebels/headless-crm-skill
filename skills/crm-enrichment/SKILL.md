@@ -136,11 +136,17 @@ Sort each change into:
 
 Build the JSON in the shape at the top of `scripts/render_digest.py`: per item `title` / `subtitle` /
 `detail` / **`source`** (`"email"` | `"calendar"`) / `confidence` / `evidence` (= `reason` + `snippet`
-+ from/subject/date); `conflicts` also carry `field` / `current` / `proposed`. Include `emails_reviewed`.
++ from/subject/date), plus an optional **`chip`** (`{text, kind:"kind"|"stage"}` — e.g. a contact's
+`Lead`, a deal's `Discovery`, or a move `proposal → verbal`). `conflicts` also carry `field` /
+`current` / `proposed`. Include `emails_reviewed` / `events_reviewed`. The renderer derives the
+monogram avatars, the header tally, and the grouping (contacts → "New contacts"; orgs+deals → "New
+records"; enrichments+deal moves → "Updates"; conflicts → "Needs your call"), so you don't format any
+of that — just sort items into the right section key.
 
 ### C2. Render the digest and ask for approval
-Run `python3 scripts/render_digest.py <proposals.json> digest.html` and show it (each item shows a
-📧/📅 source badge; evidence is in the "AI overview" dropdowns). Then approve **in the conversation** —
+Run `python3 scripts/render_digest.py <proposals.json> digest.html` and show it (each item carries an
+`email`/`calendar` source badge; the reasoning + source quote sit in the "Why this?" dropdowns; the
+one conflict is quarantined in an amber "Needs your call" card). Then approve **in the conversation** —
 the HTML is for reviewing, chat is for deciding (an artifact can't call tools back). Accept "approve
 all", "skip #2", etc. **Write nothing before approval.**
 

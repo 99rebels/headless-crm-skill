@@ -1,33 +1,195 @@
 {
-  "_comment": "Sample dashboard state from the demo scenario — used to preview/test render_dashboard.py. Not read by the skill at runtime (the skill builds this from live CRM reads).",
+  "_comment": "Sample dashboard state = the exact output of the get_pipeline_summary MCP tool (facts, stage buckets, roster, recently-won — all computed server-side and identical for every model) PLUS the model's judgement layer: `focus` (the ranked 'needs you now' list, built from the tool's `signals`) and the presentation fields `weekday`/`generated_label`. Not read at runtime. Mirrors the real demo workspace (Acme is a genuine unstaged $24k open deal; last_interaction is null everywhere until enrichment runs).",
   "workspace": "Fractional Ops — Rian",
+  "weekday": "Saturday",
   "generated_label": "11 Jul 2026",
   "currency": "USD",
-  "stats": { "open_pipeline_value": 30000, "open_deals": 2, "relationships": 5, "needs_attention": 3 },
+  "stats": {
+    "open_pipeline_value": 54000,
+    "open_deals": 3,
+    "relationships": 5,
+    "unstaged_deals": 1,
+    "mixed_currency": false
+  },
+  "focus": [
+    {
+      "ref": "26ebda7b-95fe-46c2-bbd2-b61741bd857f",
+      "name": "David Okafor",
+      "type": "opportunity",
+      "meta": "$30,000",
+      "why": "The board approved the budget — a verbal yes on the Meridian COO engagement.",
+      "action": "Send the engagement paperwork",
+      "search": "david okafor meridian"
+    },
+    {
+      "ref": "8fb0f985-baf8-46b0-9c80-462a70a76e2c",
+      "name": "Jordan Blake",
+      "type": "cool",
+      "meta": "31 days",
+      "why": "No contact in a month — and he sent you the Calder intro that's now in your pipeline.",
+      "action": "Thank him for the introduction",
+      "search": "jordan blake advisory"
+    },
+    {
+      "ref": "7252e2a8-d65c-4450-bf3c-5e208a80644e",
+      "name": "Priya Nair",
+      "type": "follow",
+      "meta": "new lead",
+      "why": "Warm intro via Blake Advisory; no meeting logged yet.",
+      "action": "Book a discovery call",
+      "search": "priya nair calder"
+    },
+    {
+      "ref": "8ed9a72a-a147-45fb-baf0-e678874f9fec",
+      "name": "Acme retainer",
+      "type": "follow",
+      "tag": "Unstaged",
+      "meta": "$24,000",
+      "why": "This open deal has no stage, so it isn't tracked anywhere in your pipeline.",
+      "action": "Give it a stage",
+      "search": "acme retainer"
+    }
+  ],
   "stages": [
     {
       "name": "discovery",
+      "label": "Discovery",
       "deals": [
-        { "name": "Calder & Co — fractional ops", "amount": null, "org": "Calder & Co", "people": ["Priya Nair"] }
+        {
+          "id": "fd36ff67-e076-457a-a0ad-86c344adf72b",
+          "name": "Calder & Co — fractional ops",
+          "amount": null,
+          "currency": "USD",
+          "org": null,
+          "people": [
+            "Priya Nair"
+          ],
+          "stage": "Discovery",
+          "status": "Open",
+          "note": "Amount TBD; stated need for fractional ops support"
+        }
       ]
     },
     {
       "name": "proposal",
+      "label": "Proposal",
       "deals": []
     },
     {
       "name": "verbal",
+      "label": "Verbal",
       "deals": [
-        { "name": "Meridian — fractional COO engagement", "amount": 30000, "org": "Meridian Health", "people": ["David Okafor"] }
+        {
+          "id": "26ebda7b-95fe-46c2-bbd2-b61741bd857f",
+          "name": "Meridian — fractional COO engagement",
+          "amount": 30000,
+          "currency": "USD",
+          "org": null,
+          "people": [
+            "David Okafor"
+          ],
+          "stage": "Verbal",
+          "status": "Open",
+          "note": "Board approved $30k; awaiting paperwork",
+          "close_label": "start 2026-09-01",
+          "date_label": "Start date",
+          "date_value": "2026-09-01"
+        }
+      ]
+    },
+    {
+      "name": "unstaged",
+      "label": "Unstaged",
+      "deals": [
+        {
+          "id": "8ed9a72a-a147-45fb-baf0-e678874f9fec",
+          "name": "Acme retainer",
+          "amount": 24000,
+          "currency": "USD",
+          "org": "Acme",
+          "people": [],
+          "stage": "Unstaged",
+          "status": "Open"
+        }
       ]
     }
   ],
-  "attention": [
-    { "title": "David Okafor", "kind": "prospect", "reason": "Verbal yes — send the paperwork", "detail": "Meridian engagement" },
-    { "title": "Priya Nair", "kind": "lead", "reason": "Warm intro, no meeting booked yet", "detail": "Calder & Co" },
-    { "title": "Tom Reyes", "kind": "client", "reason": "New contact — not yet acknowledged", "detail": "Northwind Logistics" }
+  "people": [
+    {
+      "id": "c59488cd-f042-4e1d-b820-e3a89cfab25d",
+      "name": "Sarah Mills",
+      "role": "COO",
+      "org": "Northwind Logistics",
+      "kind": "client",
+      "days": 3,
+      "email": "sarah@northwind.co",
+      "deals": [
+        [
+          "Northwind — Q3 ops retainer",
+          "won · $18,000"
+        ]
+      ]
+    },
+    {
+      "id": "e52d2bfe-219d-432b-9bfb-247074b63da5",
+      "name": "David Okafor",
+      "role": "CEO",
+      "org": "Meridian Health",
+      "kind": "prospect",
+      "days": 2,
+      "email": "david@meridianhealth.com",
+      "deals": [
+        [
+          "Meridian — fractional COO engagement",
+          "verbal · $30,000"
+        ]
+      ]
+    },
+    {
+      "id": "de5c4e0e-72e6-4440-acdb-531462d7bb53",
+      "name": "Tom Reyes",
+      "role": "CFO",
+      "org": "Northwind Logistics",
+      "kind": "client",
+      "days": 9,
+      "email": "tom@northwind.co",
+      "deals": [],
+      "note": "Point of contact for budgets and renewals; took over finance from Sarah"
+    },
+    {
+      "id": "7252e2a8-d65c-4450-bf3c-5e208a80644e",
+      "name": "Priya Nair",
+      "role": "CEO",
+      "org": "Calder & Co",
+      "kind": "lead",
+      "days": null,
+      "email": "priya@caldergroup.com",
+      "deals": [
+        [
+          "Calder & Co — fractional ops",
+          "discovery"
+        ]
+      ],
+      "note": "Warm intro via Blake Advisory; looking for fractional ops support"
+    },
+    {
+      "id": "8fb0f985-baf8-46b0-9c80-462a70a76e2c",
+      "name": "Jordan Blake",
+      "role": null,
+      "org": "Blake Advisory",
+      "kind": "partner",
+      "days": 31,
+      "email": null,
+      "deals": [],
+      "note": "Introduced Priya Nair / Calder & Co; no email in thread"
+    }
   ],
   "won": [
-    { "name": "Northwind — Q3 ops retainer", "amount": 18000, "org": "Northwind Logistics" }
+    {
+      "id": "cc18c2b1-1897-474d-97f4-531b7edc33c4",
+      "name": "Northwind — Q3 ops retainer",
+      "amount": 18000,
+      "currency": "USD"
+    }
   ]
 }
