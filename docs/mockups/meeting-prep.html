@@ -1,0 +1,260 @@
+<title>Meeting prep — Nimbus</title>
+<style>
+  :root{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6;
+    --cool:#3f6f86; --cool-ink:#2c5266; --cool-soft:#e4eef3; --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05); --shadow-lg:0 8px 40px rgba(40,32,16,.18);
+    --serif:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){ :root{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413;
+    --cool:#7fb0c9; --cool-ink:#a7cede; --cool-soft:#17272f; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30); --shadow-lg:0 10px 44px rgba(0,0,0,.55);
+  }}
+  :root[data-theme="light"]{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6;
+    --cool:#3f6f86; --cool-ink:#2c5266; --cool-soft:#e4eef3; --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05); --shadow-lg:0 8px 40px rgba(40,32,16,.18);
+  }
+  :root[data-theme="dark"]{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413;
+    --cool:#7fb0c9; --cool-ink:#a7cede; --cool-soft:#17272f; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30); --shadow-lg:0 10px 44px rgba(0,0,0,.55);
+  }
+
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:760px; margin:0 auto; padding:32px 22px 72px; }
+  .kicker{ font:600 11px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
+
+  .topbar{ display:flex; justify-content:flex-end; margin-bottom:10px; }
+  .themebar{ display:inline-flex; background:var(--raise); border:1px solid var(--line); border-radius:999px; padding:3px; gap:2px; }
+  .themebar button{ font:600 11px/1 var(--sans); color:var(--muted); background:none; border:none; border-radius:999px; padding:6px 11px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+  .themebar button[aria-pressed="true"]{ color:var(--accent-ink); background:var(--surface); box-shadow:var(--shadow); }
+  .themebar button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* meeting header */
+  .mhead{ display:flex; justify-content:space-between; align-items:flex-start; gap:20px; padding-bottom:18px; border-bottom:1px solid var(--line-strong); }
+  .mtitle{ font-family:var(--serif); font-weight:600; font-size:28px; line-height:1.08; margin:8px 0 8px; letter-spacing:-.01em; text-wrap:balance; }
+  .mwhen{ display:flex; flex-wrap:wrap; gap:8px 16px; font:12.5px/1 var(--mono); color:var(--muted); font-variant-numeric:tabular-nums; }
+  .mwhen span{ display:inline-flex; align-items:center; gap:6px; }
+  .countdown{ flex:none; text-align:center; background:var(--accent-soft); border-radius:14px; padding:12px 16px; min-width:104px; }
+  .countdown .cd-n{ font-family:var(--serif); font-size:24px; font-weight:600; color:var(--accent-ink); line-height:1; }
+  .countdown .cd-l{ font:600 9.5px/1.3 var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-top:6px; }
+  .countdown .cd-dot{ display:inline-block; width:7px; height:7px; border-radius:999px; background:var(--accent); margin-right:5px; animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+
+  .sec-title{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+    margin:30px 0 13px; display:flex; align-items:center; gap:10px; }
+
+  /* the walk-in brief — the one thing that matters */
+  .lead{ margin-top:20px; background:var(--surface); border:1px solid var(--warn-line); border-left:3px solid var(--warn); border-radius:14px;
+    padding:18px 20px; box-shadow:var(--shadow); }
+  .lead .flag{ display:inline-flex; align-items:center; gap:7px; font:600 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--warn-ink); margin-bottom:10px; }
+  .lead .flag .fdot{ width:8px; height:8px; border-radius:999px; background:var(--warn); }
+  .lead p{ margin:0; font-family:var(--serif); font-size:18.5px; line-height:1.5; color:var(--ink); text-wrap:pretty; }
+  .lead b{ color:var(--warn-ink); font-weight:600; }
+
+  /* the room */
+  .room{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .att{ background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:14px 15px; box-shadow:var(--shadow); display:flex; gap:12px; align-items:flex-start; }
+  .att.key{ border-color:var(--warn-line); background:linear-gradient(0deg,var(--warn-soft),transparent 60%); }
+  .att .avatar{ width:40px; height:40px; flex:none; border-radius:11px; display:grid; place-items:center; font-family:var(--serif); font-weight:600; font-size:16px; color:var(--accent-ink); background:var(--accent-soft); }
+  .att.key .avatar{ color:var(--warn-ink); background:var(--warn-soft); }
+  .att .a-body{ min-width:0; }
+  .att .a-name{ font-family:var(--serif); font-size:16px; font-weight:600; }
+  .att .a-role{ font:12px/1.4 var(--sans); color:var(--muted); margin-top:1px; }
+  .rolechip{ display:inline-block; font:600 9.5px/1 var(--sans); letter-spacing:.05em; text-transform:uppercase; padding:3px 7px; border-radius:999px; margin-bottom:6px; }
+  .rolechip.champ{ color:var(--accent-ink); background:var(--accent-soft); }
+  .rolechip.block{ color:var(--warn-ink); background:var(--warn-soft); }
+  .a-note{ font:12.5px/1.5 var(--sans); color:var(--ink); margin-top:8px; }
+  .a-firsttime{ font:600 10px/1 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--warn-ink); margin-top:8px; display:inline-flex; align-items:center; gap:6px; }
+
+  /* where you left off */
+  .leftoff{ background:var(--raise); border:1px solid var(--line); border-radius:13px; padding:15px 17px; }
+  .leftoff .lo-when{ font:11.5px/1 var(--mono); color:var(--faint); margin-bottom:8px; display:flex; align-items:center; gap:7px; }
+  .leftoff .lo-when .sd{ width:7px; height:7px; border-radius:999px; background:var(--accent); }
+  .leftoff p{ margin:0; font:14px/1.6 var(--sans); color:var(--ink); }
+  .leftoff b{ color:var(--accent-ink); font-weight:600; }
+
+  /* agenda — prioritised talking points, generated from context */
+  .agenda{ display:flex; flex-direction:column; gap:11px; counter-reset:ag; }
+  .ag{ display:grid; grid-template-columns:auto 1fr; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:15px 17px; box-shadow:var(--shadow); }
+  .ag .num{ counter-increment:ag; width:26px; height:26px; border-radius:8px; display:grid; place-items:center; background:var(--accent); color:var(--surface); font:600 13px/1 var(--mono); }
+  .ag.warn .num{ background:var(--warn); }
+  .ag .ag-h{ font:600 15.5px/1.35 var(--sans); color:var(--ink); }
+  .ag .ag-why{ font:13px/1.5 var(--sans); color:var(--muted); margin-top:5px; }
+  .ag .ag-tag{ display:inline-flex; align-items:center; gap:6px; font:600 10px/1 var(--sans); letter-spacing:.04em; text-transform:uppercase; margin-top:9px; padding:4px 9px; border-radius:999px; }
+  .ag-tag.mine{ color:var(--accent-ink); background:var(--accent-soft); }
+  .ag-tag.due{ color:var(--warn-ink); background:var(--warn-soft); }
+  .ag-tag.ask{ color:var(--cool-ink); background:var(--cool-soft); }
+
+  /* bring / owe checklist */
+  .bring{ background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:8px 18px; box-shadow:var(--shadow); }
+  .bring .row{ display:flex; align-items:flex-start; gap:11px; padding:12px 0; border-top:1px solid var(--line); }
+  .bring .row:first-child{ border-top:none; }
+  .bring .box{ flex:none; width:17px; height:17px; border:1.5px solid var(--line-strong); border-radius:5px; margin-top:1px; }
+  .bring .row .txt{ font:13.5px/1.5 var(--sans); color:var(--ink); }
+  .bring .row .due{ font:11px/1 var(--mono); color:var(--warn-ink); margin-left:6px; }
+
+  /* quick facts strip */
+  .facts{ display:flex; flex-wrap:wrap; gap:10px; }
+  .fact{ flex:1 1 150px; background:var(--raise); border:1px solid var(--line); border-radius:11px; padding:12px 14px; }
+  .fact .fl{ font:600 10px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .fact .fv{ font-family:var(--serif); font-size:19px; font-weight:600; margin-top:7px; font-variant-numeric:tabular-nums; }
+  .fact .fv.warnv{ color:var(--warn-ink); }
+
+  .deeplink{ display:inline-flex; align-items:center; gap:7px; margin-top:22px; font:600 12.5px/1 var(--sans); color:var(--accent-ink);
+    background:var(--surface); border:1px solid var(--line-strong); border-radius:999px; padding:11px 16px; text-decoration:none; transition:all .12s ease; }
+  .deeplink:hover, .deeplink:focus-visible{ border-color:var(--accent); background:var(--accent-soft); outline:none; }
+
+  .foot{ margin-top:26px; background:var(--accent-soft); border-radius:13px; padding:15px 18px; display:flex; gap:12px; align-items:flex-start; }
+  .foot .fi{ flex:none; width:30px; height:30px; border-radius:9px; display:grid; place-items:center; background:var(--surface); color:var(--accent); margin-top:1px; }
+  .foot p{ margin:0; font:13px/1.55 var(--sans); color:var(--accent-ink); }
+  .foot b{ font-weight:600; }
+
+  @media (max-width:600px){ .room{ grid-template-columns:1fr; } .mhead{ flex-direction:column-reverse; align-items:stretch; } .countdown{ align-self:flex-start; } }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
+</style>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="themebar" role="group" aria-label="Colour theme">
+      <button type="button" data-set="light">&#9728; Light</button>
+      <button type="button" data-set="dark">&#9790; Dark</button>
+    </div>
+  </div>
+
+  <!-- MEETING HEADER (from the calendar event) -->
+  <header class="mhead">
+    <div>
+      <span class="kicker">Meeting prep &middot; Nimbus Labs</span>
+      <h1 class="mtitle">Nimbus &mdash; term &amp; sign-off</h1>
+      <div class="mwhen">
+        <span>&#128197; Today, 2:00 PM</span>
+        <span>&#9201; 30 min</span>
+        <span>&#128247; Google Meet</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- THE WALK-IN BRIEF: the single thing that matters -->
+  <section class="lead">
+    <span class="flag"><span class="fdot"></span> Lead with this</span>
+    <p>This is likely the <b>decision meeting</b>. Marcus, the budget approver, is joining for the
+      <b>first time</b> &mdash; so present the <b>revised 3-month initial term</b> up front. That rework
+      is the one thing standing between you and his sign-off on the $45k.</p>
+  </section>
+
+  <!-- THE ROOM -->
+  <h2 class="sec-title">Who's in the room</h2>
+  <div class="room">
+    <div class="att">
+      <div class="avatar">SC</div>
+      <div class="a-body">
+        <span class="rolechip champ">Champion</span>
+        <div class="a-name">Sarah Chen</div>
+        <div class="a-role">Founder &amp; CEO</div>
+        <div class="a-note">Your advocate. Sold on the work and the price &mdash; she asked for the shorter term so she could get Marcus on board.</div>
+      </div>
+    </div>
+    <div class="att key">
+      <div class="avatar">ML</div>
+      <div class="a-body">
+        <span class="rolechip block">Budget sign-off</span>
+        <div class="a-name">Marcus Lee</div>
+        <div class="a-role">Co-founder &amp; CTO</div>
+        <div class="a-note">Controls spend, wary of long commitments. Win him on the 3-month term and you're through.</div>
+        <div class="a-firsttime">&#9873; First time you're meeting him</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHERE YOU LEFT OFF -->
+  <h2 class="sec-title">Where you left off</h2>
+  <div class="leftoff">
+    <div class="lo-when"><span class="sd"></span> Last contact &middot; 10 Jul &middot; email from Sarah</div>
+    <p>Sarah confirmed the <b>price is right</b> but the 6-month term is the holdup &mdash; Marcus wants
+      to start smaller. She asked you to re-cut it as a <b>3-month initial term with an option to
+      extend</b> and get it back before this meeting so she could line up his sign-off.</p>
+  </div>
+
+  <!-- AGENDA: talking points, generated from context (not stored) -->
+  <h2 class="sec-title">What to cover &mdash; in this order</h2>
+  <div class="agenda">
+    <div class="ag warn">
+      <div class="num"></div>
+      <div>
+        <div class="ag-h">Present the revised 3-month initial term</div>
+        <div class="ag-why">Directly answers Marcus's concern about a long commitment. Frame the extension option as the low-risk on-ramp, not a discount.</div>
+        <span class="ag-tag due">Your open item &middot; due today</span>
+      </div>
+    </div>
+    <div class="ag">
+      <div class="num"></div>
+      <div>
+        <div class="ag-h">Confirm the sign-off path with Marcus</div>
+        <div class="ag-why">He's the economic buyer and new to the thread &mdash; get explicit on what he needs to approve and by when, so it doesn't drift past the ~31 Jul decision date.</div>
+        <span class="ag-tag ask">Ask them</span>
+      </div>
+    </div>
+    <div class="ag">
+      <div class="num"></div>
+      <div>
+        <div class="ag-h">Anchor on the Series-A outcome</div>
+        <div class="ag-why">Their real goal is an investor-ready sales motion before the raise. Tie the 3-month term to a concrete first milestone they can show.</div>
+        <span class="ag-tag mine">Your angle</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRING / OWE -->
+  <h2 class="sec-title">Bring with you</h2>
+  <div class="bring">
+    <div class="row"><span class="box"></span><span class="txt">The revised proposal with the 3-month initial term<span class="due">promised by 15 Jul</span></span></div>
+    <div class="row"><span class="box"></span><span class="txt">Two mobile dev-tools GTM references</span></div>
+  </div>
+
+  <!-- QUICK FACTS -->
+  <h2 class="sec-title">The deal at a glance</h2>
+  <div class="facts">
+    <div class="fact"><div class="fl">Value</div><div class="fv">$45,000</div></div>
+    <div class="fact"><div class="fl">Stage</div><div class="fv">Proposal</div></div>
+    <div class="fact"><div class="fl">Decision by</div><div class="fv warnv">~31 Jul</div></div>
+  </div>
+
+  <a class="deeplink" href="deep-view-company.html">&#9636; Open the full Nimbus deep view &rarr;</a>
+
+  <!-- FOOTER: the loop, reframed for after the meeting -->
+  <div class="foot">
+    <div class="fi">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <p>This prep was assembled from your CRM and calendar &mdash; nothing here was typed by hand. <b>After
+      you meet</b>, tell Claude how it went and it'll log the interaction, refresh the summary, and
+      update these open items for you.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  var tbtns=Array.prototype.slice.call(document.querySelectorAll(".themebar button"));
+  function media(){ return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+  function apply(t){ root.setAttribute("data-theme",t);
+    tbtns.forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-set")===t ? "true":"false"); }); }
+  apply(root.getAttribute("data-theme") || media());
+  tbtns.forEach(function(b){ b.addEventListener("click",function(){ apply(b.getAttribute("data-set")); }); });
+})();
+</script>
