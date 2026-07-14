@@ -8,11 +8,14 @@ what's next. Read it fully, then the referenced docs, before acting.
 ## 0. ⭐ MOST RECENT — read this first (2026-07-14)
 **⏰ DESIGN-PARTNER MEETING CONFIRMED — Friday 2026-07-17, 11am.** The advisor/design partner (the solo
 operator who tried and failed to build this himself) meets Rian **Fri 17 Jul 11am**. The demo is **back
-on** — prep matters again. Story to show: *enrich from calendar/email → approve digest → dashboard/timeline
-reflects it → the living summary reads on each record.* **Before Friday (Rian's gated steps):**
-`cd server && npm run deploy` (ships `summary_line` + confirms the timeline tools live), then **re-upload
-all three zips** (`crm-dashboard.zip`, `crm-enrichment.zip`, `crm-import.zip`), then `npm run reset-demo`
-(clears test clutter incl. a duplicate deal) and re-run the calendar test.
+on**. Story to show: *enrich from calendar/email → approve digest → dashboard/timeline reflects it → the
+living summary reads on each record.*
+
+**✅ DEPLOYED + LIVE-VERIFIED (2026-07-14).** Rian deployed the Worker (`summary_line` + the timeline
+tools now live), re-uploaded all three zips, ran `npm run reset-demo`, and re-ran the calendar test on
+claude.ai — **it passed**: the deal-dedup fix works live (Meridian landed as an **update** proposal→verbal,
+not a duplicate) and the **dashboard drawer shows the `summary_line` headline**. So the notes/context
+layer is fully live and demo-ready — **remaining work before Friday is rehearsal, not code.**
 
 **This session (2026-07-14, later) — notes exposure decided, hardened from a live test:**
 - **Where notes/summaries surface (decided):** **conversation = primary** (zero-build — "brief me on X"
