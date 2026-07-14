@@ -21,8 +21,14 @@ Input contract (all sections optional; empty/missing sections are skipped):
   "new_deals":         [ Item ],   # rendered under "New records"   (avatar: deal)
   "deal_updates":      [ Item ],   # rendered under "Updates"       (avatar: deal)
   "updates":           [ Item ],   # rendered under "Updates"       (avatar: person)
+  "timeline":          [ Item ],   # rendered under "Logged to your timeline" — touchpoints (email/meeting)
+  "summaries":         [ Item ],   # rendered under "Living summaries" — refreshed relationship/deal state
   "conflicts":         [ Conflict ]# rendered under "Needs your call" — existing value would change
 }
+
+The living summary (a person's/deal's current-state prose) goes in each `summaries` item's `subtitle`.
+A timeline touchpoint uses `title` = what happened (e.g. "Meeting — Nimbus kickoff"), `subtitle` =
+who/when, `avatar` = person|deal. These are the loop's new main job (see docs/notes-design.md).
 
 Item = {
   "title":      "Priya Nair",                        # required — the headline
@@ -59,6 +65,8 @@ GROUPS = [
     ("New contacts", None, [("new_contacts", "person")]),
     ("New records", None, [("new_organizations", "org"), ("new_deals", "deal")]),
     ("Updates", "to records you already have", [("deal_updates", "deal"), ("updates", "person")]),
+    ("Logged to your timeline", "new touchpoints — these set last-contact recency", [("timeline", "person")]),
+    ("Living summaries", "refreshed from the latest activity", [("summaries", "person")]),
 ]
 CONFLICT_KEY = "conflicts"
 
@@ -187,8 +195,10 @@ def render(data: dict) -> str:
     n_people = len(data.get("new_contacts", []) or [])
     n_records = len(data.get("new_organizations", []) or []) + len(data.get("new_deals", []) or [])
     n_updates = len(data.get("deal_updates", []) or []) + len(data.get("updates", []) or [])
+    n_timeline = len(data.get("timeline", []) or [])
+    n_summaries = len(data.get("summaries", []) or [])
     n_review = len(data.get(CONFLICT_KEY, []) or [])
-    total = n_people + n_records + n_updates + n_review
+    total = n_people + n_records + n_updates + n_timeline + n_summaries + n_review
 
     pills = []
     if n_people:
@@ -197,6 +207,10 @@ def render(data: dict) -> str:
         pills.append(f"<span class='pill'><b>{n_records}</b> new record{'s' if n_records != 1 else ''}</span>")
     if n_updates:
         pills.append(f"<span class='pill'><b>{n_updates}</b> update{'s' if n_updates != 1 else ''}</span>")
+    if n_timeline:
+        pills.append(f"<span class='pill'><b>{n_timeline}</b> logged</span>")
+    if n_summaries:
+        pills.append(f"<span class='pill'><b>{n_summaries}</b> summar{'ies' if n_summaries != 1 else 'y'}</span>")
     if n_review:
         pills.append(f"<span class='pill pill-warn'><b>{n_review}</b> to review</span>")
     tally = "".join(pills)

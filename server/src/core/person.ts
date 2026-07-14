@@ -15,6 +15,8 @@ export interface CreatePersonInput {
   title?: string;
   lifecycle_stage?: string;
   last_interaction_at?: string; // ISO timestamp — the enrichment loop refreshes this after a comm
+  summary?: string; // living relationship summary (self-maintained by the enrichment loop)
+  summary_provenance?: Attributes; // which timeline entries / comms it was built from (§7)
   owner_id?: UUID;
   attributes?: Attributes;
 }
@@ -47,6 +49,9 @@ export async function createPerson(
         title: input.title ?? null,
         lifecycle_stage: input.lifecycle_stage ?? null,
         last_interaction_at: input.last_interaction_at ?? null,
+        summary: input.summary ?? null,
+        summary_updated_at: input.summary !== undefined ? new Date().toISOString() : null,
+        summary_provenance: input.summary_provenance ?? {},
         owner_id: input.owner_id ?? null,
         attributes: input.attributes ?? {},
       })
@@ -135,6 +140,11 @@ export async function updatePerson(
   if (input.title !== undefined) patch.title = input.title;
   if (input.lifecycle_stage !== undefined) patch.lifecycle_stage = input.lifecycle_stage;
   if (input.last_interaction_at !== undefined) patch.last_interaction_at = input.last_interaction_at;
+  if (input.summary !== undefined) {
+    patch.summary = input.summary;
+    patch.summary_updated_at = new Date().toISOString(); // stamp whenever the summary is rewritten
+  }
+  if (input.summary_provenance !== undefined) patch.summary_provenance = input.summary_provenance;
   if (input.owner_id !== undefined) patch.owner_id = input.owner_id;
   if (input.attributes !== undefined) patch.attributes = input.attributes;
   if (input.emails !== undefined || input.primary_email !== undefined) {

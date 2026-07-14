@@ -1,0 +1,13 @@
+{
+  "_note": "A sample model-supplied mapping for the fixture Attio. In a real run the model writes this after reading the workspace's attribute definitions (esp. the deal-stage ORDER + win-ish titles). Here it only needs to add what config.json doesn't already seed.",
+  "stage_aliases": {
+    "won 🎉": "won"
+  },
+  "fields": {
+    "companies": { "categories": "organization.attr.industry" }
+  },
+  "options": {
+    "default_currency": "EUR",
+    "source_label": "Attio · Track"
+  }
+}

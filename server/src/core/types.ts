@@ -9,8 +9,17 @@ export type UUID = string;
 export type Attributes = Record<string, unknown>;
 
 export type DealStatus = "open" | "won" | "lost";
-export type InteractionType = "email" | "meeting" | "call" | "note";
+// The unified timeline entry's kind: human/comms touchpoints + system change-events (notes-design §3).
+export type InteractionType =
+  | "email"
+  | "meeting"
+  | "call"
+  | "note"
+  | "stage_change"
+  | "relationship_change";
 export type InteractionDirection = "inbound" | "outbound" | "internal";
+/** The record kinds a timeline entry can link to (a subset of EntityType). */
+export type TimelineRecordType = "person" | "organization" | "deal";
 export type TaskStatus = "open" | "done";
 
 /** Any record that can participate in the association graph. */
@@ -38,6 +47,9 @@ export interface Person {
   title: string | null;
   lifecycle_stage: string | null; // values configured per-workspace
   last_interaction_at: string | null;
+  summary: string | null; // living relationship summary — self-maintained by the enrichment loop
+  summary_updated_at: string | null;
+  summary_provenance: Attributes; // which timeline entries / comms it was built from (§7)
   owner_id: UUID | null;
   attributes: Attributes;
   created_at: string;
@@ -51,6 +63,7 @@ export interface Organization {
   name: string | null;
   primary_domain: string | null;
   domains: string[];
+  description: string | null; // stable identity: who they are / what they do
   last_interaction_at: string | null;
   owner_id: UUID | null;
   attributes: Attributes;
@@ -69,6 +82,9 @@ export interface Deal {
   currency: string;
   expected_close_date: string | null;
   closed_at: string | null; // stamped when status flips to won/lost (source of truth for "recently won")
+  summary: string | null; // living deal summary — self-maintained by the enrichment loop
+  summary_updated_at: string | null;
+  summary_provenance: Attributes; // which timeline entries / comms it was built from (§7)
   owner_id: UUID | null;
   attributes: Attributes;
   created_at: string;
@@ -76,6 +92,8 @@ export interface Deal {
   archived_at: string | null;
 }
 
+/** A unified timeline entry: a free note OR a logged touchpoint OR a system change-event,
+ *  distinguished by `type`. Table name stays `interaction`; the vocabulary is "timeline". */
 export interface Interaction {
   id: UUID;
   workspace_id: UUID;
@@ -85,11 +103,29 @@ export interface Interaction {
   subject: string | null;
   summary: string | null; // always stored
   body: string | null; // notes only; ingested comms stay summary-only (compliance)
-  source: string | null;
+  source: string | null; // the MECHANISM: manual / enrichment / migration / granola (§6.4)
   external_id: string | null; // dedup/idempotency
-  owner_id: UUID | null;
+  owner_id: UUID | null; // the AUTHOR it's attributed to (§6.4 — forward-compat for teams)
   created_at: string;
   updated_at: string;
+}
+
+/** A many-to-many link from a timeline entry to a record it concerns. One entry → any number of
+ *  people/deals/orgs (notes-design §1, the flexible model). Purpose-built, kept out of `association`
+ *  so graph traversals and timeline reads never have to filter each other out. */
+export interface InteractionLink {
+  id: UUID;
+  workspace_id: UUID;
+  interaction_id: UUID;
+  record_type: TimelineRecordType;
+  record_id: UUID;
+  role: string | null; // participant | subject | organizer | … (optional)
+  created_at: string;
+}
+
+/** A timeline entry with its resolved record links attached — what the read tools return. */
+export interface TimelineEntry extends Interaction {
+  links: InteractionLink[];
 }
 
 export interface Task {

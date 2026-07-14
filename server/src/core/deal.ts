@@ -15,6 +15,8 @@ export interface CreateDealInput {
   amount?: number;
   currency?: string;
   expected_close_date?: string; // ISO date (YYYY-MM-DD)
+  summary?: string; // living deal summary (self-maintained by the enrichment loop)
+  summary_provenance?: Attributes; // which timeline entries / comms it was built from (§7)
   owner_id?: UUID;
   attributes?: Attributes;
 }
@@ -36,6 +38,9 @@ export async function createDeal(workspaceId: UUID, input: CreateDealInput): Pro
         expected_close_date: input.expected_close_date ?? null,
         // stamp the close date if the deal is created already-closed
         closed_at: status === "won" || status === "lost" ? new Date().toISOString() : null,
+        summary: input.summary ?? null,
+        summary_updated_at: input.summary !== undefined ? new Date().toISOString() : null,
+        summary_provenance: input.summary_provenance ?? {},
         owner_id: input.owner_id ?? null,
         attributes: input.attributes ?? {},
       })
@@ -113,6 +118,11 @@ export async function updateDeal(
   if (input.amount !== undefined) patch.amount = input.amount;
   if (input.currency !== undefined) patch.currency = input.currency;
   if (input.expected_close_date !== undefined) patch.expected_close_date = input.expected_close_date;
+  if (input.summary !== undefined) {
+    patch.summary = input.summary;
+    patch.summary_updated_at = new Date().toISOString(); // stamp whenever the summary is rewritten
+  }
+  if (input.summary_provenance !== undefined) patch.summary_provenance = input.summary_provenance;
   if (input.owner_id !== undefined) patch.owner_id = input.owner_id;
   if (input.attributes !== undefined) patch.attributes = input.attributes;
 

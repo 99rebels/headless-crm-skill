@@ -22,6 +22,13 @@ import { createDeal, findDeals, getDeal, updateDeal } from "../core/deal.js";
 import { findAssociationsFor, link, unlink } from "../core/association.js";
 import { getPipelineSummary } from "../core/summary.js";
 import { bulkImport } from "../core/bulk.js";
+import {
+  createTimelineEntry,
+  findTimelineEntries,
+  getTimelineEntry,
+  updateTimelineEntry,
+  type TimelineLinkInput,
+} from "../core/note.js";
 
 /** The record kinds that can participate in the association graph. */
 const ENTITY_TYPES = ["person", "organization", "deal", "interaction", "task"] as const;
@@ -164,6 +171,14 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
           .string()
           .optional()
           .describe("ISO timestamp of the most recent contact — refresh this after an email/meeting"),
+        summary: z
+          .string()
+          .optional()
+          .describe("the living relationship summary — current state, open items, sentiment"),
+        summary_provenance: z
+          .record(z.string(), z.unknown())
+          .optional()
+          .describe("which timeline entry ids / comms this summary was built from"),
         attributes: z.record(z.string(), z.unknown()).optional(),
       },
     },
@@ -190,6 +205,10 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
         name: z.string().optional(),
         domain: z.string().optional().describe("primary domain, e.g. acme.com"),
         domains: z.array(z.string()).optional().describe("additional known domains"),
+        description: z
+          .string()
+          .optional()
+          .describe("who they are / what they do — the stable identity line"),
         attributes: z
           .record(z.string(), z.unknown())
           .optional()
@@ -215,6 +234,7 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
           name: args.name,
           primary_domain: args.domain,
           domains: args.domains,
+          description: args.description,
           attributes: args.attributes,
         });
         return text({ status: "created", organization: org });
@@ -275,6 +295,7 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
         name: z.string().optional(),
         domain: z.string().optional(),
         domains: z.array(z.string()).optional(),
+        description: z.string().optional().describe("who they are / what they do"),
         last_interaction_at: z.string().optional().describe("ISO timestamp of the most recent contact"),
         attributes: z.record(z.string(), z.unknown()).optional(),
       },
@@ -371,6 +392,14 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
         amount: z.number().optional(),
         currency: z.string().optional(),
         expected_close_date: z.string().optional(),
+        summary: z
+          .string()
+          .optional()
+          .describe("the living deal summary — where it stands, next steps, blockers, key dates"),
+        summary_provenance: z
+          .record(z.string(), z.unknown())
+          .optional()
+          .describe("which timeline entry ids / comms this summary was built from"),
         attributes: z.record(z.string(), z.unknown()).optional(),
       },
     },
@@ -412,7 +441,7 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
     {
       title: "Bulk import",
       description:
-        "Create and link many records in ONE call — the write step for the CSV-import skill. Takes a `plan` of contacts, organizations, deals, and links (each record has a local `key` like 'c0'/'o0'/'d0'; links reference those keys). Creates in the right order (orgs → contacts → deals → links), dedupes orgs by domain and contacts by email (reusing matches, never duplicating), and resolves the keys to real ids server-side. Writes are set-based (a few DB ops total, not one per record), so pass the WHOLE plan in a single call — do NOT pre-split it into batches, and do NOT loop create_/link_ per record (that hits the per-turn tool limit). Returns created/reused counts and any per-record errors.",
+        "Create and link many records in ONE call — the write step for the CSV-import / migration skill. Takes a `plan` of contacts, organizations, deals, links, and optional timeline_entries (each record has a local `key` like 'c0'/'o0'/'d0'; links and timeline-entry links reference those keys). Creates in the right order (orgs → contacts → deals → links → timeline), dedupes orgs by domain and contacts by email (reusing matches, never duplicating), folds notes into the timeline (idempotent on source+external_id), and resolves the keys to real ids server-side. Writes are set-based (a few DB ops total, not one per record), so pass the WHOLE plan in a single call — do NOT pre-split it into batches, and do NOT loop create_/link_ per record (that hits the per-turn tool limit). Returns created/reused/skipped counts and any per-record errors.",
       inputSchema: {
         plan: z.object({
           contacts: z
@@ -425,6 +454,10 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
                 phone: z.string().optional(),
                 title: z.string().optional(),
                 lifecycle_stage: z.string().optional(),
+                last_interaction_at: z
+                  .string()
+                  .optional()
+                  .describe("ISO — carry-in recency from a migrated source's 'last contacted'"),
                 attributes: bulkAttrs,
               }),
             )
@@ -436,6 +469,8 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
                 name: z.string().optional(),
                 domain: z.string().optional(),
                 domains: z.array(z.string()).optional(),
+                description: z.string().optional(),
+                last_interaction_at: z.string().optional().describe("ISO — carry-in recency"),
                 attributes: bulkAttrs,
               }),
             )
@@ -463,6 +498,28 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
               }),
             )
             .optional(),
+          timeline_entries: z
+            .array(
+              z.object({
+                type: z.enum(["email", "meeting", "call", "note", "stage_change", "relationship_change"]),
+                occurred_at: z.string().optional().describe("ISO — e.g. the note's created date"),
+                subject: z.string().optional(),
+                summary: z.string().optional(),
+                body: z.string().optional().describe("full text (migration notes are user-authored)"),
+                source: z.string().optional().describe("e.g. migration | granola"),
+                external_id: z.string().optional().describe("source's id — makes re-runs idempotent"),
+                links: z
+                  .array(
+                    z.object({
+                      key: z.string().describe("local key of the record this entry concerns, e.g. 'c0'"),
+                      role: z.string().optional(),
+                    }),
+                  )
+                  .optional(),
+              }),
+            )
+            .optional()
+            .describe("notes/touchpoints to fold into the timeline (e.g. a migration's notes)"),
         }),
       },
     },
@@ -471,6 +528,116 @@ export function registerCrmTools(server: McpServer, workspace: WorkspaceRef): vo
         const workspaceId = await getWorkspaceId();
         const result = await bulkImport(workspaceId, args.plan);
         return text({ status: "imported", ...result });
+      } catch (e) {
+        return errorText((e as Error).message);
+      }
+    },
+  );
+
+  // ── timeline (the notes / context layer) ──────────────────────────────────────────
+  // One unified entry (note | touchpoint | system event) linking to any number of people/deals/orgs.
+  const TIMELINE_TYPES = ["email", "meeting", "call", "note", "stage_change", "relationship_change"] as const;
+  const linkIdArrays = {
+    person_ids: z.array(z.string()).optional().describe("contact ids this entry concerns"),
+    deal_ids: z.array(z.string()).optional().describe("deal ids this entry concerns"),
+    organization_ids: z.array(z.string()).optional().describe("organization ids this entry concerns"),
+  };
+  const toLinks = (a: {
+    person_ids?: string[];
+    deal_ids?: string[];
+    organization_ids?: string[];
+  }): TimelineLinkInput[] => [
+    ...(a.person_ids ?? []).map((id) => ({ record_type: "person" as const, record_id: id })),
+    ...(a.deal_ids ?? []).map((id) => ({ record_type: "deal" as const, record_id: id })),
+    ...(a.organization_ids ?? []).map((id) => ({ record_type: "organization" as const, record_id: id })),
+  ];
+
+  server.registerTool(
+    "create_timeline_entry",
+    {
+      title: "Create timeline entry",
+      description:
+        "Log a timeline entry — a note, a touchpoint (email/meeting/call), or a system change-event (stage_change/relationship_change) — and link it to any number of people, deals, and organizations at once (a real meeting: several attendees across several deals). Contact-type entries (email/meeting/call) drive each linked record's last-contact recency automatically. Pass an external_id + source to make re-runs idempotent (an existing entry with that key is returned, not duplicated).",
+      inputSchema: {
+        type: z.enum(TIMELINE_TYPES),
+        occurred_at: z.string().optional().describe("ISO timestamp — defaults to now"),
+        direction: z.enum(["inbound", "outbound", "internal"]).optional(),
+        subject: z.string().optional(),
+        summary: z.string().optional().describe("what happened — always safe to store"),
+        body: z.string().optional().describe("full text for user-authored notes only (not ingested comms)"),
+        source: z.string().optional().describe("mechanism: manual | enrichment | migration | granola"),
+        external_id: z.string().optional().describe("source's id — dedup/idempotency key"),
+        ...linkIdArrays,
+      },
+    },
+    async (args) => {
+      try {
+        const workspaceId = await getWorkspaceId();
+        const { person_ids, deal_ids, organization_ids, ...entry } = args;
+        const { entry: created, deduped } = await createTimelineEntry(workspaceId, {
+          ...entry,
+          links: toLinks({ person_ids, deal_ids, organization_ids }),
+        });
+        return text({ status: deduped ? "already_exists" : "created", entry: created });
+      } catch (e) {
+        return errorText((e as Error).message);
+      }
+    },
+  );
+
+  server.registerTool(
+    "find_timeline_entries",
+    {
+      title: "Find timeline entries",
+      description:
+        "Read a record's timeline (newest first) by passing record_type + record_id, or the whole workspace's recent timeline with neither. Each entry includes its record links.",
+      inputSchema: {
+        record_type: z.enum(["person", "organization", "deal"]).optional(),
+        record_id: z.string().optional(),
+        limit: z.number().int().positive().optional(),
+      },
+    },
+    async (args) => {
+      try {
+        const workspaceId = await getWorkspaceId();
+        const entries = await findTimelineEntries(workspaceId, args);
+        return text({ count: entries.length, entries });
+      } catch (e) {
+        return errorText((e as Error).message);
+      }
+    },
+  );
+
+  server.registerTool(
+    "update_timeline_entry",
+    {
+      title: "Update timeline entry",
+      description:
+        "Edit an existing timeline entry (e.g. correct a summary or occurred_at). If any of person_ids/deal_ids/organization_ids is provided, the entry's links are REPLACED with exactly those (pass empty arrays to clear); omit all three to leave links unchanged.",
+      inputSchema: {
+        id: z.string(),
+        type: z.enum(TIMELINE_TYPES).optional(),
+        occurred_at: z.string().optional(),
+        direction: z.enum(["inbound", "outbound", "internal"]).optional(),
+        subject: z.string().optional(),
+        summary: z.string().optional(),
+        body: z.string().optional(),
+        ...linkIdArrays,
+      },
+    },
+    async (args) => {
+      try {
+        const workspaceId = await getWorkspaceId();
+        const { id, person_ids, deal_ids, organization_ids, ...rest } = args;
+        const relinking =
+          person_ids !== undefined || deal_ids !== undefined || organization_ids !== undefined;
+        const existing = await getTimelineEntry(workspaceId, id);
+        if (!existing) return errorText("No timeline entry with that id.");
+        const entry = await updateTimelineEntry(workspaceId, id, {
+          ...rest,
+          ...(relinking ? { links: toLinks({ person_ids, deal_ids, organization_ids }) } : {}),
+        });
+        return text({ status: "updated", entry });
       } catch (e) {
         return errorText((e as Error).message);
       }

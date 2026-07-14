@@ -20,6 +20,11 @@ import {
 } from "./core/organization.js";
 import { createDeal, findDeals, updateDeal } from "./core/deal.js";
 import { findAssociationsFor, link } from "./core/association.js";
+import {
+  createTimelineEntry,
+  findTimelineEntries,
+  getLatestContactMap,
+} from "./core/note.js";
 
 function ok(label: string, cond: boolean) {
   console.log(`${cond ? "✅" : "❌"} ${label}`);
@@ -108,6 +113,43 @@ async function main() {
     ok("kate has exactly 2 links (idempotent re-link didn't duplicate)", kateLinks.length === 2);
     const dealLinks = await findAssociationsFor(ws.id, "deal", deal.id);
     ok("traversal finds the link from the deal's side too", dealLinks.length === 1);
+
+    // ── timeline / notes layer (the context layer) ────────────────────────────────
+    const { entry, deduped } = await createTimelineEntry(ws.id, {
+      type: "meeting",
+      subject: "Kickoff with Kate",
+      summary: "Scoped the retainer; Kate signs off.",
+      source: "manual",
+      external_id: "evt-1",
+      links: [
+        { record_type: "person", record_id: kate.id },
+        { record_type: "deal", record_id: deal.id },
+      ],
+    });
+    ok("created timeline entry", !!entry.id && !deduped);
+    ok("entry links to both the person and the deal (many-to-many)", entry.links.length === 2);
+
+    const { deduped: again } = await createTimelineEntry(ws.id, {
+      type: "meeting",
+      source: "manual",
+      external_id: "evt-1", // same source+external_id → must dedupe, not duplicate
+      links: [{ record_type: "person", record_id: kate.id }],
+    });
+    ok("re-logging same source+external_id is idempotent (deduped)", again);
+
+    const kateTimeline = await findTimelineEntries(ws.id, { record_type: "person", record_id: kate.id });
+    ok("read the person's timeline back", kateTimeline.length === 1 && kateTimeline[0].id === entry.id);
+
+    // a NON-contact entry (a plain note) must NOT drive recency
+    const nora = await createPerson(ws.id, { name: "Nora Vale", primary_email: "nora@vale.test", lifecycle_stage: "lead" });
+    await createTimelineEntry(ws.id, {
+      type: "note",
+      body: "Met at a conference — follow up someday.",
+      links: [{ record_type: "person", record_id: nora.id }],
+    });
+    const recency = await getLatestContactMap(ws.id);
+    ok("recency map includes the person we had a meeting with", recency.has(kate.id));
+    ok("recency map excludes a person with only a note (note ≠ contact)", !recency.has(nora.id));
 
     console.log("\n📇 Final record:");
     console.log(JSON.stringify(updated, null, 2));

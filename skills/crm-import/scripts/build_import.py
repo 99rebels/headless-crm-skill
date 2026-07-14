@@ -11,7 +11,7 @@ per-row records, so a 2,000-row file is as reliable as a 5-row one.
 
 The output's `plan` block is the exact set of MCP create/link calls to make once approved; each
 record carries a stable local `key` so `links` can reference records before they have real ids.
-The `digest` block is what render_import.py renders for human approval.
+The `digest` block is what render_preview.py renders for human approval.
 
 Usage:
     python3 build_import.py <file.csv> <mapping.json> [config.json] > plan.json

@@ -1,0 +1,41 @@
+[
+  {
+    "record_id": "per_james",
+    "attributes": {
+      "name": "James McElroy",
+      "email_addresses": ["james@joinaxe.com"],
+      "job_title": "CEO",
+      "linkedin": "https://www.linkedin.com/in/jim-james-114b9346",
+      "company": { "object_slug": "companies", "record_id": "com_axe" },
+      "created_at": "Sunday, 2026-02-22 16:29:44",
+      "created_by": { "workspace_membership_id": "wm_1" }
+    }
+  },
+  {
+    "record_id": "per_dan1",
+    "attributes": {
+      "name": "Dan Hobbs",
+      "job_title": "CEO",
+      "company": { "object_slug": "companies", "record_id": "com_axe" },
+      "created_at": "Sunday, 2026-03-08 15:10:03"
+    }
+  },
+  {
+    "record_id": "per_dan2",
+    "attributes": {
+      "name": "Dan Hobbs",
+      "job_title": "Founder",
+      "company": { "object_slug": "companies", "record_id": "com_forte" }
+    }
+  },
+  {
+    "record_id": "per_sara",
+    "attributes": {
+      "name": "Sara Lin",
+      "email_addresses": ["sara@nimbus.io", "sara.lin@gmail.com"],
+      "job_title": "Head of Ops",
+      "phone_numbers": ["+15551234567"],
+      "company": { "object_slug": "companies", "record_id": "com_nimbus" }
+    }
+  }
+]

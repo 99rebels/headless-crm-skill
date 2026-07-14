@@ -41,6 +41,7 @@ async function main() {
       "create_deal", "find_deals", "get_deal", "update_deal",
       "link_records", "find_associations", "unlink_records",
       "get_pipeline_summary", "bulk_import",
+      "create_timeline_entry", "find_timeline_entries", "update_timeline_entry",
     ];
     ok(
       `lists ${expectedTools.length} tools (${tools.join(", ")})`,
@@ -175,6 +176,17 @@ async function main() {
               { from: "c1", to: "o1", relationship_type: "works_at" }, // 2nd-new-of-each: catches order bugs
               { from: "c1", to: "d1", relationship_type: "primary_contact" },
             ],
+            timeline_entries: [
+              // a migration note folded into the timeline, linked to a record created in THIS plan
+              {
+                type: "note",
+                body: "Met Rae at the Zephyr rollout kickoff; keen champion.",
+                source: "migration",
+                external_id: "attio-note-1",
+                occurred_at: "2026-06-01T00:00:00Z",
+                links: [{ key: "c0" }, { key: "d0" }],
+              },
+            ],
           },
         },
       }),
@@ -202,6 +214,88 @@ async function main() {
         boAssoc?.associations?.some((a: any) => a.relationship_type === "works_at") &&
         boAssoc?.associations?.some((a: any) => a.relationship_type === "primary_contact"),
     );
+    ok("bulk_import folded the migration note into the timeline (1 created)", bulk?.created?.timeline_entries === 1);
+    // the note's links resolved to the freshly-created contact + deal (both keys in this plan)
+    const raeId = payload(await client.callTool({ name: "find_contacts", arguments: { email: "rae@zephyr.test" } }))?.contacts?.[0]?.id;
+    const raeTimeline = payload(
+      await client.callTool({ name: "find_timeline_entries", arguments: { record_type: "person", record_id: raeId } }),
+    );
+    ok("the migrated note is readable on the contact's timeline", raeTimeline?.count === 1 && raeTimeline?.entries?.[0]?.links?.length === 2);
+    // re-running the same plan must NOT duplicate the note (idempotent on source+external_id)
+    const bulk2 = payload(
+      await client.callTool({
+        name: "bulk_import",
+        arguments: {
+          plan: {
+            timeline_entries: [
+              { type: "note", body: "dup", source: "migration", external_id: "attio-note-1", links: [] },
+            ],
+          },
+        },
+      }),
+    );
+    ok("bulk_import re-run skips the already-imported note (idempotent)",
+      bulk2?.created?.timeline_entries === 0 && bulk2?.skipped?.timeline_entries === 1);
+
+    // ── timeline / notes layer (create + link many + idempotency + derived recency) ──
+    const entry = payload(
+      await client.callTool({
+        name: "create_timeline_entry",
+        arguments: {
+          type: "meeting",
+          subject: "Kickoff with Kate",
+          summary: "Walked through scope; she's the decision maker on the retainer.",
+          source: "manual",
+          external_id: "evt-kickoff-1",
+          person_ids: [id],
+          deal_ids: [dealId],
+        },
+      }),
+    );
+    ok("create_timeline_entry → created", entry?.status === "created");
+    ok("entry links to both the contact and the deal (many-to-many)", entry?.entry?.links?.length === 2);
+
+    const dupeEntry = payload(
+      await client.callTool({
+        name: "create_timeline_entry",
+        arguments: { type: "meeting", source: "manual", external_id: "evt-kickoff-1", person_ids: [id] },
+      }),
+    );
+    ok("create_timeline_entry (same source+external_id) → already_exists (idempotent)", dupeEntry?.status === "already_exists");
+
+    const kateTimeline = payload(
+      await client.callTool({
+        name: "find_timeline_entries",
+        arguments: { record_type: "person", record_id: id },
+      }),
+    );
+    ok("find_timeline_entries returns the contact's entry", kateTimeline?.count === 1 && kateTimeline?.entries?.[0]?.subject === "Kickoff with Kate");
+
+    // the meeting (a contact-type entry, occurred just now) should now DRIVE Kate's recency in the summary
+    const summary = payload(await client.callTool({ name: "get_pipeline_summary", arguments: {} }));
+    const kateRow = summary?.people?.find((p: any) => p.id === id);
+    ok("get_pipeline_summary derives recency from the timeline (0 days, not 'no contact logged')", kateRow?.days === 0);
+
+    // living summary folds into update_contact + description into update_organization
+    const withSummary = payload(
+      await client.callTool({
+        name: "update_contact",
+        arguments: { id, summary: "Warm; leads the retainer decision. Next: send SOW." },
+      }),
+    );
+    ok("update_contact stores the living summary + stamps summary_updated_at",
+      withSummary?.contact?.summary?.startsWith("Warm") && !!withSummary?.contact?.summary_updated_at);
+    // the living summary must surface in the dashboard data so the views can render it
+    const summary2 = payload(await client.callTool({ name: "get_pipeline_summary", arguments: {} }));
+    const kateRow2 = summary2?.people?.find((p: any) => p.id === id);
+    ok("get_pipeline_summary surfaces the living summary on the person", kateRow2?.summary?.startsWith("Warm"));
+    const withDesc = payload(
+      await client.callTool({
+        name: "update_organization",
+        arguments: { id: orgId, description: "Fintech, ~80 people, payments infra." },
+      }),
+    );
+    ok("update_organization stores the description", withDesc?.organization?.description?.startsWith("Fintech"));
 
     console.log("\n📇 Final contact via MCP:");
     console.log(JSON.stringify(fetched, null, 2));

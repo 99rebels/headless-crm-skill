@@ -1,0 +1,61 @@
+[
+  {
+    "record_id": "deal_forte",
+    "attributes": {
+      "name": "Forte Healthcare",
+      "value": "€12,000.00",
+      "stage": "Disqualified",
+      "associated_company": { "object_slug": "companies", "record_id": "com_forte" },
+      "associated_people": [{ "object_slug": "people", "record_id": "per_dan2" }],
+      "owner": { "workspace_membership_id": "wm_1" },
+      "created_at": "Friday, 2026-05-01 08:25:56"
+    }
+  },
+  {
+    "record_id": "deal_nimbus",
+    "attributes": {
+      "name": "Nimbus rollout",
+      "value": "€5,000.00",
+      "stage": "Won 🎉",
+      "associated_company": { "object_slug": "companies", "record_id": "com_nimbus" },
+      "associated_people": [{ "object_slug": "people", "record_id": "per_sara" }]
+    }
+  },
+  {
+    "record_id": "deal_axe",
+    "attributes": {
+      "name": "Axe pilot",
+      "value": "$3,000",
+      "stage": "Demo scheduled",
+      "associated_company": { "object_slug": "companies", "record_id": "com_axe" },
+      "associated_people": [{ "object_slug": "people", "record_id": "per_james" }]
+    }
+  },
+  {
+    "record_id": "deal_live",
+    "attributes": {
+      "name": "Nimbus expansion",
+      "value": "€20,000.00",
+      "stage": "Live",
+      "associated_company": { "object_slug": "companies", "record_id": "com_nimbus" }
+    }
+  },
+  {
+    "record_id": "deal_mystery",
+    "attributes": {
+      "name": "Unknown-stage deal",
+      "value": "£800",
+      "stage": "Pilot",
+      "associated_company": { "object_slug": "companies", "record_id": "com_axe" }
+    }
+  },
+  {
+    "record_id": "deal_ghost",
+    "attributes": {
+      "name": "Ghost-link deal",
+      "value": "€1,000.00",
+      "stage": "Lead",
+      "associated_company": { "object_slug": "companies", "record_id": "com_missing" }
+    }
+  }
+]

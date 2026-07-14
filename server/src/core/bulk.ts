@@ -19,35 +19,50 @@ import { createPeople, findPeopleByEmail } from "./person.js";
 import { createOrganizations, findOrganizationsByDomain } from "./organization.js";
 import { createDeals } from "./deal.js";
 import { linkMany, type LinkInput } from "./association.js";
-import type { Attributes, DealStatus, EntityType, UUID } from "./types.js";
+import { createTimelineEntries, type CreateTimelineEntryInput } from "./note.js";
+import type { Attributes, DealStatus, EntityType, InteractionType, TimelineRecordType, UUID } from "./types.js";
 
 export interface BulkContact {
   key: string;
   name?: string; email?: string; emails?: string[]; phone?: string; title?: string;
-  lifecycle_stage?: string; attributes?: Attributes;
+  lifecycle_stage?: string; last_interaction_at?: string; attributes?: Attributes;
 }
 export interface BulkOrganization {
-  key: string; name?: string; domain?: string; domains?: string[]; attributes?: Attributes;
+  key: string; name?: string; domain?: string; domains?: string[];
+  description?: string; last_interaction_at?: string; attributes?: Attributes;
 }
 export interface BulkDeal {
   key: string; name?: string; stage?: string; status?: DealStatus; amount?: number;
   currency?: string; expected_close_date?: string; attributes?: Attributes;
 }
 export interface BulkLink { from: string; to: string; relationship_type: string; }
+/** A timeline entry in a plan — its links reference LOCAL record keys (c0 / o0 / d0), resolved here. */
+export interface BulkTimelineEntry {
+  type: InteractionType;
+  occurred_at?: string; subject?: string; summary?: string; body?: string;
+  source?: string; external_id?: string;
+  links?: { key: string; role?: string }[];
+}
 
 export interface BulkImportPlan {
   contacts?: BulkContact[];
   organizations?: BulkOrganization[];
   deals?: BulkDeal[];
   links?: BulkLink[];
+  timeline_entries?: BulkTimelineEntry[];
 }
 
 // Local-key prefix → entity type (build_import.py emits c*/o*/d*).
 const KEY_TYPE: Record<string, EntityType> = { c: "person", o: "organization", d: "deal" };
+// same prefix → the timeline's record-type subset (person/organization/deal)
+const KEY_RECORD_TYPE: Record<string, TimelineRecordType> = {
+  c: "person", o: "organization", d: "deal",
+};
 
 export interface BulkImportResult {
-  created: { contacts: number; organizations: number; deals: number; links: number };
+  created: { contacts: number; organizations: number; deals: number; links: number; timeline_entries: number };
   reused: { contacts: number; organizations: number };
+  skipped: { timeline_entries: number };
   errors: string[];
 }
 
@@ -55,8 +70,9 @@ const lower = (s: string) => s.trim().toLowerCase();
 
 export async function bulkImport(workspaceId: UUID, plan: BulkImportPlan): Promise<BulkImportResult> {
   const idMap: Record<string, UUID> = {};
-  const created = { contacts: 0, organizations: 0, deals: 0, links: 0 };
+  const created = { contacts: 0, organizations: 0, deals: 0, links: 0, timeline_entries: 0 };
   const reused = { contacts: 0, organizations: 0 };
+  const skipped = { timeline_entries: 0 };
   const errors: string[] = [];
 
   // 1) ORGANIZATIONS — one dedup fetch (by all domains) + one bulk insert of the new ones
@@ -85,7 +101,10 @@ export async function bulkImport(workspaceId: UUID, plan: BulkImportPlan): Promi
     }
     const createdOrgs = await createOrganizations(
       workspaceId,
-      toCreate.map((o) => ({ name: o.name, primary_domain: o.domain, domains: o.domains, attributes: o.attributes })),
+      toCreate.map((o) => ({
+        name: o.name, primary_domain: o.domain, domains: o.domains,
+        description: o.description, last_interaction_at: o.last_interaction_at, attributes: o.attributes,
+      })),
     );
     createdOrgs.forEach((org, i) => (idMap[toCreateKeys[i]] = org.id));
     created.organizations = createdOrgs.length;
@@ -116,7 +135,8 @@ export async function bulkImport(workspaceId: UUID, plan: BulkImportPlan): Promi
       workspaceId,
       toCreate.map((c) => ({
         name: c.name, primary_email: c.email, emails: c.emails, phone: c.phone,
-        title: c.title, lifecycle_stage: c.lifecycle_stage, attributes: c.attributes,
+        title: c.title, lifecycle_stage: c.lifecycle_stage,
+        last_interaction_at: c.last_interaction_at, attributes: c.attributes,
       })),
     );
     createdPeople.forEach((p, i) => (idMap[toCreateKeys[i]] = p.id));
@@ -153,5 +173,28 @@ export async function bulkImport(workspaceId: UUID, plan: BulkImportPlan): Promi
   const createdLinks = await linkMany(workspaceId, linkInputs);
   created.links = createdLinks.length;
 
-  return { created, reused, errors };
+  // 5) TIMELINE ENTRIES — resolve each entry's local-key links → real ids, then ONE batch insert
+  //    (folds a migration's notes into the timeline; idempotent on source+external_id).
+  const entryInputs: CreateTimelineEntryInput[] = [];
+  for (const e of plan.timeline_entries ?? []) {
+    const links: { record_type: TimelineRecordType; record_id: UUID; role?: string }[] = [];
+    for (const l of e.links ?? []) {
+      const id = idMap[l.key];
+      const recordType = KEY_RECORD_TYPE[l.key[0]];
+      if (!id || !recordType) {
+        errors.push(`timeline entry link ${l.key}: unresolved key (record failed to create or was skipped)`);
+        continue;
+      }
+      links.push({ record_type: recordType, record_id: id, role: l.role });
+    }
+    entryInputs.push({
+      type: e.type, occurred_at: e.occurred_at, subject: e.subject, summary: e.summary,
+      body: e.body, source: e.source, external_id: e.external_id, links,
+    });
+  }
+  const timelineResult = await createTimelineEntries(workspaceId, entryInputs);
+  created.timeline_entries = timelineResult.created;
+  skipped.timeline_entries = timelineResult.skipped;
+
+  return { created, reused, skipped, errors };
 }

@@ -76,9 +76,11 @@ For each relevant event, extract from **attendees + title/description**:
 - **People:** attendee name + email → contact (dedupe by email as in A2). An attendee on a real
   meeting is a direct participant → **high confidence**.
 - **Organisations:** attendee email **domains** → org (dedupe by domain).
-- **`last_interaction_at`:** for a **past** meeting, the person's last-interaction date is (at least)
-  the event date. Propose setting/refreshing it. This is the calendar's signature contribution — it
-  powers "who haven't I talked to in a while."
+- **Recency via a timeline entry:** for a **past** meeting, log a `timeline` touchpoint
+  (`type: "meeting"`, `occurred_at` = the event date, linked to the attendees + any deal). Recency
+  is now **derived** from contact-type timeline entries, so logging the meeting is what powers "who
+  haven't I talked to in a while" — you don't separately set `last_interaction_at` (leave that for a
+  migrated carry-in). See "the context layer" below.
 - Deal signals from a calendar are usually weak; only extract one if the title/description is explicit
   (e.g. "Acme renewal — contract review"). When unsure, don't.
 Tag each candidate `source: "calendar"`, with evidence (reason + the event title/time as the snippet).
@@ -98,6 +100,24 @@ surface (propose across all of it — don't restrict to one field):
 - **deal:** name, `stage`/`status` (from `vocab`), amount, currency, expected close date, plus
   `attributes`.
 - **associations:** who `works_at` which org, who is `decision_maker` / `champion` on which deal.
+- **timeline entry** (the context layer — the loop's new main job): each processed **email/meeting**
+  becomes one timeline touchpoint — `type` (`email`/`meeting`/`call`), `occurred_at`, a short `subject`,
+  an AI **`summary`** (what happened / what was said / what's next), and the people + deal(s) + org(s)
+  it involves. This is the record's history *and* what drives recency.
+- **living summary** (per person and per deal): the current relationship/deal state in a sentence or
+  two — where it stands, open items/commitments, key dates, sentiment. Rebuilt from the timeline +
+  this comm when something material changed; not every run.
+
+### The context layer — two hard rules
+1. **Compliance: a timeline entry from an ingested comm stores the AI `summary` ONLY — never the raw
+   `body`.** (The `body` field is for user-authored notes.) Same boundary as everything else: we hold
+   the gist, not the raw email/event. For idempotency, tag each entry `source: "gmail"` (emails) or
+   `source: "gcal"` (calendar) with `external_id` = the Gmail thread id / Calendar event id — re-running
+   the loop then never double-logs (the write dedupes on source+external_id).
+2. **Summaries regenerate, they don't blind-edit.** Rebuild the living summary from the timeline (cite
+   the entries/comms it's built from as its provenance); a *material* change surfaces in the digest for
+   approval like any other write. Recency and the summary are context the model *maintains*, not
+   authoritative numbers it invents.
 
 Judgment rules:
 - **Worthiness:** not every new address is a lead. Vendors, receipts, automated notifications, and
@@ -132,6 +152,10 @@ Sort each change into:
 - `updates` — enrichments to existing records: a fact for an **empty** field, a **new** attribute, or
   a more-recent `last_interaction_at`.
 - `deal_updates` — stage / status / amount moves on an existing deal.
+- `timeline` — the touchpoints to log (one per processed email/meeting), each linked to the people /
+  deal(s) / org(s) it involves.
+- `summaries` — living-summary refreshes on people/deals whose state materially changed (put the new
+  summary prose in the item's `subtitle`).
 - `conflicts` — a stated value **differs from an existing, non-empty** value (never `last_interaction_at`).
 
 Build the JSON in the shape at the top of `scripts/render_digest.py`: per item `title` / `subtitle` /
@@ -140,8 +164,9 @@ Build the JSON in the shape at the top of `scripts/render_digest.py`: per item `
 `Lead`, a deal's `Discovery`, or a move `proposal → verbal`). `conflicts` also carry `field` /
 `current` / `proposed`. Include `emails_reviewed` / `events_reviewed`. The renderer derives the
 monogram avatars, the header tally, and the grouping (contacts → "New contacts"; orgs+deals → "New
-records"; enrichments+deal moves → "Updates"; conflicts → "Needs your call"), so you don't format any
-of that — just sort items into the right section key.
+records"; enrichments+deal moves → "Updates"; `timeline` → "Logged to your timeline"; `summaries` →
+"Living summaries"; conflicts → "Needs your call"), so you don't format any of that — just sort items
+into the right section key.
 
 ### C2. Render the digest and ask for approval
 Run `python3 scripts/render_digest.py <proposals.json> digest.html` and show it (each item carries an
@@ -153,7 +178,11 @@ all", "skip #2", etc. **Write nothing before approval.**
 ### C3. Write approved changes (via the CRM MCP tools)
 Approved items only, in this order so links resolve: `create_organization` → `create_contact` →
 `create_deal` → `link_records` (idempotent) → `update_*` for enrichments, `last_interaction_at`, and
-resolved conflicts. The tools re-check dedup server-side as a backstop.
+resolved conflicts. Then the **context layer**: `create_timeline_entry` for each approved touchpoint
+(pass `person_ids` / `deal_ids` / `organization_ids`, `summary` [the gist, **not** the raw body],
+`source`, `external_id`), and `update_contact` / `update_deal` with the new `summary` +
+`summary_provenance` for each approved living-summary refresh. The tools re-check dedup server-side as a
+backstop (contacts by email, orgs by domain, timeline entries by source+external_id).
 
 ### C4. Close the loop
 Apply `scope.exclude_label` (`crm-processed`) to the handled **Gmail** threads (create the label first

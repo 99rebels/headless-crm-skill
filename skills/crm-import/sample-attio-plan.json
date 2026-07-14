@@ -1,0 +1,396 @@
+{
+  "rows_reviewed": 13,
+  "plan": {
+    "contacts": [
+      {
+        "key": "c0",
+        "name": "James McElroy",
+        "email": "james@joinaxe.com",
+        "title": "CEO",
+        "lifecycle_stage": "prospect"
+      },
+      {
+        "key": "c1",
+        "name": "Dan Hobbs",
+        "title": "CEO",
+        "lifecycle_stage": "prospect"
+      },
+      {
+        "key": "c2",
+        "name": "Dan Hobbs",
+        "title": "Founder",
+        "lifecycle_stage": "lead"
+      },
+      {
+        "key": "c3",
+        "name": "Sara Lin",
+        "email": "sara@nimbus.io",
+        "emails": [
+          "sara.lin@gmail.com"
+        ],
+        "title": "Head of Ops",
+        "phone": "+15551234567",
+        "lifecycle_stage": "client"
+      }
+    ],
+    "organizations": [
+      {
+        "key": "o0",
+        "name": "Axe",
+        "domain": "joinaxe.com"
+      },
+      {
+        "key": "o1",
+        "name": "Forte Healthcare",
+        "domain": "forte.example"
+      },
+      {
+        "key": "o2",
+        "name": "Nimbus",
+        "domain": "nimbus.io",
+        "attributes": {
+          "industry": "E-commerce"
+        }
+      }
+    ],
+    "deals": [
+      {
+        "key": "d0",
+        "name": "Forte Healthcare",
+        "amount": 12000.0,
+        "currency": "EUR",
+        "attributes": {
+          "imported_stage": "Disqualified"
+        },
+        "stage": "lost",
+        "status": "lost"
+      },
+      {
+        "key": "d1",
+        "name": "Nimbus rollout",
+        "amount": 5000.0,
+        "currency": "EUR",
+        "attributes": {
+          "imported_stage": "Won 🎉"
+        },
+        "stage": "won",
+        "status": "won"
+      },
+      {
+        "key": "d2",
+        "name": "Axe pilot",
+        "amount": 3000.0,
+        "currency": "USD",
+        "attributes": {
+          "imported_stage": "Demo scheduled"
+        },
+        "stage": "discovery",
+        "status": "open"
+      },
+      {
+        "key": "d3",
+        "name": "Nimbus expansion",
+        "amount": 20000.0,
+        "currency": "EUR",
+        "attributes": {
+          "imported_stage": "Live"
+        },
+        "stage": "won",
+        "status": "won"
+      },
+      {
+        "key": "d4",
+        "name": "Unknown-stage deal",
+        "amount": 800.0,
+        "currency": "GBP",
+        "attributes": {
+          "imported_stage": "Pilot"
+        },
+        "status": "open"
+      },
+      {
+        "key": "d5",
+        "name": "Ghost-link deal",
+        "amount": 1000.0,
+        "currency": "EUR",
+        "attributes": {
+          "imported_stage": "Lead"
+        },
+        "stage": "discovery",
+        "status": "open"
+      }
+    ],
+    "links": [
+      {
+        "from": "c0",
+        "to": "d2",
+        "relationship_type": "primary_contact"
+      },
+      {
+        "from": "c0",
+        "to": "o0",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "c1",
+        "to": "o0",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "c2",
+        "to": "d0",
+        "relationship_type": "primary_contact"
+      },
+      {
+        "from": "c2",
+        "to": "o1",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "c3",
+        "to": "d1",
+        "relationship_type": "primary_contact"
+      },
+      {
+        "from": "c3",
+        "to": "o2",
+        "relationship_type": "works_at"
+      },
+      {
+        "from": "d0",
+        "to": "o1",
+        "relationship_type": "account"
+      },
+      {
+        "from": "d1",
+        "to": "o2",
+        "relationship_type": "account"
+      },
+      {
+        "from": "d2",
+        "to": "o0",
+        "relationship_type": "account"
+      },
+      {
+        "from": "d3",
+        "to": "o2",
+        "relationship_type": "account"
+      },
+      {
+        "from": "d4",
+        "to": "o0",
+        "relationship_type": "account"
+      }
+    ]
+  },
+  "digest": {
+    "rows_reviewed": 13,
+    "source_kind": "attio",
+    "source_file": "Attio · Track",
+    "counts": {
+      "contacts": 4,
+      "organizations": 3,
+      "deals": 6,
+      "links": 12
+    },
+    "mapping": [
+      {
+        "sources": [
+          "name"
+        ],
+        "field": "Contact name"
+      },
+      {
+        "sources": [
+          "email_addresses"
+        ],
+        "field": "Email"
+      },
+      {
+        "sources": [
+          "job_title"
+        ],
+        "field": "Title"
+      },
+      {
+        "sources": [
+          "phone_numbers"
+        ],
+        "field": "Phone"
+      },
+      {
+        "sources": [
+          "name"
+        ],
+        "field": "Organisation"
+      },
+      {
+        "sources": [
+          "domains"
+        ],
+        "field": "Domain"
+      },
+      {
+        "sources": [
+          "associated_company",
+          "company"
+        ],
+        "field": "Company (link)"
+      },
+      {
+        "sources": [
+          "associated_people"
+        ],
+        "field": "Contact (link)"
+      },
+      {
+        "sources": [
+          "name"
+        ],
+        "field": "Deal"
+      },
+      {
+        "sources": [
+          "value"
+        ],
+        "field": "Amount"
+      },
+      {
+        "sources": [
+          "stage"
+        ],
+        "field": "Deal stage"
+      },
+      {
+        "sources": [
+          "categories"
+        ],
+        "field": "Note"
+      }
+    ],
+    "skipped_columns": [
+      "companies.company_stage",
+      "people.linkedin"
+    ],
+    "value_aliases": [
+      {
+        "from": "Disqualified",
+        "to": "lost"
+      },
+      {
+        "from": "Won 🎉",
+        "to": "won"
+      },
+      {
+        "from": "Demo scheduled",
+        "to": "discovery"
+      },
+      {
+        "from": "Live",
+        "to": "won"
+      },
+      {
+        "from": "Lead",
+        "to": "discovery"
+      }
+    ],
+    "contacts": [
+      {
+        "name": "James McElroy",
+        "initials": "JM",
+        "title": "CEO",
+        "email": "james@joinaxe.com",
+        "lifecycle": "Prospect"
+      },
+      {
+        "name": "Dan Hobbs",
+        "initials": "DH",
+        "title": "CEO",
+        "email": "",
+        "lifecycle": "Prospect"
+      },
+      {
+        "name": "Dan Hobbs",
+        "initials": "DH",
+        "title": "Founder",
+        "email": "",
+        "lifecycle": "Lead"
+      },
+      {
+        "name": "Sara Lin",
+        "initials": "SL",
+        "title": "Head of Ops",
+        "email": "sara@nimbus.io",
+        "lifecycle": "Client"
+      }
+    ],
+    "organizations": [
+      {
+        "name": "Axe",
+        "initial": "A",
+        "domain": "joinaxe.com"
+      },
+      {
+        "name": "Forte Healthcare",
+        "initial": "F",
+        "domain": "forte.example"
+      },
+      {
+        "name": "Nimbus",
+        "initial": "N",
+        "domain": "nimbus.io"
+      }
+    ],
+    "deals": [
+      {
+        "name": "Nimbus expansion",
+        "amount_display": "€20,000",
+        "stage": "Won",
+        "status": "won"
+      },
+      {
+        "name": "Forte Healthcare",
+        "amount_display": "€12,000",
+        "stage": "Lost",
+        "status": "lost"
+      },
+      {
+        "name": "Nimbus rollout",
+        "amount_display": "€5,000",
+        "stage": "Won",
+        "status": "won"
+      },
+      {
+        "name": "Axe pilot",
+        "amount_display": "$3,000",
+        "stage": "Discovery",
+        "status": "open"
+      },
+      {
+        "name": "Ghost-link deal",
+        "amount_display": "€1,000",
+        "stage": "Discovery",
+        "status": "open"
+      },
+      {
+        "name": "Unknown-stage deal",
+        "amount_display": "£800",
+        "stage": "Unstaged",
+        "status": "open"
+      }
+    ],
+    "aggregates": {
+      "open_total": 4800.0,
+      "won_total": 25000.0,
+      "open_display": "€4,800",
+      "won_display": "€25,000",
+      "people_with_deal": 3
+    },
+    "notes": [
+      "1 link(s) pointed at a record outside this pull — skipped. Re-run pulling all objects to capture them.",
+      "2 people had no email address — deduped by Attio identity, not email (so none were wrongly merged).",
+      "Assigned a lifecycle to 4 contact(s) from their deal activity (won → client, open → prospect, otherwise lead) — Attio has no lifecycle field. Adjust any that look off before approving.",
+      "Deal stage “Pilot” isn’t in your vocab — kept as a note, stage left blank."
+    ]
+  }
+}

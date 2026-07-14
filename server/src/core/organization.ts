@@ -12,6 +12,7 @@ export interface CreateOrganizationInput {
   name?: string;
   primary_domain?: string;
   domains?: string[];
+  description?: string; // stable identity: who they are / what they do
   last_interaction_at?: string; // ISO timestamp — refreshed by the enrichment loop
   owner_id?: UUID;
   attributes?: Attributes;
@@ -50,6 +51,7 @@ export async function createOrganization(
         name: input.name ?? null,
         primary_domain: primary_domain ?? null,
         domains,
+        description: input.description ?? null,
         last_interaction_at: input.last_interaction_at ?? null,
         owner_id: input.owner_id ?? null,
         attributes: input.attributes ?? {},
@@ -132,6 +134,7 @@ export async function updateOrganization(
 ): Promise<Organization> {
   const patch: Record<string, unknown> = {};
   if (input.name !== undefined) patch.name = input.name;
+  if (input.description !== undefined) patch.description = input.description;
   if (input.last_interaction_at !== undefined) patch.last_interaction_at = input.last_interaction_at;
   if (input.owner_id !== undefined) patch.owner_id = input.owner_id;
   if (input.attributes !== undefined) patch.attributes = input.attributes;

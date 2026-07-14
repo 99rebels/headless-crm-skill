@@ -23,16 +23,25 @@
     },
     "deal_stage": {
       "new": "discovery",
+      "lead": "discovery",
       "qualification": "discovery",
       "qualified": "discovery",
+      "in progress": "discovery",
+      "demo scheduled": "discovery",
+      "meeting": "discovery",
       "quote": "proposal",
       "proposal sent": "proposal",
       "negotiation": "verbal",
       "contract": "verbal",
+      "won": "won",
       "closed won": "won",
       "closed-won": "won",
+      "live": "won",
+      "onboarding": "won",
+      "onboarding scheduled": "won",
       "closed lost": "lost",
-      "closed-lost": "lost"
+      "closed-lost": "lost",
+      "disqualified": "lost"
     }
   },
 

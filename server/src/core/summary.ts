@@ -15,6 +15,7 @@
 // workspace.settings — DATA, not code — so adding a stage is a settings change, never a code one.
 
 import { getDb, orThrow } from "./db.js";
+import { getLatestContactMap } from "./note.js";
 import type { Deal, Organization, Person, UUID } from "./types.js";
 
 const RECENTLY_WON_DAYS = 90;
@@ -46,6 +47,7 @@ interface DealView {
   stage: string; // display label ("Verbal", "Unstaged")
   status: string;
   note?: string;
+  summary?: string; // the living deal summary — current state, maintained by enrichment
   close_label?: string;
   date_label?: string;
   date_value?: string;
@@ -62,6 +64,7 @@ interface PersonView {
   email: string | null;
   deals: [string, string][];
   note?: string;
+  summary?: string; // the living relationship summary — maintained by enrichment
 }
 
 function money(amount: number | null, currency: string): string {
@@ -80,6 +83,15 @@ function daysSince(iso: string | null): number | null {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return null;
   return Math.max(0, Math.floor((Date.now() - then) / 86_400_000));
+}
+
+/** Effective recency = the more recent of the derived timeline date and the stored carry-in column.
+ *  Timeline wins once a contact-type entry exists; migrated/seeded records with no timeline still show
+ *  their stored last_interaction_at (notes-design: the imported-recency carry-in). Either may be null. */
+function mostRecent(a: string | null, b: string | null | undefined): string | null {
+  if (!a) return b ?? null;
+  if (!b) return a;
+  return a > b ? a : b;
 }
 
 function readSettings(raw: Record<string, unknown> | null | undefined): Settings {
@@ -124,12 +136,14 @@ export interface PipelineSummary {
  *  (modulo real time, which only affects recency days). The dashboard skill renders this + a Focus list. */
 export async function getPipelineSummary(workspaceId: UUID): Promise<PipelineSummary> {
   const db = getDb();
-  const [wsRes, dealsRes, peopleRes, orgsRes, assocRes] = await Promise.all([
+  const [wsRes, dealsRes, peopleRes, orgsRes, assocRes, contactMap] = await Promise.all([
     db.from("workspace").select("name,settings").eq("id", workspaceId).maybeSingle(),
     db.from("deal").select("*").eq("workspace_id", workspaceId).is("archived_at", null),
     db.from("person").select("*").eq("workspace_id", workspaceId).is("archived_at", null),
     db.from("organization").select("*").eq("workspace_id", workspaceId).is("archived_at", null),
     db.from("association").select("*").eq("workspace_id", workspaceId),
+    // per-record recency derived from the timeline (contact-type entries) — maxed with the stored column
+    getLatestContactMap(workspaceId),
   ]);
   if (wsRes.error) throw new Error(wsRes.error.message);
   const deals = orThrow(dealsRes) as Deal[];
@@ -191,6 +205,7 @@ export async function getPipelineSummary(workspaceId: UUID): Promise<PipelineSum
       stage: d.stage ? titleCase(d.stage) : "Unstaged",
       status: titleCase(d.status),
       note: typeof d.attributes?.note === "string" ? (d.attributes.note as string) : undefined,
+      summary: d.summary ?? undefined,
     };
     if (closeLabel) view.close_label = closeLabel;
     if (d.expected_close_date) {
@@ -264,7 +279,7 @@ export async function getPipelineSummary(workspaceId: UUID): Promise<PipelineSum
   }
 
   const peopleView: PersonView[] = roster.map((p) => {
-    const days = daysSince(p.last_interaction_at);
+    const days = daysSince(mostRecent(contactMap.get(p.id) ?? null, p.last_interaction_at));
     return {
       id: p.id,
       name: p.name ?? "(unnamed)",
@@ -276,6 +291,7 @@ export async function getPipelineSummary(workspaceId: UUID): Promise<PipelineSum
       email: p.primary_email,
       deals: personDeals.get(p.id) ?? [],
       note: typeof p.attributes?.note === "string" ? (p.attributes.note as string) : undefined,
+      summary: p.summary ?? undefined,
     };
   });
 
@@ -295,7 +311,7 @@ export async function getPipelineSummary(workspaceId: UUID): Promise<PipelineSum
     else if (d.stage === lastOpenStage) signals[d.id] = { ...(signals[d.id] ?? {}), awaiting_close: true };
   }
   for (const p of roster) {
-    const days = daysSince(p.last_interaction_at);
+    const days = daysSince(mostRecent(contactMap.get(p.id) ?? null, p.last_interaction_at));
     if (days === null && (p.lifecycle_stage === "lead" || p.lifecycle_stage === "prospect")) {
       signals[p.id] = { ...(signals[p.id] ?? {}), new_no_interaction: true };
     } else if (days !== null && days > QUIET_AFTER_DAYS) {

@@ -1,0 +1,40 @@
+[
+  {
+    "note_id": "note_sara",
+    "parent_object": "people",
+    "parent_record_id": "per_sara",
+    "title": "Intro call",
+    "content": "Sara is the economic buyer; wants a rollout by Q3.",
+    "created_at": "2026-05-10T09:00:00Z"
+  },
+  {
+    "note_id": "note_nimbus_co",
+    "parent_object": "companies",
+    "parent_record_id": "com_nimbus",
+    "title": "Account context",
+    "content": "Nimbus — Series A dev-tools, ~40 people.",
+    "created_at": "2026-04-01T12:00:00Z"
+  },
+  {
+    "note_id": "note_nimbus_deal",
+    "parent_object": "deals",
+    "parent_record_id": "deal_nimbus",
+    "content": "Rollout signed; onboarding scheduled.",
+    "created_at": "2026-06-15T15:30:00Z"
+  },
+  {
+    "note_id": "note_orphan",
+    "parent_object": "people",
+    "parent_record_id": "per_not_in_pull",
+    "title": "Dangling",
+    "content": "Parent wasn't part of this pull.",
+    "created_at": "2026-06-16T10:00:00Z"
+  },
+  {
+    "note_id": "note_empty",
+    "parent_object": "companies",
+    "parent_record_id": "com_nimbus",
+    "title": "",
+    "content": "   "
+  }
+]

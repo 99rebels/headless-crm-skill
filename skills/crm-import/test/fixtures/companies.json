@@ -1,0 +1,26 @@
+[
+  {
+    "record_id": "com_axe",
+    "attributes": {
+      "name": "Axe",
+      "domains": ["joinaxe.com"],
+      "created_at": "Sunday, 2026-02-01 10:00:00"
+    }
+  },
+  {
+    "record_id": "com_forte",
+    "attributes": {
+      "name": "Forte Healthcare",
+      "domains": ["forte.example"]
+    }
+  },
+  {
+    "record_id": "com_nimbus",
+    "attributes": {
+      "name": "Nimbus",
+      "domains": ["nimbus.io"],
+      "categories": "E-commerce",
+      "company_stage": "Series A"
+    }
+  }
+]

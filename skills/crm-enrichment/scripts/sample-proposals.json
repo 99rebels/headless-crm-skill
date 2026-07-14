@@ -92,17 +92,48 @@
       }
     }
   ],
-  "updates": [
+  "timeline": [
     {
-      "title": "Sarah Mills",
-      "subtitle": "Last interaction refreshed → 8 Jul 2026",
+      "title": "Meeting — Northwind ops sync",
+      "subtitle": "with Sarah Mills · 8 Jul 2026",
+      "avatar": "person",
       "source": "calendar",
       "confidence": "high",
       "evidence": {
-        "reason": "You had a meeting with Sarah this week, so her last-interaction date is refreshed.",
+        "reason": "A past meeting with Sarah — logged as a touchpoint, which refreshes her last-contact recency.",
         "snippet": "Event: Northwind ops sync · Mon 8 Jul, 10:00am",
         "from": "Google Calendar",
         "date": "8 Jul 2026"
+      }
+    },
+    {
+      "title": "Email — board approved the engagement",
+      "subtitle": "David Okafor · Meridian · 10 Jul 2026",
+      "avatar": "deal",
+      "source": "email",
+      "confidence": "high",
+      "evidence": {
+        "reason": "David's note confirming budget sign-off — logged against the Meridian deal.",
+        "snippet": "The board approved the engagement at the $30k we discussed. Let's aim to start Sept 1.",
+        "from": "David Okafor",
+        "subject": "Re: proposal",
+        "date": "10 Jul 2026"
+      }
+    }
+  ],
+  "summaries": [
+    {
+      "title": "Meridian — fractional COO engagement",
+      "subtitle": "Verbal at $30k; board approved budget, targeting a 1 Sept start. Next: send the engagement letter. Champion: David Okafor (CEO).",
+      "avatar": "deal",
+      "source": "email",
+      "confidence": "high",
+      "evidence": {
+        "reason": "Refreshed from David's approval email and the stage move to verbal — captures where the deal now stands and the next step.",
+        "snippet": "The board approved the engagement at the $30k we discussed. Let's aim to start Sept 1.",
+        "from": "David Okafor",
+        "subject": "Re: proposal",
+        "date": "10 Jul 2026"
       }
     }
   ],
