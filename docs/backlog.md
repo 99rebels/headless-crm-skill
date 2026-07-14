@@ -29,12 +29,19 @@ every model renders the deep view identically.
 - *Have:* the pieces via separate calls (`get_organization` + `find_associations` + `find_timeline_entries` + `find_deals`); the `get_pipeline_summary` pattern to mirror.
 - *Adds:* the single composed call (a `core/detail.ts`), so the deep view isn't stitched per-model.
 
-**🤔 Company-level living summary** — a living `summary` on `organization` (symmetric with person/deal):
+**⬜ Company-level living summary** — a living `summary` on `organization` (symmetric with person/deal):
 the current *account state*, rolled up from its people/deals plus company-only facts (funding, reorg,
 went-quiet-everywhere).
-- *Lives in:* [`source-attribution.md`](source-attribution.md) §4. **Rian likes this.**
+- *Lives in:* [`source-attribution.md`](source-attribution.md) §4. **DECIDED (2026-07-14): Rian will build it — but ON HOLD for now.**
 - *Have:* `organization.description` (stable identity only); living summaries on person + deal.
 - *Adds:* a migration (3 columns) + enrichment maintaining it. Free interim: compose from the deal summary at render time.
+
+**✅ Dashboard exposure of the living summary (done 2026-07-14)** — the click-to-drill drawer shows a
+**trimmed one-line `summary_line`** (first sentence, computed in `core/summary.ts`; enrichment writes the
+summary so its first sentence is a standalone headline). Decided exposure map (see `notes-exposure` memory):
+**conversation = primary** (zero-build), **dashboard drawer = trimmed line**, **deep view = full** (pending),
+**migration preview = a notes count** (pending). Full summary stays off the dashboard payload — read via
+`get_deal`/`get_contact` or the deep view.
 
 **🤔 Structured commitments + the commitments ledger** — capture "my open items / waiting on them" as
 *structured data* (owner, text, due, status) at enrichment time, unlocking a cross-record ledger ("what

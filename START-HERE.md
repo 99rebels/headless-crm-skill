@@ -6,6 +6,30 @@ what's next. Read it fully, then the referenced docs, before acting.
 ---
 
 ## 0. ⭐ MOST RECENT — read this first (2026-07-14)
+**⏰ DESIGN-PARTNER MEETING CONFIRMED — Friday 2026-07-17, 11am.** The advisor/design partner (the solo
+operator who tried and failed to build this himself) meets Rian **Fri 17 Jul 11am**. The demo is **back
+on** — prep matters again. Story to show: *enrich from calendar/email → approve digest → dashboard/timeline
+reflects it → the living summary reads on each record.* **Before Friday (Rian's gated steps):**
+`cd server && npm run deploy` (ships `summary_line` + confirms the timeline tools live), then **re-upload
+all three zips** (`crm-dashboard.zip`, `crm-enrichment.zip`, `crm-import.zip`), then `npm run reset-demo`
+(clears test clutter incl. a duplicate deal) and re-run the calendar test.
+
+**This session (2026-07-14, later) — notes exposure decided, hardened from a live test:**
+- **Where notes/summaries surface (decided):** **conversation = primary** (zero-build — "brief me on X"
+  works on deploy); **dashboard = the click-to-drill drawer shows a trimmed one-line headline**
+  (`summary_line`, first sentence, computed in `core/summary.ts`); **deep view = the full summary +
+  timeline** (later — needs `get_record_detail`); **migration preview = a notes count**; org living
+  summary **decided but on hold**. See the `notes-exposure` memory + `docs/backlog.md` §A.
+- **Live calendar test caught a real bug — fixed.** The enrichment loop created a **duplicate deal**
+  (it deduped contacts/orgs but not deals). Added deal read-before-write to `crm-enrichment/SKILL.md`;
+  **verified across Sonnet+Opus** and added a permanent eval regression (`eval/eval-notes-workflow.mjs`,
+  scenario N5).
+- **Living summaries now lead with a standalone headline sentence** so the code-trimmed dashboard line
+  always reads well (no read-time LLM cost).
+- **Haiku dropped** as a supported/tested model (too inconsistent) — build for **Sonnet + Opus only**
+  (`models-drop-haiku` memory). The notes cross-model eval: Sonnet 93 / Opus 94 avg, **0 critical failures**.
+- New test assets: `skills/crm-enrichment/demo-calendar-seed.md` (populate a calendar) + the notes eval.
+
 **The NOTES / CONTEXT LAYER is now BUILT (phase 2).** Migration `0003` (applied to dev Supabase, **not
 yet deployed to the live Worker** — Rian's gated step): the `interaction` table is now the unified
 **timeline** + a many-to-many **`interaction_link`**; a **living `summary`** on person/deal;
@@ -18,7 +42,7 @@ one), and many-to-many links (not fixed FK columns). **The consolidated deferred
 build brief is [docs/source-attribution.md](docs/source-attribution.md).
 
 The picture below (from 2026-07-12) is still accurate for the three pillars, but here's what changed since:
-- **⏰ Demo DEPRIORITIZED.** The advisor demo is no longer imminent (date TBD, "later in the week"). **Do NOT optimize for or think about the demo until Rian raises it.** Focus is the *product*, not demo prep.
+- **⏰ Demo BACK ON — Fri 2026-07-17 11am** (see the top of this section). It was deprioritized through mid-July while we built the notes layer; the confirmed design-partner meeting re-prioritizes demo prep.
 - **Attio→CRM migration — built, merged, live-tested.** Migrating from a connected CRM is now a second *source* inside **`crm-import`** (not a separate skill): live via the Attio MCP connector, one source-aware renderer (`render_preview.py`), routing in `SKILL.md` STEP 0 (file→CSV, migrate/Attio→Attio, ambiguous→ask). **66-check local suite** (`skills/crm-import/test/run_tests.py`) incl. a **CSV golden regression**. Live-tested on Rian's real Attio (8 companies / 18 people / 8 deals + links + stage mapping all came through; notes/tasks did not — no such objects). Design: `docs/crm-migration.md`. `bulk_import` is DEPLOYED.
 - **lifecycle-from-deal** derivation added to the migration (Attio people have no lifecycle → derived from deal activity so they're dashboard-roster-visible).
 - **Strategic frame adopted:** Attio is our capability *benchmark, not a feature-parity target*; moat = structural edges (in-Claude + conversation-enrichment); **target = solo now, small teams next** (data model team-ready, product solo-first). See `docs/roadmap.md` §1 + §5b.
