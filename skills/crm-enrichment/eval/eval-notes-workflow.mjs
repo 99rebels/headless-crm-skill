@@ -12,6 +12,7 @@ export const meta = {
 // the compliance boundary — not just the field updates the base eval already covers.
 const SKILL_RULES = `You keep a CRM current from incoming email and calendar. For the given CRM state and incoming items, propose changes. Base rules:
 - Extract only concrete STATED facts. Read before write (dedupe people by email, orgs by domain: Acme / acme.com are one org). Never silently overwrite a non-empty value — surface it as a conflict.
+- DEALS have no key: match a deal named in a comm to an EXISTING deal by name + org; if one exists, propose a stage/amount UPDATE (deal_updates), NEVER a second copy. A duplicate deal doubles pipeline value — a trust-breaking error.
 - Deal precision: a start/kickoff date is NOT expected_close_date; a verbal yes / board approval / "budget approved" is the "verbal" stage with status STILL open, never "won".
 - Worthiness: skip newsletters, receipts, automated/no-reply, notifications, cold/unsolicited pitches. Do not add the user themselves or internal colleagues (same domain).
 
@@ -19,7 +20,7 @@ THE CONTEXT LAYER (your new main job — in ADDITION to the above):
 - TIMELINE: log each processed real email/meeting as ONE timeline entry — type (email|meeting|call), a short subject, and an AI "summary" of what happened / what's next. Link it to the people, deal(s), and organisation(s) it involves (a single meeting can link to MANY people and MANY deals at once — do NOT split it into one entry per person).
 - COMPLIANCE (hard rule): the timeline entry stores your AI SUMMARY only — a paraphrased gist. NEVER copy the raw email/event body verbatim into the summary, and never populate a "body" for an ingested comm (body is only for notes the user types themselves). Set source ("gmail" for email, "gcal" for calendar) and external_id (the thread/event id) so a re-run never double-logs.
 - RECENCY comes from the logged contact-type entry — do NOT separately hand-set last_interaction_at for a meeting you've logged.
-- LIVING SUMMARY: when a person's or deal's state MATERIALLY changed, propose a refreshed living summary — the current state in a sentence or two (where it stands, open items, next step, blocker, key dates). REGENERATE it to reflect the new reality (integrate old + new); do not blindly append or discard prior context. Cite provenance (which comm/entry it's built from). No living-summary churn for trivial/no-change items.
+- LIVING SUMMARY: when a person's or deal's state MATERIALLY changed, propose a refreshed living summary — the current state in a sentence or two (where it stands, open items, next step, blocker, key dates). LEAD with a standalone one-line headline sentence that reads well on its own (the dashboard shows only that first sentence, trimmed by code), then add detail. REGENERATE it to reflect the new reality (integrate old + new); do not blindly append or discard prior context. Cite provenance (which comm/entry it's built from). No living-summary churn for trivial/no-change items.
 - Do NOT create timeline entries or summaries for items you SKIP (junk/automated/cold).
 Output strictly as the proposals JSON.`
 
@@ -127,6 +128,22 @@ EMAIL 4 (gmail thread id: THREAD-VELA-9) — from: Marta Ruiz <marta@velafoods.c
     rubric: `- TIMELINE: exactly ONE entry — for Marta's email (type=email, source=gmail, external_id=THREAD-VELA-9, linked to Marta Ruiz + Vela Foods). NO timeline entries for emails 1, 2, or 3.
 - NEW: contact Marta Ruiz + org Vela Foods (velafoods.com). SKIP the newsletter, receipt, and Kyle's cold pitch.
 CRITICAL: creating a timeline entry (or contact) for ANY of the newsletter/receipt/cold-pitch senders; missing Marta's entry.`,
+  },
+  {
+    id: 'N5-dealdedup',
+    title: 'Existing deal advances → UPDATE, not a duplicate (regression for the live bug)',
+    stresses: ['deal read-before-write', 'match by name+org', 'no duplicate deal', 'timeline links the EXISTING deal'],
+    self: 'you@rioconsulting.com',
+    crm_state: `CONTACTS: David Okafor · david@meridianhealth.com · Founder · prospect
+ORGANISATIONS: Meridian Health · meridianhealth.com
+DEALS: "Meridian — fractional COO engagement" · stage: proposal · status: open · amount: 30000  (already exists, linked to David Okafor)`,
+    inputs: `CALENDAR EVENT (gcal event id: EVT-MER-1, past, 2026-07-11) — Title: Meridian sync — Attendees: david@meridianhealth.com, you@rioconsulting.com
+Description: Reviewed the fractional COO proposal. The board approved the $30k engagement; aiming to start Sept 1. David will send the signed order form by Friday.`,
+    rubric: `- The "Meridian — fractional COO engagement" deal ALREADY EXISTS. This must be a DEAL UPDATE (stage proposal -> verbal, status stays open), NOT a new deal. Creating a SECOND "Meridian — fractional COO engagement" (in new_deals) is the critical failure this scenario exists to catch.
+- TIMELINE: one meeting entry (source=gcal, external_id=EVT-MER-1) linked to David AND the EXISTING Meridian deal.
+- Sept 1 is a START date, not a close date. Verbal, not won.
+- David already exists — do NOT re-create him.
+CRITICAL: a duplicate Meridian deal in new_deals; marking it won; Sept 1 as close date; re-creating David.`,
   },
   {
     id: 'N4-regenerate',

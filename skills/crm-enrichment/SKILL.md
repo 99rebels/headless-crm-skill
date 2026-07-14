@@ -58,7 +58,11 @@ survivors get their bodies read.
 ### A2. Classify vs the CRM (cheap DB reads, no tokens)
 For each survivor: `find_contacts(email)` / `find_organizations(domain)` → tag KNOWN (update) or NEW
 (add). This does **not** exclude unknown senders — discovering new people is half the value; it just
-sets create-vs-update and supplies the existing record as context.
+sets create-vs-update and supplies the existing record as context. **Also load existing DEALS** — call
+`find_deals` and check the deals already linked to any matched contact/org (`find_associations`) — so a
+deal mentioned in a comm can be matched to one that already exists (see the deal read-before-write rule
+in C1). Deals have no email/domain key, so this lookup is the only thing standing between "advance the
+stage" and "create a duplicate deal."
 
 ### A3. Read + extract
 `get_thread` on survivors only. Extract concrete, stated facts from the body (see EXTRACT rules
@@ -106,7 +110,11 @@ surface (propose across all of it — don't restrict to one field):
   it involves. This is the record's history *and* what drives recency.
 - **living summary** (per person and per deal): the current relationship/deal state in a sentence or
   two — where it stands, open items/commitments, key dates, sentiment. Rebuilt from the timeline +
-  this comm when something material changed; not every run.
+  this comm when something material changed; not every run. **Lead with a standalone one-line headline
+  sentence** — a self-contained "where things stand" gist that reads well on its own (the dashboard
+  shows *only this first sentence* in its drawer, trimmed by code, so it must make sense without the
+  rest). Then add the supporting detail in the following sentence(s). e.g. *"Verbal at $30k; board
+  approved, awaiting the signed order form. Targeting a Sept 1 start; David sends paperwork by Friday."*
 
 ### The context layer — two hard rules
 1. **Compliance: a timeline entry from an ingested comm stores the AI `summary` ONLY — never the raw
@@ -162,6 +170,14 @@ Sort each change into:
   record has no summary yet (a first summary), omit `previous`** — there's nothing to replace, and it
   renders as plain new text.
 - `conflicts` — a stated value **differs from an existing, non-empty** value (never `last_interaction_at`).
+
+**Read-before-write for DEALS (deals have no natural key — match, don't duplicate).** Before you put
+anything in `new_deals`, check the existing deals loaded in A2 — especially those on the matched
+organisation/contact. If a deal with the **same or clearly-equivalent name on the same org** already
+exists, it is **NOT new** — file it as a `deal_update` (e.g. stage `proposal → verbal`, an amount move),
+**never a second copy**. A duplicate deal silently doubles that pipeline's value — a trust-breaking
+invisible error. Only use `new_deals` when no existing deal plausibly matches. (Same discipline as the
+email/domain dedup for people/orgs; deals just need name+org judgement instead of a key.)
 
 Build the JSON in the shape at the top of `scripts/render_digest.py`: per item `title` / `subtitle` /
 `detail` / **`source`** (`"email"` | `"calendar"`) / `confidence` / `evidence` (= `reason` + `snippet`
