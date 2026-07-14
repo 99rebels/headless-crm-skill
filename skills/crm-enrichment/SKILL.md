@@ -111,7 +111,9 @@ surface (propose across all of it — don't restrict to one field):
 ### The context layer — two hard rules
 1. **Compliance: a timeline entry from an ingested comm stores the AI `summary` ONLY — never the raw
    `body`.** (The `body` field is for user-authored notes.) Same boundary as everything else: we hold
-   the gist, not the raw email/event. For idempotency, tag each entry `source: "gmail"` (emails) or
+   the gist, not the raw email/event. Write the summary as *your own paraphrase of the outcome* —
+   don't carry over sentences, quotes, or filler phrases (e.g. "everyone's aligned", "sounds good")
+   verbatim from the message; capture what changed and what's next, not the wording. For idempotency, tag each entry `source: "gmail"` (emails) or
    `source: "gcal"` (calendar) with `external_id` = the Gmail thread id / Calendar event id — re-running
    the loop then never double-logs (the write dedupes on source+external_id).
 2. **Summaries regenerate, they don't blind-edit.** Rebuild the living summary from the timeline (cite
@@ -155,7 +157,10 @@ Sort each change into:
 - `timeline` — the touchpoints to log (one per processed email/meeting), each linked to the people /
   deal(s) / org(s) it involves.
 - `summaries` — living-summary refreshes on people/deals whose state materially changed (put the new
-  summary prose in the item's `subtitle`).
+  summary prose in the item's `subtitle`). Also include the record's **current stored summary** as
+  `previous`, so the digest shows a before→after diff of exactly what the rewrite changed. **If the
+  record has no summary yet (a first summary), omit `previous`** — there's nothing to replace, and it
+  renders as plain new text.
 - `conflicts` — a stated value **differs from an existing, non-empty** value (never `last_interaction_at`).
 
 Build the JSON in the shape at the top of `scripts/render_digest.py`: per item `title` / `subtitle` /

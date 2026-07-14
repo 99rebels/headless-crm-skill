@@ -22,13 +22,19 @@ Input contract (all sections optional; empty/missing sections are skipped):
   "deal_updates":      [ Item ],   # rendered under "Updates"       (avatar: deal)
   "updates":           [ Item ],   # rendered under "Updates"       (avatar: person)
   "timeline":          [ Item ],   # rendered under "Logged to your timeline" — touchpoints (email/meeting)
-  "summaries":         [ Item ],   # rendered under "Living summaries" — refreshed relationship/deal state
+  "summaries":         [ Summary ], # rendered under "Living summaries" — refreshed relationship/deal state
   "conflicts":         [ Conflict ]# rendered under "Needs your call" — existing value would change
 }
 
 The living summary (a person's/deal's current-state prose) goes in each `summaries` item's `subtitle`.
+A `summaries` item may also carry `"previous"` (the prior summary) — when present it renders a
+word-level before→after diff (added text highlighted, removed text struck) so a rewrite is obvious to
+approve; without it, the new summary shows plain (a first-time summary). See Summary below.
 A timeline touchpoint uses `title` = what happened (e.g. "Meeting — Nimbus kickoff"), `subtitle` =
 who/when, `avatar` = person|deal. These are the loop's new main job (see docs/notes-design.md).
+
+Summary = Item, plus:
+  "previous": "the prior summary prose"   # optional — triggers the before→after diff; omit for a first summary
 
 Item = {
   "title":      "Priya Nair",                        # required — the headline
@@ -55,6 +61,7 @@ Evidence = {
 }
 """
 
+import difflib
 import html
 import json
 import re
@@ -66,7 +73,6 @@ GROUPS = [
     ("New records", None, [("new_organizations", "org"), ("new_deals", "deal")]),
     ("Updates", "to records you already have", [("deal_updates", "deal"), ("updates", "person")]),
     ("Logged to your timeline", "new touchpoints — these set last-contact recency", [("timeline", "person")]),
-    ("Living summaries", "refreshed from the latest activity", [("summaries", "person")]),
 ]
 CONFLICT_KEY = "conflicts"
 
@@ -191,6 +197,62 @@ def render_conflicts(items: list) -> str:
     )
 
 
+def diff_prose(old: str, new: str) -> str:
+    """Word-level before→after diff of two summary strings: <ins> = added, <del> = removed.
+    So a rewritten living summary shows exactly what changed, not just the new paragraph."""
+    old_w, new_w = (old or "").split(), (new or "").split()
+    sm = difflib.SequenceMatcher(a=old_w, b=new_w, autojunk=False)
+    out = []
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag == "equal":
+            out.append(esc(" ".join(new_w[j1:j2])))
+        else:
+            if tag in ("delete", "replace"):
+                out.append("<del>" + esc(" ".join(old_w[i1:i2])) + "</del>")
+            if tag in ("insert", "replace"):
+                out.append("<ins>" + esc(" ".join(new_w[j1:j2])) + "</ins>")
+    return " ".join(x for x in out if x)
+
+
+def render_summary_item(item: dict) -> str:
+    """A living-summary rewrite. The new summary is in `subtitle`; an optional `previous`
+    (the prior summary) turns it into a word-level diff so the change is obvious to approve."""
+    now = item.get("subtitle", "") or ""
+    prev = item.get("previous")
+    if prev:
+        body = (
+            f"<div class='sm-diff'>{diff_prose(prev, now)}</div>"
+            "<div class='sm-legend'><span class='lg-ins'>added</span><span class='lg-del'>removed</span></div>"
+        )
+    else:
+        body = (
+            f"<div class='sm-now'>{esc(now)}</div>"
+            "<div class='sm-legend'><span class='lg-new'>first summary</span></div>"
+        )
+    return (
+        "<li class='item summary'>"
+        f"{render_avatar(item, item.get('avatar', 'deal'))}"
+        "<div class='item-main'>"
+        f"<div class='title'>{esc(item.get('title', ''))} {render_badges(item)}</div>"
+        f"{body}{render_evidence(item.get('evidence'))}"
+        "</div>"
+        "</li>"
+    )
+
+
+def render_summaries(items: list) -> str:
+    if not items:
+        return ""
+    rows = "".join(render_summary_item(i) for i in items)
+    return (
+        "<section class='section'>"
+        f"<h2>Living summaries <span class='count'>{len(items)}</span> "
+        "<span class='hint'>refreshed from the latest activity</span></h2>"
+        f"<ul>{rows}</ul>"
+        "</section>"
+    )
+
+
 def render(data: dict) -> str:
     n_people = len(data.get("new_contacts", []) or [])
     n_records = len(data.get("new_organizations", []) or []) + len(data.get("new_deals", []) or [])
@@ -228,6 +290,7 @@ def render(data: dict) -> str:
     )
 
     body = "".join(render_group(h, hint, parts, data) for h, hint, parts in GROUPS)
+    body += render_summaries(data.get("summaries", []) or [])
     body += render_conflicts(data.get(CONFLICT_KEY, []) or [])
 
     if total == 0:
@@ -363,6 +426,18 @@ TEMPLATE = """<!doctype html>
   .prop{ color:var(--good); font-weight:700; }
   .conflicts details.ev summary{ color:var(--warn-ink); }
   .conflicts .ev-snippet{ border-left-color:var(--warn-line); }
+
+  .summary .sm-now{ font:13.5px/1.55 var(--sans); color:var(--ink); margin-top:6px; }
+  .sm-diff{ font:13.5px/1.6 var(--sans); color:var(--ink); margin-top:6px; }
+  .sm-diff ins{ text-decoration:none; background:var(--accent-soft); color:var(--accent-ink); border-radius:3px; padding:0 3px;
+    box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+  .sm-diff del{ text-decoration:line-through; text-decoration-color:var(--faint); color:var(--faint); }
+  .sm-legend{ display:flex; gap:15px; margin-top:10px; font:10px/1 var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--faint); }
+  .sm-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .sm-legend span::before{ content:""; width:10px; height:10px; border-radius:3px; display:inline-block; }
+  .sm-legend .lg-ins::before{ background:var(--accent-soft); }
+  .sm-legend .lg-del::before{ background:var(--faint); }
+  .sm-legend .lg-new::before{ background:var(--accent); }
 
   .approve{ margin-top:20px; padding:16px 18px; background:var(--surface); border:1px solid var(--line-strong);
     border-radius:13px; box-shadow:var(--shadow); }
