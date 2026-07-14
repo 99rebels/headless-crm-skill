@@ -34,9 +34,12 @@ happens back in the chat via the MCP tools; the drawer says so.
 Call **`get_pipeline_summary`**. It returns the whole factual half of the dashboard, computed
 server-side: `stats` (open_pipeline_value, open_deals, relationships, unstaged_deals, mixed_currency),
 `stages` (deals bucketed by stage **including an "Unstaged" bucket**), `people` (roster with real
-`days`-since-contact, null ⇒ no contact), `won`, and `signals` (attention flags per record id).
-Do **not** re-compute any of these from `find_deals`/`find_contacts` — that's what used to make
-different models show different numbers.
+`days`-since-contact, null ⇒ no contact), `won`, and `signals` (attention flags per record id). Each
+deal/person also carries a **`summary_line`** — a one-line "where things stand" headline trimmed from
+its living summary — which the renderer shows in the **click-to-drill drawer** (the *full* living
+summary isn't here; it's read on demand via `get_deal`/`get_contact` or the deep view). Do **not**
+re-compute any of these from `find_deals`/`find_contacts` — that's what used to make different models
+show different numbers.
 
 ### 2 — Add the Focus list (the only judgement) and render
 Pass the tool's output straight through, and add two things:

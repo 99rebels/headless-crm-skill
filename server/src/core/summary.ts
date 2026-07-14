@@ -47,7 +47,8 @@ interface DealView {
   stage: string; // display label ("Verbal", "Unstaged")
   status: string;
   note?: string;
-  summary?: string; // the living deal summary — current state, maintained by enrichment
+  summary_line?: string; // TRIMMED living-summary headline (~1 line) for the dashboard drawer — the
+  // full summary lives on the record (get_deal / a deep-view tool), not here, to keep this payload light
   close_label?: string;
   date_label?: string;
   date_value?: string;
@@ -64,7 +65,7 @@ interface PersonView {
   email: string | null;
   deals: [string, string][];
   note?: string;
-  summary?: string; // the living relationship summary — maintained by enrichment
+  summary_line?: string; // TRIMMED living-summary headline (~1 line) — full lives on the record
 }
 
 function money(amount: number | null, currency: string): string {
@@ -76,6 +77,19 @@ function money(amount: number | null, currency: string): string {
 
 function titleCase(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** Trim a living summary to a single headline line for the dashboard drawer: the first sentence,
+ *  hard-capped so a long first sentence can't bloat the payload. The full summary stays on the record
+ *  (read it via get_deal/get_contact or a deep-view tool) — the dashboard only needs the gist. */
+function summaryLine(s: string | null, cap = 140): string | undefined {
+  if (!s) return undefined;
+  const t = s.trim();
+  if (!t) return undefined;
+  const sentence = t.match(/^.*?[.!?](\s|$)/);
+  let line = (sentence ? sentence[0] : t).trim();
+  if (line.length > cap) line = `${line.slice(0, cap - 1).trimEnd()}…`;
+  return line;
 }
 
 function daysSince(iso: string | null): number | null {
@@ -205,7 +219,7 @@ export async function getPipelineSummary(workspaceId: UUID): Promise<PipelineSum
       stage: d.stage ? titleCase(d.stage) : "Unstaged",
       status: titleCase(d.status),
       note: typeof d.attributes?.note === "string" ? (d.attributes.note as string) : undefined,
-      summary: d.summary ?? undefined,
+      summary_line: summaryLine(d.summary),
     };
     if (closeLabel) view.close_label = closeLabel;
     if (d.expected_close_date) {
@@ -291,7 +305,7 @@ export async function getPipelineSummary(workspaceId: UUID): Promise<PipelineSum
       email: p.primary_email,
       deals: personDeals.get(p.id) ?? [],
       note: typeof p.attributes?.note === "string" ? (p.attributes.note as string) : undefined,
-      summary: p.summary ?? undefined,
+      summary_line: summaryLine(p.summary),
     };
   });
 

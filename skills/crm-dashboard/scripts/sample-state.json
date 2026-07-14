@@ -90,6 +90,7 @@
           ],
           "stage": "Verbal",
           "status": "Open",
+          "summary_line": "Verbal at $30k; the board approved and we're awaiting the signed order form.",
           "note": "Board approved $30k; awaiting paperwork",
           "close_label": "start 2026-09-01",
           "date_label": "Start date",
@@ -143,7 +144,8 @@
           "Meridian — fractional COO engagement",
           "verbal · $30,000"
         ]
-      ]
+      ],
+      "summary_line": "Decision-maker on the Meridian COO deal; board approval came through, paperwork is the next step."
     },
     {
       "id": "de5c4e0e-72e6-4440-acdb-531462d7bb53",
@@ -170,6 +172,7 @@
           "discovery"
         ]
       ],
+      "summary_line": "Warm intro from Blake Advisory; wants fractional ops support, no discovery call booked yet.",
       "note": "Warm intro via Blake Advisory; looking for fractional ops support"
     },
     {

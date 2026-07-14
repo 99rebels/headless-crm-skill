@@ -285,10 +285,11 @@ async function main() {
     );
     ok("update_contact stores the living summary + stamps summary_updated_at",
       withSummary?.contact?.summary?.startsWith("Warm") && !!withSummary?.contact?.summary_updated_at);
-    // the living summary must surface in the dashboard data so the views can render it
+    // the dashboard gets a TRIMMED one-line headline (drawer), not the full summary — keeps the payload light
     const summary2 = payload(await client.callTool({ name: "get_pipeline_summary", arguments: {} }));
     const kateRow2 = summary2?.people?.find((p: any) => p.id === id);
-    ok("get_pipeline_summary surfaces the living summary on the person", kateRow2?.summary?.startsWith("Warm"));
+    ok("get_pipeline_summary returns a trimmed summary_line (first sentence only, not the full summary)",
+      kateRow2?.summary_line === "Warm; leads the retainer decision." && !kateRow2?.summary);
     const withDesc = payload(
       await client.callTool({
         name: "update_organization",

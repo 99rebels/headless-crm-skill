@@ -59,7 +59,8 @@ Deal = {
   "status": "Open",
   "close_label": "start 1 Sep 2026",         # optional footer line on the card
   "date_label": "Start date", "date_value": "1 Sep 2026",  # optional drawer fact
-  "note": "Board approved the budget — a verbal yes…",     # optional drawer note
+  "summary_line": "Verbal at $30k; board approved, awaiting signed order form.",  # the living-summary headline (from the tool) — shown in the drawer
+  "note": "Board approved the budget — a verbal yes…",     # optional legacy drawer note
   "search": "…"               # optional override of the search string
 }
 Person = {
@@ -69,7 +70,8 @@ Person = {
   "last_label": "No meeting yet",   # optional override of the recency label
   "email": "david@meridianhealth.com",
   "deals": [ ["Meridian — COO engagement", "verbal · $30,000"] ],   # optional drawer links
-  "note": "Verbal yes on the record…",       # optional drawer note
+  "summary_line": "Decision-maker on the COO deal; cautious, loops in the board.",  # the living-summary headline (from the tool)
+  "note": "Verbal yes on the record…",       # optional legacy drawer note
   "search": "…"
 }
 """
@@ -116,7 +118,8 @@ def deal_record(d: dict, currency: str) -> dict:
     facts.append(["Status", d.get("status", "Open")])
     links = [[n, "decision maker", "→"] for n in person_names(d.get("people"))]
     return {"kind": f"Deal · {d.get('stage', 'Open')}", "title": d.get("name", ""),
-            "sub": d.get("org", ""), "facts": facts, "links": links, "note": d.get("note", "")}
+            "sub": d.get("org", ""), "facts": facts, "links": links,
+            "summary_line": d.get("summary_line", ""), "note": d.get("note", "")}
 
 
 def person_record(p: dict) -> dict:
@@ -131,7 +134,8 @@ def person_record(p: dict) -> dict:
     sub = " · ".join(x for x in [p.get("role"), p.get("org")] if x)
     kind = (p.get("kind") or "contact").capitalize()
     return {"kind": f"Person · {kind}", "title": p.get("name", ""), "sub": sub,
-            "facts": facts, "links": links, "note": p.get("note", "")}
+            "facts": facts, "links": links,
+            "summary_line": p.get("summary_line", ""), "note": p.get("note", "")}
 
 
 # ---------- server-rendered HTML sections ----------
@@ -580,6 +584,9 @@ TEMPLATE = r"""<!doctype html>
   .dr-sec{ font:600 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:22px 0 10px; }
   .dr-link{ display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--raise); border:1px solid var(--line); border-radius:10px; margin-bottom:8px; font-size:13px; }
   .dr-link b{ font-weight:600; } .dr-link .r{ margin-left:auto; font:11px/1 var(--mono); color:var(--muted); }
+  .dr-summary{ margin-top:18px; }
+  .dr-sm-text{ font:13.5px/1.6 var(--serif); color:var(--ink); background:var(--surface); border:1px solid var(--line);
+    border-left:3px solid var(--accent); border-radius:0 10px 10px 0; padding:11px 14px; margin:8px 0 0; text-wrap:pretty; }
   .dr-note{ font:12.5px/1.5 var(--sans); color:var(--ink); background:var(--accent-soft); border-radius:10px; padding:12px 14px; margin-top:18px; }
   .dr-hint{ font:11.5px/1.45 var(--sans); color:var(--faint); text-align:center; margin-top:20px; font-style:italic; }
   .dr-back{ font:600 12px/1 var(--sans); color:var(--accent); background:none; border:none; cursor:pointer; padding:4px 0; margin-bottom:6px; display:inline-flex; align-items:center; gap:5px; }
@@ -700,6 +707,7 @@ TEMPLATE = r"""<!doctype html>
   <div class="dr-subtitle" id="drSub"></div>
   <div id="drList"></div>
   <dl class="dr-facts" id="drFacts"></dl>
+  <div class="dr-summary" id="drSummary"><div class="dr-sec">Where things stand</div><p class="dr-sm-text" id="drSummaryText"></p></div>
   <div id="drLinks"></div>
   <div class="dr-note" id="drNote"></div>
   <p class="dr-hint" id="drHint">To act on this &mdash; log a note, move the stage, draft the follow-up &mdash; just ask Claude in the chat.</p>
@@ -731,7 +739,7 @@ TEMPLATE = r"""<!doctype html>
   function fact(f){ return "<div class='dr-fact'><dt>"+f[0]+"</dt><dd class='"+(f[2]||"")+"'>"+f[1]+"</dd></div>"; }
   function link(l){ return "<div class='dr-link'><b>"+l[0]+"</b><span class='r'>"+l[1]+"</span><span>"+(l[2]||"")+"</span></div>"; }
   function recordMode(isRecord){
-    ["#drFacts","#drLinks","#drNote","#drHint"].forEach(function(s){ $(s).style.display=isRecord?"":"none"; });
+    ["#drFacts","#drSummary","#drLinks","#drNote","#drHint"].forEach(function(s){ $(s).style.display=isRecord?"":"none"; });
     $("#drList").style.display=isRecord?"none":"";
   }
   function ensureOpen(){ if(!drawer.classList.contains("on")){ lastFocus=document.activeElement; }
@@ -744,6 +752,7 @@ TEMPLATE = r"""<!doctype html>
     $("#drKind").textContent=r.kind; $("#drTitle").textContent=r.title; $("#drSub").textContent=r.sub;
     $("#drFacts").innerHTML=(r.facts||[]).map(fact).join("");
     $("#drLinks").innerHTML=(r.links&&r.links.length?"<div class='dr-sec'>Linked</div>"+r.links.map(link).join(""):"");
+    var sm=r.summary_line||""; $("#drSummaryText").textContent=sm; $("#drSummary").style.display=sm?"":"none";
     $("#drNote").textContent=r.note||"";
   }
   function openList(key){ var L=LISTS[key]; if(!L) return;
