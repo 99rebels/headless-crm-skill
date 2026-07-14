@@ -2,6 +2,13 @@
 
 *Written 2026-07-12 to capture the design of `get_pipeline_summary` and, honestly, its rough edges — so we can revisit it deliberately **after the demo**. Rian's read: the tool is **needed and good, but feels a little primitive**, and may hinder us later without a redesign. This doc is the "come back to this" note. Source of truth for behaviour: `server/src/core/summary.ts`.*
 
+> **Update 2026-07-14:** one item below is now **done** — §4 limitation #4 / §6 "smaller win" (*recency
+> reads a cached column; derive it from the timeline instead*) shipped in phase 2. `summary.ts` now
+> computes recency as `max(latest contact-type timeline entry, stored last_interaction_at)` — timeline-
+> derived, with the stored column kept as the migrated-recency carry-in. The tool also now surfaces the
+> living `summary` on each person/deal view. The bigger redesign question (§7, per-view tools vs. a
+> general query layer) is still open, to answer when the deep view lands.
+
 ---
 
 ## 1. Why it exists — the problem it solves

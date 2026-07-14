@@ -145,7 +145,7 @@ buttons top-to-bottom, copy the log back. An automated/CLI instance can *write* 
 
 **If green → first real feature: the CSV "Import all" button.** `bulk_import` is one call and the plan
 is already embedded in the import preview, so the button is a ~20-line port of the probe's Write step
-into `skills/crm-import/scripts/render_import.py`. Keep the chat fallback ("or reply `import`") for
+into `skills/crm-import/scripts/render_preview.py`. Keep the chat fallback ("or reply `import`") for
 free-plan users. Then the digest-as-a-form, then the in-artifact deep view.
 
 ## Related

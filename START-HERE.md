@@ -5,6 +5,25 @@ what's next. Read it fully, then the referenced docs, before acting.
 
 ---
 
+## 0. ⭐ MOST RECENT — read this first (2026-07-14)
+**The NOTES / CONTEXT LAYER is now BUILT (phase 2).** Migration `0003` (applied to dev Supabase, **not
+yet deployed to the live Worker** — Rian's gated step): the `interaction` table is now the unified
+**timeline** + a many-to-many **`interaction_link`**; a **living `summary`** on person/deal;
+**`description`** on org. Wired through `core/note.ts`, **three new timeline MCP tools (20 total)**,
+timeline-derived recency, the enrichment loop (logs touchpoints + maintains summaries), and the Attio
+migration (notes→timeline + last-contacted carry-in). All local suites green. Two build decisions
+changed from the design (both Rian's): reuse the existing `interaction` table (not a new `timeline`
+one), and many-to-many links (not fixed FK columns). **The consolidated deferred/done checklist is now
+[docs/backlog.md](docs/backlog.md)** — read it to see what's built vs. still planned. The deep-view
+build brief is [docs/source-attribution.md](docs/source-attribution.md).
+
+The picture below (from 2026-07-12) is still accurate for the three pillars, but here's what changed since:
+- **⏰ Demo DEPRIORITIZED.** The advisor demo is no longer imminent (date TBD, "later in the week"). **Do NOT optimize for or think about the demo until Rian raises it.** Focus is the *product*, not demo prep.
+- **Attio→CRM migration — built, merged, live-tested.** Migrating from a connected CRM is now a second *source* inside **`crm-import`** (not a separate skill): live via the Attio MCP connector, one source-aware renderer (`render_preview.py`), routing in `SKILL.md` STEP 0 (file→CSV, migrate/Attio→Attio, ambiguous→ask). **66-check local suite** (`skills/crm-import/test/run_tests.py`) incl. a **CSV golden regression**. Live-tested on Rian's real Attio (8 companies / 18 people / 8 deals + links + stage mapping all came through; notes/tasks did not — no such objects). Design: `docs/crm-migration.md`. `bulk_import` is DEPLOYED.
+- **lifecycle-from-deal** derivation added to the migration (Attio people have no lifecycle → derived from deal activity so they're dashboard-roster-visible).
+- **Strategic frame adopted:** Attio is our capability *benchmark, not a feature-parity target*; moat = structural edges (in-Claude + conversation-enrichment); **target = solo now, small teams next** (data model team-ready, product solo-first). See `docs/roadmap.md` §1 + §5b.
+- **➡️ THE NEXT BUILD = NOTES / the context layer.** Design is locked and fully specced in **[docs/notes-design.md](docs/notes-design.md)** (start there — §10 says how). It's the keystone: a `description` field on orgs + one unified **timeline** object + an enrichment-maintained **living summary**, on deals + people. Big build, touches deployed paths, has a regression plan (§9). A downstream fast-follow (the person↔person **referral graph**) is scoped in §8b — its storage already exists.
+
 ## 1. Read these, in order
 1. **[docs/concept.md](docs/concept.md)** — what we're building and why: the product, the user, the bet, the (honest) edge.
 2. **[docs/roadmap.md](docs/roadmap.md)** — the build plan, phases, decisions, open questions.
@@ -17,6 +36,8 @@ what's next. Read it fully, then the referenced docs, before acting.
 8. **[docs/lessons-v1.md](docs/lessons-v1.md)** — the idea we tried first and killed. Don't re-walk the traps.
 9. **[docs/artifact-interactivity.md](docs/artifact-interactivity.md)** — ⛔ verdict: artifact JS **cannot** write to the CRM (platform limit, closed *not planned*). Read this before anyone proposes an in-artifact button.
 10. **[docs/advisor-instance.md](docs/advisor-instance.md)** — the runbook for giving the design-partner his own isolated instance ("Path A" + the dev/prod Supabase split). Rian's account-gated steps.
+11. **[docs/crm-migration.md](docs/crm-migration.md)** — the Attio→CRM migration design + the confidence model (structure-first stage mapping, never destroy the source label, don't mirror the source's objects).
+12. **[docs/notes-design.md](docs/notes-design.md)** — ⭐ **the next build.** The notes/context-layer spec: model, locked decisions, the living-summary discipline, the downstream referral graph (§8b), and the refactor + regression plan (§9). Read before touching notes.
 
 ## 2. One-paragraph what-and-why
 We're building a **simple, AI-native CRM that lives inside Claude.ai**, for **solo/small "fractional" operators** (independent consultants, fractional execs, agencies, indie founders) who run a relationship pipeline, live in Claude, and find Salesforce/HubSpot heavy and admin-heavy. It has its **own small Postgres database** (we own the substrate), **maintains itself** by reading the user's comms *client-side* and proposing clean updates for approval, and renders views **on demand** via skills instead of a fixed UI. Per-seat subscription. Indie scale: ~100 customers to validate.
@@ -66,10 +87,10 @@ The build is demo-complete; remaining work is **Rian's account-gated steps + reh
 - **Architecture:** all logic in `core/` (env-agnostic; each adapter calls `initDb(url,key)`). The core enforces `workspace_id` scoping (service-role key bypasses RLS for now; a "Dev Workspace" auto-resolves). **Adapters are thin** — no business logic leaks into MCP/HTTP, which is what keeps a future REST API a clean drop-in. **Aggregation/derived views also live in `core`** (`core/summary.ts` → `get_pipeline_summary`) — the pattern for "compute facts once so all callers agree."
 - **To add an object's tools:** write `core/<object>.ts` (mirror `person.ts`), register in `src/mcp/build.ts`'s `registerCrmTools`, `npm run typecheck` + smoke (both `smoke` and `mcp-smoke` — the latter asserts the tool count), then `npm run deploy`.
 
-**Skills** (`skills/`, delivered as zips, **script-heavy** — deterministic work in Python, model only for judgment). The view-skills render self-contained HTML artifacts in the shared **"Ledger"** identity (the design system = the CSS token block at the top of each `render_*.py` — now **three**: `render_digest.py`, `render_dashboard.py`, `render_import.py`; keep them in sync). Interactivity is presentation-only — the artifact sandbox has no network **and cannot call our MCP tools** (see §5.4), so CRM writes always go back through the conversation.
+**Skills** (`skills/`, delivered as zips, **script-heavy** — deterministic work in Python, model only for judgment). The view-skills render self-contained HTML artifacts in the shared **"Ledger"** identity (the design system = the CSS token block at the top of each `render_*.py` — now **three**: `render_digest.py`, `render_dashboard.py`, `render_preview.py`; keep them in sync). Interactivity is presentation-only — the artifact sandbox has no network **and cannot call our MCP tools** (see §5.4), so CRM writes always go back through the conversation.
 - `crm-enrichment/` — `SKILL.md` (the loop) · `config.json` (self/scope/ignore/vocab) · `scripts/render_digest.py` (the approval digest) · `eval/eval-workflow.mjs` (repeatable stress-test) · `demo-*.md` · `sample-*` (previews).
 - `crm-dashboard/` — `SKILL.md` (step 1 = call `get_pipeline_summary`; the model only adds the `focus` list) · `scripts/render_dashboard.py` · `sample-state.json` (the tool's output + a Focus list) · `sample-dashboard.html` (preview).
-- `crm-import/` — `SKILL.md` (the profile→map→build→approve→write loop; write step is ONE `bulk_import` call) · `config.json` (vocab + export-label aliases + column hints) · `scripts/inspect_csv.py` (cheap column profiler) · `scripts/build_import.py` (mapping→deduped write-plan + the digest that drives the preview) · `scripts/render_import.py` (the redesigned bulk-review preview: tiles + column-mapping card + tabbed tables) · `sample-*` (a messy CSV + its mapping/plan/preview). Live test data: `test-data/my-crm-export.csv`.
+- `crm-import/` — `SKILL.md` (STEP 0 routes file→CSV / migrate→Attio; profile→map→build→approve→write; write step is ONE `bulk_import` call) · `config.json` (vocab + export-label aliases + column hints) · `scripts/inspect_csv.py` (cheap column profiler) · **two builders** `scripts/build_import.py` (CSV) + `scripts/build_from_attio.py` (Attio, incl. notes→timeline + last-contacted carry-in) → the same `plan`+`digest` shape · `scripts/render_preview.py` (ONE source-aware bulk-review preview) · `test/run_tests.py` (78 checks incl. the CSV golden) · `sample-*` (CSV + Attio samples). Live test data: `test-data/my-crm-export.csv`.
 - Rebuild a zip: `cd skills && zip -rq crm-import.zip crm-import -x '*.DS_Store' -x '*/__pycache__/*'` (same for `crm-dashboard`, `crm-enrichment`).
 
 ## 7. Working norms Rian expects

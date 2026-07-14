@@ -2,6 +2,16 @@
 
 *The core schema. Read `roadmap.md` for where this sits. This is a **draft for review**, not frozen. Philosophy: a lean **typed spine** (real columns for what we query/sort/filter) + a flexible **`attributes` (JSONB) layer** the AI fills (add fields with no migration) + a generic **association table** (the relationship graph). Decisions locked 2026-07-09: flex fields (no user-created custom objects yet), build the full association table.*
 
+> **Update 2026-07-14 — the notes/context layer landed (migration `0003`).** This doc still shows the
+> Phase-0 schema; the source of truth is now `server/db/migrations/0001…0003`. What `0003` added (see
+> [`notes-design.md`](notes-design.md) + [`backlog.md`](backlog.md) §F): the `interaction` table became
+> the unified **timeline** (its `type` widened to add `stage_change`/`relationship_change`); a new
+> **`interaction_link`** many-to-many join (one entry ↔ any number of people/deals/orgs, with a `role`);
+> a **living `summary`** (+ `summary_updated_at`, `summary_provenance`) on `person` and `deal`; and a
+> **`description`** on `organization`. **The "store raw body or summary-only?" question below (§"needs
+> your call") is now DECIDED: summary-only for ingested comms, full `body` for user-authored notes** —
+> see [`source-attribution.md`](source-attribution.md).
+
 ---
 
 ## Design principles (the guardrails)

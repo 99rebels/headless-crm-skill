@@ -4,6 +4,14 @@
 model does at runtime); this doc is the design rationale a new **builder** needs. Read `concept.md`
 §5/§8 and `roadmap.md` §2/§5 (Phase 2) for where this sits. Status at bottom.*
 
+> **Update 2026-07-14 — the loop now maintains the context layer (phase 2).** Beyond field updates, the
+> loop now (a) logs each processed email/meeting as a **timeline entry** (AI summary only, never raw
+> body; `source`+`external_id` make re-runs idempotent) and (b) maintains a **living summary** per
+> person/deal. Recency is now *derived* from contact-type timeline entries (it no longer hand-sets
+> `last_interaction_at`). So where this doc says meeting/interaction records are "deferred," read
+> "built" — see the digest's new "Logged to your timeline" + "Living summaries" sections, and
+> [`notes-design.md`](notes-design.md).
+
 ---
 
 ## What it is and why it matters
@@ -47,12 +55,13 @@ calm approval digest is the product's UX, not two. Adding a source = adding a re
   full bodies for survivors. We do **not** gate on "already in the CRM" — discovering *new*
   people/companies is half the value; the CRM lookup only *classifies* create-vs-update and supplies
   the existing record as context.
-- **Calendar's contribution:** attendees → new contacts/orgs (deduped by email/domain), and
-  crucially **`last_interaction_at`** — a past meeting refreshes when you last spoke to someone, which
-  powers the dashboard's "who haven't I talked to in a while." We take *only the timestamp* from
-  calendar for v1; **full interaction/meeting-note records stay deferred** (a single-channel timeline
-  is misleading until more sources land — `data-model.md`). `last_interaction_at` is a special case of
-  the overwrite guardrail: a **more-recent date is an enrichment, never a conflict** (monotonic).
+- **Calendar's contribution:** attendees → new contacts/orgs (deduped by email/domain), and a past
+  meeting refreshes when you last spoke to someone, which powers the dashboard's "who haven't I talked
+  to in a while." *(Updated 2026-07-14: this now flows through a logged **timeline entry** — the
+  meeting is recorded and recency is **derived** from it — rather than only stamping
+  `last_interaction_at`. Full interaction/meeting-note records are no longer deferred; they're the
+  context layer, built in phase 2.)* Recency stays a special case of the overwrite guardrail: a
+  **more-recent date is an enrichment, never a conflict** (monotonic).
 - **Script-heavy split:** the LLM does only what's genuinely fuzzy — reading prose/events and
   extracting facts. Filtering, existence checks, reconciliation, and rendering are mechanical and live
   in code. Cheaper *and* more reliable (`roadmap.md` §2.6). `render_digest.py` is the clearest example:

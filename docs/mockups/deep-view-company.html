@@ -1,0 +1,582 @@
+<title>Nimbus Labs — deep view</title>
+<style>
+  :root{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6;
+    --cool:#3f6f86; --cool-ink:#2c5266; --cool-soft:#e4eef3; --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05); --shadow-lg:0 8px 40px rgba(40,32,16,.18);
+    --serif:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){ :root{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413;
+    --cool:#7fb0c9; --cool-ink:#a7cede; --cool-soft:#17272f; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30); --shadow-lg:0 10px 44px rgba(0,0,0,.55);
+  }}
+  :root[data-theme="light"]{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6;
+    --cool:#3f6f86; --cool-ink:#2c5266; --cool-soft:#e4eef3; --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05); --shadow-lg:0 8px 40px rgba(40,32,16,.18);
+  }
+  :root[data-theme="dark"]{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413;
+    --cool:#7fb0c9; --cool-ink:#a7cede; --cool-soft:#17272f; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30); --shadow-lg:0 10px 44px rgba(0,0,0,.55);
+  }
+
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:900px; margin:0 auto; padding:32px 22px 72px; }
+  .kicker{ font:600 11px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
+
+  .topbar{ display:flex; justify-content:flex-end; margin-bottom:10px; }
+  .themebar{ display:inline-flex; background:var(--raise); border:1px solid var(--line); border-radius:999px; padding:3px; gap:2px; }
+  .themebar button{ font:600 11px/1 var(--sans); color:var(--muted); background:none; border:none; border-radius:999px; padding:6px 11px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+  .themebar button[aria-pressed="true"]{ color:var(--accent-ink); background:var(--surface); box-shadow:var(--shadow); }
+  .themebar button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* masthead */
+  .masthead{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px;
+    padding-bottom:18px; border-bottom:1px solid var(--line-strong); }
+  .mast-title{ font-family:var(--serif); font-weight:600; font-size:31px; line-height:1.04; margin:8px 0 6px; letter-spacing:-.01em; }
+  .mast-sub{ font:13.5px/1.4 var(--sans); color:var(--muted); }
+  .mast-sub b{ color:var(--ink); font-weight:500; }
+  .mast-right{ text-align:right; display:flex; flex-direction:column; gap:7px; align-items:flex-end; }
+  .temp{ display:inline-flex; align-items:center; gap:7px; font:600 11px/1 var(--sans); letter-spacing:.05em; text-transform:uppercase;
+    padding:6px 11px; border-radius:999px; }
+  .temp.warm{ color:var(--accent-ink); background:var(--accent-soft); }
+  .temp .dot{ width:8px; height:8px; border-radius:999px; background:var(--accent); }
+  .mast-touch{ font:12px/1.35 var(--mono); color:var(--muted); }
+
+  /* section scaffolding */
+  .sec-title{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+    margin:34px 0 14px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .sec-title .count{ font:600 11px/1 var(--mono); color:var(--muted); }
+
+  /* brief band — the living summary as hero */
+  .brief-band{ margin-top:22px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--accent);
+    border-radius:14px; padding:20px 22px 18px; box-shadow:var(--shadow); }
+  .brief-eyebrow{ display:flex; align-items:center; gap:9px; margin-bottom:11px; }
+  .brief-eyebrow .lbl{ font:600 10.5px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .brief{ font-family:var(--serif); font-size:19px; line-height:1.5; margin:0; color:var(--ink); text-wrap:pretty; }
+  .brief b{ color:var(--accent-ink); font-weight:600; }
+  .brief .risk{ color:var(--warn-ink); font-weight:600; }
+  .prov{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:15px; padding-top:13px; border-top:1px dashed var(--line-strong);
+    font:11.5px/1.4 var(--sans); color:var(--faint); }
+  .prov .fresh-pill{ display:inline-flex; align-items:center; gap:6px; font:600 11px/1 var(--sans); color:var(--accent-ink);
+    background:var(--accent-soft); border-radius:999px; padding:4px 10px; }
+  .prov .fresh-pill .pdot{ width:7px; height:7px; border-radius:999px; background:var(--accent); }
+  .prov .src{ display:inline-flex; align-items:center; gap:5px; }
+  .prov .sep{ color:var(--line-strong); }
+
+  /* snapshot tiles */
+  .tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+  .tile{ background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:14px 15px; box-shadow:var(--shadow); }
+  .tile-label{ font:600 10.5px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .figure{ font-family:var(--serif); font-size:24px; font-weight:600; margin-top:9px; font-variant-numeric:tabular-nums; letter-spacing:-.01em; line-height:1.05; }
+  .tile-sub{ font:11.5px/1.35 var(--sans); color:var(--faint); margin-top:5px; }
+  .tile-sub.warnsub{ color:var(--warn-ink); }
+
+  /* identity / description */
+  .idcard{ background:var(--raise); border:1px solid var(--line); border-radius:13px; padding:17px 19px; }
+  .idcard p{ margin:0; font:14.5px/1.6 var(--sans); color:var(--ink); }
+  .idmeta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:13px; }
+  .idchip{ font:12px/1 var(--sans); color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:6px 11px; }
+  .idchip b{ color:var(--ink); font-weight:600; }
+
+  /* people */
+  .people{ display:flex; flex-direction:column; gap:10px; }
+  .person{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:14px;
+    background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; box-shadow:var(--shadow); }
+  .avatar{ width:38px; height:38px; border-radius:10px; display:grid; place-items:center; font-family:var(--serif); font-weight:600;
+    font-size:15px; color:var(--accent-ink); background:var(--accent-soft); }
+  .p-main{ min-width:0; }
+  .p-name{ font-family:var(--serif); font-size:16px; font-weight:600; }
+  .p-role{ font:12.5px/1.4 var(--sans); color:var(--muted); margin-top:2px; }
+  .p-role .rolechip{ display:inline-block; font:600 10px/1 var(--sans); letter-spacing:.05em; text-transform:uppercase;
+    padding:3px 7px; border-radius:999px; margin-right:7px; vertical-align:1px; }
+  .rolechip.champ{ color:var(--accent-ink); background:var(--accent-soft); }
+  .rolechip.block{ color:var(--warn-ink); background:var(--warn-soft); }
+  .p-recency{ text-align:right; font:12px/1 var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .p-recency .rlabel{ display:block; font:10px/1.3 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--faint); margin-bottom:3px; }
+  .p-recency.fresh .rval{ color:var(--accent-ink); } .p-recency.warm .rval{ color:var(--cool-ink); } .p-recency.stale .rval{ color:var(--warn); }
+
+  /* deal card */
+  .deal{ background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+  .deal-head{ display:flex; align-items:flex-start; gap:14px; padding:17px 19px 15px; }
+  .deal-titlewrap{ min-width:0; flex:1; }
+  .deal-name{ font-family:var(--serif); font-size:18px; font-weight:600; margin:0; line-height:1.2; text-wrap:balance; }
+  .deal-chips{ display:flex; flex-wrap:wrap; gap:7px; margin-top:9px; }
+  .chip{ font:600 10.5px/1 var(--sans); letter-spacing:.04em; text-transform:uppercase; padding:5px 9px; border-radius:999px; white-space:nowrap; }
+  .chip.stage{ color:var(--accent-ink); background:var(--accent-soft); }
+  .chip.age-ok{ color:var(--cool-ink); background:var(--cool-soft); }
+  .chip.age-warn{ color:var(--warn-ink); background:var(--warn-soft); border:1px solid var(--warn-line); }
+  .deal-amount{ font-family:var(--serif); font-size:22px; font-weight:600; color:var(--accent-ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .deal-body{ padding:0 19px 18px; }
+  .deal-summary{ font:14px/1.6 var(--sans); color:var(--ink); margin:0 0 4px; }
+  .deal-summary b{ color:var(--accent-ink); font-weight:600; } .deal-summary .risk{ color:var(--warn-ink); font-weight:600; }
+
+  /* open items — mine / theirs */
+  .items{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+  .itembox{ background:var(--raise); border:1px solid var(--line); border-radius:11px; padding:13px 14px; }
+  .itembox h5{ margin:0 0 9px; font:600 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:7px; }
+  .itembox ul{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .itembox li{ font:13px/1.45 var(--sans); color:var(--ink); padding-left:19px; position:relative; }
+  .itembox li::before{ content:""; position:absolute; left:2px; top:6px; width:7px; height:7px; border-radius:2px; }
+  .itembox.mine li::before{ background:var(--accent); } .itembox.theirs li::before{ background:var(--cool); }
+  .itembox li .due{ display:block; font:11px/1.3 var(--mono); color:var(--faint); margin-top:2px; }
+
+  /* key dates row */
+  .keydates{ display:flex; flex-wrap:wrap; gap:18px; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+  .kd{ display:flex; flex-direction:column; gap:3px; }
+  .kd .kd-l{ font:600 10px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--faint); }
+  .kd .kd-v{ font:13px/1 var(--mono); color:var(--ink); font-variant-numeric:tabular-nums; }
+  .kd .kd-v.warnv{ color:var(--warn-ink); }
+
+  /* timeline (shared: deal drill + company feed) */
+  details.fold{ margin-top:16px; border-top:1px solid var(--line); }
+  details.fold > summary{ list-style:none; cursor:pointer; padding:13px 0 0; display:flex; align-items:center; gap:9px;
+    font:600 11px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--accent); }
+  details.fold > summary::-webkit-details-marker{ display:none; }
+  details.fold > summary .caret{ transition:transform .18s ease; font-size:10px; color:var(--muted); }
+  details.fold[open] > summary .caret{ transform:rotate(90deg); }
+  details.fold > summary .n{ font:600 11px/1 var(--mono); color:var(--muted); margin-left:auto; text-transform:none; letter-spacing:0; }
+
+  .timeline{ margin:14px 0 2px; padding-left:8px; }
+  .month{ font:600 10px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin:16px 0 12px; }
+  .month:first-child{ margin-top:6px; }
+  .tl-entry{ position:relative; display:grid; grid-template-columns:26px 1fr; gap:12px; padding-bottom:16px; }
+  .tl-entry::before{ content:""; position:absolute; left:12px; top:26px; bottom:-2px; width:1.5px; background:var(--line); }
+  .tl-entry:last-child::before{ display:none; }
+  .tl-ic{ width:26px; height:26px; border-radius:8px; display:grid; place-items:center; background:var(--raise); border:1px solid var(--line); color:var(--muted); z-index:1; }
+  .tl-ic svg{ width:14px; height:14px; display:block; }
+  .tl-ic.meeting{ color:var(--accent); background:var(--accent-soft); border-color:transparent; }
+  .tl-ic.email{ color:var(--cool-ink); background:var(--cool-soft); border-color:transparent; }
+  .tl-ic.stage{ color:var(--accent-ink); background:var(--accent-soft); border-color:transparent; }
+  .tl-ic.rel{ color:var(--warn-ink); background:var(--warn-soft); border-color:transparent; }
+  .tl-body{ min-width:0; padding-top:1px; }
+  .tl-top{ display:flex; align-items:baseline; gap:10px; justify-content:space-between; }
+  .tl-title{ font:600 14px/1.35 var(--sans); color:var(--ink); }
+  .tl-date{ font:11.5px/1 var(--mono); color:var(--faint); white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .tl-desc{ font:13px/1.5 var(--sans); color:var(--muted); margin-top:4px; }
+  .tl-meta{ margin-top:6px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; font:11px/1 var(--sans); color:var(--faint); }
+  .tl-src{ display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:var(--raise); border:1px solid var(--line); }
+  .tl-src .sd{ width:6px; height:6px; border-radius:999px; }
+  .sd.granola{ background:var(--accent); } .sd.gmail{ background:var(--cool); } .sd.manual{ background:var(--faint); } .sd.system{ background:var(--warn); }
+
+  /* compact timeline — the deal-scoped quick spine (an index into the full record) */
+  .timeline.compact{ padding-left:0; }
+  .timeline.compact .tl-entry{ grid-template-columns:24px 1fr auto; align-items:center; padding-bottom:4px; }
+  .timeline.compact .tl-entry::before{ display:none; }
+  .timeline.compact .tl-ic{ width:24px; height:24px; }
+  .timeline.compact .tl-ic svg{ width:12px; height:12px; }
+  .timeline.compact .tl-title{ font-weight:500; font-size:13.5px; }
+  .timeline.compact .linkable{ cursor:pointer; border-radius:9px; margin:0 -8px; padding:8px; transition:background .12s ease; }
+  .timeline.compact .linkable:hover{ background:var(--raise); }
+  .timeline.compact .linkable:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+  .tl-open{ font:600 9.5px/1 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--faint);
+    border:1px solid var(--line); border-radius:999px; padding:5px 9px; white-space:nowrap; transition:all .12s ease; }
+  .linkable:hover .tl-open{ color:var(--accent-ink); border-color:transparent; background:var(--accent-soft); }
+  .tl-open.note{ color:var(--accent-ink); border-color:var(--accent-soft); }
+  .tl-open.email{ color:var(--cool-ink); border-color:var(--cool-soft); }
+
+  /* landing flash when you jump from a checkpoint into the full timeline */
+  .tl-entry.flash{ animation:flashbg 1.5s ease; border-radius:10px; }
+  @keyframes flashbg{ 0%,45%{ background:var(--accent-soft); box-shadow:0 0 0 6px var(--accent-soft); } 100%{ background:transparent; box-shadow:none; } }
+
+  /* email body drill (mirrors the meeting-note drill) */
+  .note-body.email{ border-left-color:var(--cool); }
+  .note-body .mail-hdr{ display:flex; flex-direction:column; gap:3px; margin-bottom:10px; padding-bottom:10px;
+    border-bottom:1px solid var(--line); font:11.5px/1.4 var(--mono); color:var(--muted); }
+  .note-body .mail-hdr b{ color:var(--ink); font-weight:600; font-family:var(--sans); margin-right:4px; }
+
+  /* source card — honest to schema: stored AI summary + attribution + a link back to the original */
+  .src-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:11px; }
+  .src-tag{ display:inline-flex; align-items:center; gap:6px; font:600 10px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .src-tag .sd{ width:7px; height:7px; border-radius:999px; }
+  .src-link{ display:inline-flex; align-items:center; gap:5px; font:600 11px/1 var(--sans); color:var(--accent-ink);
+    background:var(--surface); border:1px solid var(--line-strong); border-radius:999px; padding:6px 11px; text-decoration:none; transition:all .12s ease; white-space:nowrap; }
+  .src-link:hover{ border-color:var(--accent); background:var(--accent-soft); }
+  .src-link:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .src-summary{ font:13.5px/1.62 var(--sans); color:var(--ink); margin:0; }
+  .excerpt{ margin:13px 0 0; padding:11px 15px; border-left:3px solid var(--accent); background:var(--surface); border-radius:0 9px 9px 0; }
+  .excerpt .xtag{ display:block; font:600 9px/1 var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin-bottom:7px; }
+  .excerpt q{ font:italic 14px/1.55 var(--serif); color:var(--ink); quotes:"\201C" "\201D"; }
+  .excerpt .xwho{ display:block; font:12px/1 var(--sans); color:var(--muted); margin-top:7px; font-style:normal; }
+  .src-foot{ font:11px/1.5 var(--sans); color:var(--faint); font-style:italic; margin:13px 0 0; padding-top:11px; border-top:1px solid var(--line);
+    display:flex; align-items:flex-start; gap:7px; }
+  .src-foot .lock{ flex:none; margin-top:1px; }
+
+  /* section-level fold — the full timeline as a dropdown that reads like a section heading */
+  details.section{ margin-top:0; }
+  details.section > summary{ margin:34px 0 0; padding:0 0 14px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:10px; cursor:pointer; list-style:none;
+    font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
+  details.section > summary::-webkit-details-marker{ display:none; }
+  details.section > summary:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }
+  details.section > summary .caret{ font-size:10px; color:var(--muted); transition:transform .18s ease; }
+  details.section[open] > summary .caret{ transform:rotate(90deg); }
+  details.section > summary .n{ margin-left:auto; font:600 11px/1 var(--mono); color:var(--muted); text-transform:none; letter-spacing:0; }
+  details.section > summary .hint{ font:400 10px/1.3 var(--sans); letter-spacing:.02em; text-transform:none; color:var(--faint); }
+
+  /* entry-level deeper view — the full meeting note / email body, embedded */
+  .entry-more{ margin-top:9px; }
+  .entry-more > summary{ list-style:none; cursor:pointer; font:600 11px/1 var(--sans); color:var(--accent);
+    display:inline-flex; align-items:center; gap:6px; padding:2px 0; }
+  .entry-more > summary::-webkit-details-marker{ display:none; }
+  .entry-more > summary:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+  .entry-more > summary .caret{ font-size:9px; color:var(--muted); transition:transform .18s ease; }
+  .entry-more[open] > summary .caret{ transform:rotate(90deg); }
+  .note-body{ margin-top:9px; padding:13px 15px; background:var(--raise); border:1px solid var(--line);
+    border-left:3px solid var(--accent); border-radius:10px; font:13px/1.65 var(--sans); color:var(--ink); }
+  .note-body .nb-head{ font:600 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:9px; }
+  .note-body p{ margin:0 0 9px; } .note-body p:last-child{ margin:0; }
+  .note-body ul{ margin:4px 0 9px; padding-left:18px; } .note-body li{ margin-bottom:4px; }
+
+  /* footer conversational hint */
+  .foot{ margin-top:34px; background:var(--accent-soft); border:1px solid transparent; border-radius:13px; padding:15px 18px;
+    display:flex; align-items:center; gap:12px; }
+  .foot .fi{ flex:none; width:30px; height:30px; border-radius:9px; display:grid; place-items:center; background:var(--surface); color:var(--accent); }
+  .foot p{ margin:0; font:13px/1.5 var(--sans); color:var(--accent-ink); }
+  .foot b{ font-weight:600; }
+
+  @media (max-width:640px){
+    .tiles{ grid-template-columns:1fr 1fr; } .items{ grid-template-columns:1fr; }
+    .masthead{ flex-direction:column; align-items:flex-start; } .mast-right{ align-items:flex-start; text-align:left; }
+  }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
+</style>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="themebar" role="group" aria-label="Colour theme">
+      <button type="button" data-set="light">&#9728; Light</button>
+      <button type="button" data-set="dark">&#9790; Dark</button>
+    </div>
+  </div>
+
+  <header class="masthead">
+    <div>
+      <span class="kicker">Company</span>
+      <h1 class="mast-title">Nimbus Labs</h1>
+      <div class="mast-sub"><b>Dev-tools startup</b> &middot; ~12 people &middot; San Francisco &middot; nimbus-labs.com</div>
+    </div>
+    <div class="mast-right">
+      <span class="temp warm"><span class="dot"></span> Warm &middot; active deal</span>
+      <span class="mast-touch">Last contact 3 days ago</span>
+    </div>
+  </header>
+
+  <!-- BRIEF BAND: the living summary, with freshness + provenance -->
+  <section class="brief-band">
+    <div class="brief-eyebrow"><span class="lbl">Where things stand</span></div>
+    <p class="brief">
+      Nimbus is in <b>proposal at $45k</b> for a fractional GTM engagement, with a decision
+      targeted for <b>end of July</b>. Sarah (founder) is a strong champion and has referred us once;
+      the open risk is <span class="risk">co-founder budget sign-off</span> &mdash; Marcus wants the
+      commitment scoped to a 3-month initial term before he approves. Momentum is good: proposal has
+      been out 12 days with active back-and-forth.
+    </p>
+    <div class="prov">
+      <span class="fresh-pill"><span class="pdot"></span> Updated 3 days ago</span>
+      <span>built from</span>
+      <span class="src">1 meeting</span><span class="sep">&middot;</span>
+      <span class="src">3 emails</span><span class="sep">&middot;</span>
+      <span class="src">1 note</span>
+      <span class="sep">&middot;</span>
+      <span>maintained by enrichment</span>
+    </div>
+  </section>
+
+  <!-- SNAPSHOT TILES -->
+  <div class="tiles">
+    <div class="tile"><div class="tile-label">Active deal</div><div class="figure">$45,000</div><div class="tile-sub">1 open deal</div></div>
+    <div class="tile"><div class="tile-label">Stage</div><div class="figure">Proposal</div><div class="tile-sub">12 days in stage</div></div>
+    <div class="tile"><div class="tile-label">Decision by</div><div class="figure">~31 Jul</div><div class="tile-sub warnsub">18 days out</div></div>
+    <div class="tile"><div class="tile-label">People</div><div class="figure">2</div><div class="tile-sub">1 champion &middot; 1 blocker</div></div>
+  </div>
+
+  <!-- IDENTITY -->
+  <h2 class="sec-title">Who they are</h2>
+  <div class="idcard">
+    <p>Seed-stage dev-tools startup building CI/CD tooling for mobile teams. Raised a $3M seed led by
+      Foundry in 2025; ~12 people. Building a repeatable sales motion ahead of a Series A next year &mdash;
+      which is where our engagement comes in.</p>
+    <div class="idmeta">
+      <span class="idchip">Industry: <b>Developer tools</b></span>
+      <span class="idchip">Stage: <b>Seed</b></span>
+      <span class="idchip">Team: <b>~12</b></span>
+      <span class="idchip">Funding: <b>$3M (2025)</b></span>
+    </div>
+  </div>
+
+  <!-- PEOPLE -->
+  <h2 class="sec-title">People <span class="count">2</span></h2>
+  <div class="people">
+    <div class="person">
+      <div class="avatar">SC</div>
+      <div class="p-main">
+        <div class="p-name">Sarah Chen</div>
+        <div class="p-role"><span class="rolechip champ">Champion</span>Founder &amp; CEO &middot; sarah@nimbus-labs.com</div>
+      </div>
+      <div class="p-recency fresh"><span class="rlabel">Last spoke</span><span class="rval">3 days</span></div>
+    </div>
+    <div class="person">
+      <div class="avatar">ML</div>
+      <div class="p-main">
+        <div class="p-name">Marcus Lee</div>
+        <div class="p-role"><span class="rolechip block">Budget sign-off</span>Co-founder &amp; CTO &middot; marcus@nimbus-labs.com</div>
+      </div>
+      <div class="p-recency warm"><span class="rlabel">Last spoke</span><span class="rval">9 days</span></div>
+    </div>
+  </div>
+
+  <!-- DEAL -->
+  <h2 class="sec-title">Deal <span class="count">1 open</span></h2>
+  <div class="deal">
+    <div class="deal-head">
+      <div class="deal-titlewrap">
+        <h3 class="deal-name">Fractional GTM engagement</h3>
+        <div class="deal-chips">
+          <span class="chip stage">Proposal</span>
+          <span class="chip age-ok">12 days in stage</span>
+          <span class="chip age-warn">1 blocker</span>
+        </div>
+      </div>
+      <div class="deal-amount">$45,000</div>
+    </div>
+    <div class="deal-body">
+      <p class="deal-summary">Proposal sent 1 Jul at <b>$45k</b> for a 6-month GTM build. Sarah pushed
+        back on term length, not price &mdash; she wants an <b>initial 3-month option</b> so Marcus will
+        sign off. <span class="risk">Waiting on the revised scope from us</span> before they can commit.</p>
+
+      <div class="items">
+        <div class="itembox mine">
+          <h5>My open items</h5>
+          <ul>
+            <li>Send revised proposal with a 3-month initial term<span class="due">promised by 15 Jul</span></li>
+            <li>Share two mobile-devtools GTM references</li>
+          </ul>
+        </div>
+        <div class="itembox theirs">
+          <h5>Waiting on them</h5>
+          <ul>
+            <li>Marcus to confirm budget once term is scoped<span class="due">the deciding step</span></li>
+            <li>Sarah to loop in their part-time growth hire</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="keydates">
+        <div class="kd"><span class="kd-l">Decision target</span><span class="kd-v warnv">~31 Jul 2026</span></div>
+        <div class="kd"><span class="kd-l">Proposal sent</span><span class="kd-v">1 Jul 2026</span></div>
+        <div class="kd"><span class="kd-l">Engagement start</span><span class="kd-v">1 Sep 2026</span></div>
+      </div>
+
+      <!-- DEAL TIMELINE — folded, compact: the quick spine scoped to this deal -->
+      <details class="fold">
+        <summary><span class="caret">&#9654;</span> How this deal evolved <span class="n">6 steps &middot; the short version</span></summary>
+        <div class="timeline compact">
+          <div class="tl-entry linkable" data-target="tl-ask" role="button" tabindex="0">
+            <div class="tl-ic email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
+            <div class="tl-body"><div class="tl-top"><span class="tl-title">Sarah asked for a 3-month initial term</span><span class="tl-date">10 Jul</span></div></div>
+            <span class="tl-open email">Email &#8599;</span>
+          </div>
+          <div class="tl-entry linkable" data-target="tl-stage" role="button" tabindex="0">
+            <div class="tl-ic stage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></div>
+            <div class="tl-body"><div class="tl-top"><span class="tl-title">Stage &rarr; Proposal</span><span class="tl-date">1 Jul</span></div></div>
+            <span class="tl-open">View &#8599;</span>
+          </div>
+          <div class="tl-entry linkable" data-target="tl-proposal" role="button" tabindex="0">
+            <div class="tl-ic email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
+            <div class="tl-body"><div class="tl-top"><span class="tl-title">Proposal sent &mdash; $45k, 6-month GTM build</span><span class="tl-date">1 Jul</span></div></div>
+            <span class="tl-open email">Email &#8599;</span>
+          </div>
+          <div class="tl-entry linkable" data-target="tl-marcus" role="button" tabindex="0">
+            <div class="tl-ic rel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M17 11h5m-2.5-2.5v5"/></svg></div>
+            <div class="tl-body"><div class="tl-top"><span class="tl-title">Marcus Lee (CTO) joined as budget approver</span><span class="tl-date">30 Jun</span></div></div>
+            <span class="tl-open">View &#8599;</span>
+          </div>
+          <div class="tl-entry linkable" data-target="tl-disc" role="button" tabindex="0">
+            <div class="tl-ic meeting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></div>
+            <div class="tl-body"><div class="tl-top"><span class="tl-title">Discovery call &mdash; mapped their GTM gaps</span><span class="tl-date">25 Jun</span></div></div>
+            <span class="tl-open note">Note &#8599;</span>
+          </div>
+          <div class="tl-entry linkable" data-target="tl-intro" role="button" tabindex="0">
+            <div class="tl-ic meeting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></div>
+            <div class="tl-body"><div class="tl-top"><span class="tl-title">Intro call with Sarah</span><span class="tl-date">18 Jun</span></div></div>
+            <span class="tl-open note">Note &#8599;</span>
+          </div>
+        </div>
+        <p class="tl-foot-note" style="font:11.5px/1.4 var(--sans);color:var(--faint);font-style:italic;margin:8px 0 0;">Tap any step to jump to it in the <b style="font-style:normal;font-weight:600;color:var(--muted);">Full timeline</b> &mdash; the meeting note or email opens right there.</p>
+      </details>
+    </div>
+  </div>
+
+  <!-- COMPANY TIMELINE — collapsible section, rich + drill-into-note -->
+  <details class="section">
+    <summary><span class="caret">&#9654;</span> Full timeline <span class="hint">every touch across the account, with sources</span> <span class="n">6 entries</span></summary>
+  <div class="timeline" style="margin-top:20px;">
+    <div class="month">July 2026</div>
+    <div class="tl-entry" id="tl-ask">
+      <div class="tl-ic email">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      </div>
+      <div class="tl-body">
+        <div class="tl-top"><span class="tl-title">Sarah asked for a 3-month initial term</span><span class="tl-date">10 Jul</span></div>
+        <div class="tl-desc">Price is fine; wants a shorter first commitment so Marcus signs off.</div>
+        <div class="tl-meta"><span class="tl-src"><span class="sd gmail"></span> via Gmail</span></div>
+        <details class="entry-more">
+          <summary><span class="caret">&#9654;</span> Summary &amp; source</summary>
+          <div class="note-body email">
+            <div class="src-head">
+              <span class="src-tag"><span class="sd" style="background:var(--cool)"></span> AI summary &middot; via Gmail</span>
+              <a class="src-link" href="https://mail.google.com/" target="_blank" rel="noopener">View original in Gmail &#8599;</a>
+            </div>
+            <div class="mail-hdr"><span><b>From</b> Sarah Chen &lt;sarah@nimbus-labs.com&gt;</span><span><b>Subject</b> Re: Nimbus GTM proposal &middot; 10 Jul &middot; inbound</span></div>
+            <p class="src-summary">Sarah is happy with the proposal and the price. Her one blocker is the 6-month term &mdash; Marcus wants to start smaller. She asked us to re-cut it as a <b>3-month initial term with an option to extend</b>, and to get it back by mid next week so she can secure his sign-off.</p>
+            <p class="src-foot"><span class="lock">&#128274;</span> The email itself stays in your inbox &mdash; the CRM keeps this summary and a link, not the message.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="tl-entry" id="tl-proposal">
+      <div class="tl-ic email">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      </div>
+      <div class="tl-body">
+        <div class="tl-top"><span class="tl-title">Proposal sent &mdash; $45k, 6-month GTM build</span><span class="tl-date">1 Jul</span></div>
+        <div class="tl-desc">Scope: positioning &amp; ICP, an outbound motion, and ramp for the first two AEs.</div>
+        <div class="tl-meta"><span class="tl-src"><span class="sd gmail"></span> via Gmail</span></div>
+        <details class="entry-more">
+          <summary><span class="caret">&#9654;</span> Summary &amp; source</summary>
+          <div class="note-body email">
+            <div class="src-head">
+              <span class="src-tag"><span class="sd" style="background:var(--cool)"></span> AI summary &middot; via Gmail</span>
+              <a class="src-link" href="https://mail.google.com/" target="_blank" rel="noopener">View original in Gmail &#8599;</a>
+            </div>
+            <div class="mail-hdr"><span><b>To</b> Sarah Chen &lt;sarah@nimbus-labs.com&gt;</span><span><b>Subject</b> Nimbus &mdash; GTM engagement proposal &middot; 1 Jul &middot; outbound</span></div>
+            <p class="src-summary">Sent the fractional GTM proposal: <b>6 months at $45k</b> across three workstreams &mdash; positioning &amp; ICP, a repeatable outbound motion, and ramp for the first two AEs. Offered to walk Marcus through the numbers; proposed a 1 Sep start.</p>
+            <p class="src-foot"><span class="lock">&#128274;</span> The email itself stays in your inbox &mdash; the CRM keeps this summary and a link, not the message.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="tl-entry" id="tl-stage">
+      <div class="tl-ic stage">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+      </div>
+      <div class="tl-body">
+        <div class="tl-top"><span class="tl-title">Stage &rarr; Proposal</span><span class="tl-date">1 Jul</span></div>
+        <div class="tl-desc">Moved from Discovery when the proposal went out.</div>
+        <div class="tl-meta"><span class="tl-src"><span class="sd system"></span> system event</span></div>
+      </div>
+    </div>
+
+    <div class="month">June 2026</div>
+    <div class="tl-entry" id="tl-marcus">
+      <div class="tl-ic rel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M17 11h5m-2.5-2.5v5"/></svg>
+      </div>
+      <div class="tl-body">
+        <div class="tl-top"><span class="tl-title">Marcus Lee (CTO) joined as budget approver</span><span class="tl-date">30 Jun</span></div>
+        <div class="tl-desc">The economic decision-maker on their side.</div>
+        <div class="tl-meta"><span class="tl-src"><span class="sd granola"></span> via Granola</span></div>
+      </div>
+    </div>
+    <div class="tl-entry" id="tl-disc">
+      <div class="tl-ic meeting">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+      </div>
+      <div class="tl-body">
+        <div class="tl-top"><span class="tl-title">Discovery call &mdash; mapped their GTM gaps</span><span class="tl-date">25 Jun</span></div>
+        <div class="tl-desc">No repeatable outbound; founder-led sales only. Clear fit for a fractional build.</div>
+        <div class="tl-meta"><span class="tl-src"><span class="sd granola"></span> via Granola</span></div>
+        <details class="entry-more">
+          <summary><span class="caret">&#9654;</span> Summary &amp; source</summary>
+          <div class="note-body">
+            <div class="src-head">
+              <span class="src-tag"><span class="sd" style="background:var(--accent)"></span> AI summary &middot; via Granola &middot; 42 min</span>
+              <a class="src-link" href="https://app.granola.ai/" target="_blank" rel="noopener">Open in Granola &#8599;</a>
+            </div>
+            <div class="mail-hdr"><span><b>Attendees</b> Sarah Chen (CEO), me</span><span><b>Title</b> Nimbus &lt;&gt; discovery &middot; 25 Jun</span></div>
+            <p class="src-summary">Mapped Nimbus&rsquo;s GTM gaps: all sales are founder-led, with no defined ICP or pipeline, and a prior SDR hire that failed for lack of a motion. They need an investor-ready sales machine before the A. Sarah flagged that Marcus controls spend and dislikes long commitments &mdash; <b>the origin of the term blocker</b>.</p>
+            <p class="src-foot"><span class="lock">&#128274;</span> The recording &amp; transcript stay in Granola &mdash; the CRM keeps this summary and the source link, not the full note.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="tl-entry" id="tl-intro">
+      <div class="tl-ic meeting">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+      </div>
+      <div class="tl-body">
+        <div class="tl-top"><span class="tl-title">Intro call with Sarah Chen</span><span class="tl-date">18 Jun</span></div>
+        <div class="tl-desc">Warm intro from a mutual founder. Prepping for Series A, needs a sales motion.</div>
+        <div class="tl-meta"><span class="tl-src"><span class="sd granola"></span> via Granola</span><span class="tl-src"><span class="sd manual"></span> referred by Dana Rios</span></div>
+        <details class="entry-more">
+          <summary><span class="caret">&#9654;</span> Summary &amp; source</summary>
+          <div class="note-body">
+            <div class="src-head">
+              <span class="src-tag"><span class="sd" style="background:var(--accent)"></span> AI summary &middot; via Granola &middot; 25 min</span>
+              <a class="src-link" href="https://app.granola.ai/" target="_blank" rel="noopener">Open in Granola &#8599;</a>
+            </div>
+            <div class="mail-hdr"><span><b>Attendees</b> Sarah Chen (CEO), me</span><span><b>Title</b> Intro &mdash; Dana Rios connect &middot; 18 Jun</span></div>
+            <p class="src-summary">Warm intro from Dana Rios. Nimbus is prepping a Series A and knows founder-led sales won&rsquo;t scale; Sarah wants to build the motion now rather than after hiring a VP. Agreed to a working discovery session &mdash; which became the 25 Jun call.</p>
+            <p class="src-foot"><span class="lock">&#128274;</span> The recording &amp; transcript stay in Granola &mdash; the CRM keeps this summary, not the full note.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+  </details>
+
+  <!-- FOOTER: conversational-action hint (the no-write constraint, made honest) -->
+  <div class="foot">
+    <div class="fi">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <p>This view is read-only. To act &mdash; <b>send the revised proposal</b>, log a note, move the
+      stage, or draft Sarah's follow-up &mdash; just ask Claude in the chat. Any change comes back here for approval.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  var tbtns=Array.prototype.slice.call(document.querySelectorAll(".themebar button"));
+  function media(){ return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+  function apply(t){ root.setAttribute("data-theme",t);
+    tbtns.forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-set")===t ? "true":"false"); }); }
+  apply(root.getAttribute("data-theme") || media());
+  tbtns.forEach(function(b){ b.addEventListener("click",function(){ apply(b.getAttribute("data-set")); }); });
+
+  // Deal checkpoints deep-link into the full timeline: open the section, expand the
+  // matching entry's note/email, scroll to it, and flash so you land on the right place.
+  var section=document.querySelector("details.section");
+  var flashTimer=null;
+  function jumpTo(id){
+    var target=document.getElementById(id); if(!target) return;
+    if(section) section.open=true;
+    var more=target.querySelector(".entry-more"); if(more) more.open=true;
+    target.scrollIntoView({behavior:"smooth", block:"center"});
+    target.classList.remove("flash"); void target.offsetWidth; target.classList.add("flash");
+    if(flashTimer) clearTimeout(flashTimer);
+    flashTimer=setTimeout(function(){ target.classList.remove("flash"); }, 1600);
+  }
+  Array.prototype.slice.call(document.querySelectorAll(".timeline.compact .linkable")).forEach(function(el){
+    function go(){ jumpTo(el.getAttribute("data-target")); }
+    el.addEventListener("click", go);
+    el.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } });
+  });
+})();
+</script>
