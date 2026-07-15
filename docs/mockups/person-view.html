@@ -1,0 +1,331 @@
+<title>Sarah Chen — person view</title>
+<style>
+  :root{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6;
+    --cool:#3f6f86; --cool-ink:#2c5266; --cool-soft:#e4eef3; --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05); --shadow-lg:0 8px 40px rgba(40,32,16,.18);
+    --serif:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){ :root{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413;
+    --cool:#7fb0c9; --cool-ink:#a7cede; --cool-soft:#17272f; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30); --shadow-lg:0 10px 44px rgba(0,0,0,.55);
+  }}
+  :root[data-theme="light"]{
+    --bg:#f3f0e8; --surface:#fffdf7; --raise:#fbf8f1; --ink:#221f18; --muted:#77705f; --faint:#9a927f;
+    --line:#e7e0d1; --line-strong:#d8cfba; --accent:#216b57; --accent-ink:#164d3d; --accent-soft:#e3efe9;
+    --warn:#8f6412; --warn-ink:#6f4e0e; --warn-soft:#f4ecd7; --warn-line:#e6d3a6;
+    --cool:#3f6f86; --cool-ink:#2c5266; --cool-soft:#e4eef3; --good:#216b57; --bad:#9d4a3b;
+    --shadow:0 1px 2px rgba(60,48,24,.05), 0 4px 14px rgba(60,48,24,.05); --shadow-lg:0 8px 40px rgba(40,32,16,.18);
+  }
+  :root[data-theme="dark"]{
+    --bg:#14120d; --surface:#1d1a13; --raise:#221e16; --ink:#ece6d8; --muted:#9c9280; --faint:#766e5e;
+    --line:#2b2619; --line-strong:#3a3324; --accent:#4fae90; --accent-ink:#c6e9de; --accent-soft:#1a3129;
+    --warn:#d6a34d; --warn-ink:#e8c485; --warn-soft:#2a2413; --warn-line:#403413;
+    --cool:#7fb0c9; --cool-ink:#a7cede; --cool-soft:#17272f; --good:#4fae90; --bad:#cf7462;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.30); --shadow-lg:0 10px 44px rgba(0,0,0,.55);
+  }
+
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:900px; margin:0 auto; padding:32px 22px 72px; }
+  .kicker{ font:600 11px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
+
+  .topbar{ display:flex; justify-content:flex-end; margin-bottom:10px; }
+  .themebar{ display:inline-flex; background:var(--raise); border:1px solid var(--line); border-radius:999px; padding:3px; gap:2px; }
+  .themebar button{ font:600 11px/1 var(--sans); color:var(--muted); background:none; border:none; border-radius:999px; padding:6px 11px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+  .themebar button[aria-pressed="true"]{ color:var(--accent-ink); background:var(--surface); box-shadow:var(--shadow); }
+  .themebar button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* masthead — person identity with a real avatar monogram */
+  .masthead{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px; padding-bottom:18px; border-bottom:1px solid var(--line-strong); }
+  .idwrap{ display:flex; gap:16px; align-items:center; }
+  .bigava{ width:56px; height:56px; flex:none; border-radius:16px; display:grid; place-items:center; font-family:var(--serif); font-weight:600; font-size:22px; color:var(--accent-ink); background:var(--accent-soft); }
+  .mast-title{ font-family:var(--serif); font-weight:600; font-size:29px; line-height:1.04; margin:2px 0 6px; letter-spacing:-.01em; }
+  .mast-sub{ font:13.5px/1.4 var(--sans); color:var(--muted); }
+  .mast-sub b{ color:var(--ink); font-weight:500; }
+  .rolechip{ display:inline-block; font:600 10px/1 var(--sans); letter-spacing:.05em; text-transform:uppercase; padding:3px 8px; border-radius:999px; margin-right:8px; vertical-align:1px; }
+  .rolechip.champ{ color:var(--accent-ink); background:var(--accent-soft); }
+  .mast-right{ text-align:right; display:flex; flex-direction:column; gap:7px; align-items:flex-end; }
+  .temp{ display:inline-flex; align-items:center; gap:7px; font:600 11px/1 var(--sans); letter-spacing:.05em; text-transform:uppercase; padding:6px 11px; border-radius:999px; color:var(--accent-ink); background:var(--accent-soft); }
+  .temp .dot{ width:8px; height:8px; border-radius:999px; background:var(--accent); }
+  .mast-touch{ font:12px/1.35 var(--mono); color:var(--muted); }
+
+  .sec-title{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:34px 0 14px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .sec-title .count{ font:600 11px/1 var(--mono); color:var(--muted); }
+
+  /* brief band */
+  .brief-band{ margin-top:22px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:14px; padding:20px 22px 18px; box-shadow:var(--shadow); }
+  .brief-eyebrow{ display:flex; align-items:center; gap:9px; margin-bottom:11px; }
+  .brief-eyebrow .lbl{ font:600 10.5px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .brief{ font-family:var(--serif); font-size:19px; line-height:1.5; margin:0; color:var(--ink); text-wrap:pretty; }
+  .brief b{ color:var(--accent-ink); font-weight:600; }
+  .prov{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:15px; padding-top:13px; border-top:1px dashed var(--line-strong); font:11.5px/1.4 var(--sans); color:var(--faint); }
+  .prov .fresh-pill{ display:inline-flex; align-items:center; gap:6px; font:600 11px/1 var(--sans); color:var(--accent-ink); background:var(--accent-soft); border-radius:999px; padding:4px 10px; }
+  .prov .fresh-pill .pdot{ width:7px; height:7px; border-radius:999px; background:var(--accent); }
+  .prov .sep{ color:var(--line-strong); }
+
+  /* tiles */
+  .tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+  .tile{ background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:14px 15px; box-shadow:var(--shadow); }
+  .tile-label{ font:600 10.5px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .figure{ font-family:var(--serif); font-size:24px; font-weight:600; margin-top:9px; font-variant-numeric:tabular-nums; letter-spacing:-.01em; line-height:1.05; }
+  .tile-sub{ font:11.5px/1.35 var(--sans); color:var(--faint); margin-top:5px; }
+
+  /* how to work with them */
+  .howto{ background:var(--raise); border:1px solid var(--line); border-radius:13px; padding:17px 19px; }
+  .howto p{ margin:0; font:14.5px/1.6 var(--sans); color:var(--ink); }
+  .howto p b{ color:var(--accent-ink); font-weight:600; }
+  .howto .tags{ display:flex; flex-wrap:wrap; gap:8px; margin-top:13px; }
+  .howto .tag{ font:12px/1 var(--sans); color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:6px 11px; }
+
+  /* deals & companies she's on */
+  .involve{ display:flex; flex-direction:column; gap:10px; }
+  .inv{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 15px; box-shadow:var(--shadow); }
+  .inv .co-ava{ width:38px; height:38px; flex:none; border-radius:10px; display:grid; place-items:center; font-family:var(--serif); font-weight:600; font-size:15px; color:var(--ink); background:var(--raise); border:1px solid var(--line-strong); }
+  .inv .i-main{ min-width:0; }
+  .inv .i-deal{ font-family:var(--serif); font-size:16px; font-weight:600; }
+  .inv .i-meta{ font:12.5px/1.4 var(--sans); color:var(--muted); margin-top:2px; }
+  .inv .i-meta b{ color:var(--ink); font-weight:500; }
+  .inv .i-amt{ text-align:right; font-family:var(--serif); font-size:17px; font-weight:600; color:var(--accent-ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .inv .i-stage{ display:block; font:10px/1.4 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--faint); }
+
+  /* CONNECTIONS — the referral graph, as directional inline lists */
+  .graph{ background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+  .graph-block{ padding:16px 19px; }
+  .graph-block + .graph-block{ border-top:1px solid var(--line); }
+  .gb-head{ display:flex; align-items:center; gap:9px; margin-bottom:13px; }
+  .gb-dir{ font:600 10px/1 var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .gb-arrow{ font-size:13px; color:var(--accent); }
+  .edge{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:13px; padding:11px 0; }
+  .edge + .edge{ border-top:1px dashed var(--line); }
+  .edge .p-ava{ width:36px; height:36px; flex:none; border-radius:999px; display:grid; place-items:center; font-family:var(--serif); font-weight:600; font-size:13px; color:var(--accent-ink); background:var(--accent-soft); }
+  .edge .e-main{ min-width:0; }
+  .edge .e-name{ font-family:var(--serif); font-size:15.5px; font-weight:600; }
+  .edge .e-role{ font:12.5px/1.4 var(--sans); color:var(--muted); margin-top:1px; }
+  .edge .e-status{ text-align:right; }
+  .statuschip{ display:inline-block; font:600 10px/1 var(--sans); letter-spacing:.04em; text-transform:uppercase; padding:5px 9px; border-radius:999px; white-space:nowrap; }
+  .statuschip.lead{ color:var(--accent-ink); background:var(--accent-soft); }
+  .statuschip.pending{ color:var(--cool-ink); background:var(--cool-soft); }
+  .statuschip.you{ color:var(--warn-ink); background:var(--warn-soft); }
+  .e-prov{ grid-column:2 / -1; font:11px/1.4 var(--sans); color:var(--faint); margin-top:2px; display:inline-flex; align-items:center; gap:6px; }
+  .e-prov .sd{ width:6px; height:6px; border-radius:999px; background:var(--accent); }
+  .graph-hint{ padding:12px 19px; background:var(--raise); border-top:1px solid var(--line); font:12px/1.5 var(--sans); color:var(--muted); }
+  .graph-hint b{ color:var(--accent-ink); font-weight:600; }
+
+  /* timeline (folded) */
+  details.fold{ margin-top:6px; }
+  details.fold > summary{ list-style:none; cursor:pointer; padding:13px 0 0; display:flex; align-items:center; gap:9px; font:600 11px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--accent); }
+  details.fold > summary::-webkit-details-marker{ display:none; }
+  details.fold > summary .caret{ transition:transform .18s ease; font-size:10px; color:var(--muted); }
+  details.fold[open] > summary .caret{ transform:rotate(90deg); }
+  details.fold > summary .n{ font:600 11px/1 var(--mono); color:var(--muted); margin-left:auto; text-transform:none; letter-spacing:0; }
+  .timeline{ margin:16px 0 2px; padding-left:8px; }
+  .tl-entry{ position:relative; display:grid; grid-template-columns:26px 1fr; gap:12px; padding-bottom:16px; }
+  .tl-entry::before{ content:""; position:absolute; left:12px; top:26px; bottom:-2px; width:1.5px; background:var(--line); }
+  .tl-entry:last-child::before{ display:none; }
+  .tl-ic{ width:26px; height:26px; border-radius:8px; display:grid; place-items:center; background:var(--raise); border:1px solid var(--line); color:var(--muted); z-index:1; }
+  .tl-ic svg{ width:14px; height:14px; display:block; }
+  .tl-ic.meeting{ color:var(--accent); background:var(--accent-soft); border-color:transparent; }
+  .tl-ic.email{ color:var(--cool-ink); background:var(--cool-soft); border-color:transparent; }
+  .tl-ic.note{ color:var(--warn-ink); background:var(--warn-soft); border-color:transparent; }
+  .tl-body{ min-width:0; padding-top:1px; }
+  .tl-top{ display:flex; align-items:baseline; gap:10px; justify-content:space-between; }
+  .tl-title{ font:600 14px/1.35 var(--sans); color:var(--ink); }
+  .tl-date{ font:11.5px/1 var(--mono); color:var(--faint); white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .tl-desc{ font:13px/1.5 var(--sans); color:var(--muted); margin-top:4px; }
+  .tl-meta{ margin-top:6px; font:11px/1 var(--sans); color:var(--faint); }
+  .tl-src{ display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:var(--raise); border:1px solid var(--line); }
+  .tl-src .sd{ width:6px; height:6px; border-radius:999px; }
+  .sd.granola{ background:var(--accent); } .sd.gmail{ background:var(--cool); } .sd.at{ background:var(--warn); }
+
+  .foot{ margin-top:34px; background:var(--accent-soft); border-radius:13px; padding:15px 18px; display:flex; align-items:center; gap:12px; }
+  .foot .fi{ flex:none; width:30px; height:30px; border-radius:9px; display:grid; place-items:center; background:var(--surface); color:var(--accent); }
+  .foot p{ margin:0; font:13px/1.5 var(--sans); color:var(--accent-ink); }
+  .foot b{ font-weight:600; }
+
+  @media (max-width:640px){ .tiles{ grid-template-columns:1fr 1fr; } .masthead{ flex-direction:column; align-items:flex-start; } .mast-right{ align-items:flex-start; text-align:left; } }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
+</style>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="themebar" role="group" aria-label="Colour theme">
+      <button type="button" data-set="light">&#9728; Light</button>
+      <button type="button" data-set="dark">&#9790; Dark</button>
+    </div>
+  </div>
+
+  <header class="masthead">
+    <div class="idwrap">
+      <div class="bigava">SC</div>
+      <div>
+        <span class="kicker">Person</span>
+        <h1 class="mast-title">Sarah Chen</h1>
+        <div class="mast-sub"><span class="rolechip champ">Champion</span><b>Founder &amp; CEO</b> at Nimbus Labs &middot; sarah@nimbus-labs.com</div>
+      </div>
+    </div>
+    <div class="mast-right">
+      <span class="temp"><span class="dot"></span> Warm &middot; your advocate</span>
+      <span class="mast-touch">Last spoke 3 days ago</span>
+    </div>
+  </header>
+
+  <!-- BRIEF BAND: person living summary -->
+  <section class="brief-band">
+    <div class="brief-eyebrow"><span class="lbl">Where things stand with Sarah</span></div>
+    <p class="brief">
+      Sarah is your <b>champion at Nimbus</b> and one of your best-connected relationships. She brought
+      you the <b>Nimbus GTM engagement</b> (in proposal at $45k) and has since made <b>two warm
+      introductions</b> to other founders — one already a live lead. Warm, responsive, prefers async.
+      Worth keeping close: she's both a deal <i>and</i> a pipeline source.
+    </p>
+    <div class="prov">
+      <span class="fresh-pill"><span class="pdot"></span> Updated 3 days ago</span>
+      <span>built from 1 meeting &middot; 2 emails &middot; 1 note</span>
+      <span class="sep">&middot;</span><span>maintained by enrichment</span>
+    </div>
+  </section>
+
+  <!-- TILES -->
+  <div class="tiles">
+    <div class="tile"><div class="tile-label">Last spoke</div><div class="figure">3 days</div><div class="tile-sub">responsive &lt; 1 day</div></div>
+    <div class="tile"><div class="tile-label">Active deals</div><div class="figure">1</div><div class="tile-sub">champion &middot; $45k</div></div>
+    <div class="tile"><div class="tile-label">Intros made</div><div class="figure">2</div><div class="tile-sub">1 became a lead</div></div>
+    <div class="tile"><div class="tile-label">Known since</div><div class="figure">Jun</div><div class="tile-sub">via Dana Rios</div></div>
+  </div>
+
+  <!-- HOW TO WORK WITH THEM -->
+  <h2 class="sec-title">How to work with her</h2>
+  <div class="howto">
+    <p>Sarah <b>prefers async over calls</b> — a tight written recap lands better than booking a meeting,
+      and she replies within a day. She's motivated by helping her network, so <b>introductions are her
+      love language</b>: give her people to connect and she'll reciprocate. Keep her looped as champion,
+      but run the numbers past Marcus (her co-founder) — he owns budget.</p>
+    <div class="tags">
+      <span class="tag">Async &gt; calls</span>
+      <span class="tag">Replies &lt; 1 day</span>
+      <span class="tag">Loves making intros</span>
+      <span class="tag">Not the budget holder</span>
+    </div>
+  </div>
+
+  <!-- DEALS & COMPANIES SHE'S ON -->
+  <h2 class="sec-title">Where she's involved <span class="count">1 deal</span></h2>
+  <div class="involve">
+    <div class="inv">
+      <div class="co-ava">N</div>
+      <div class="i-main">
+        <div class="i-deal">Fractional GTM engagement</div>
+        <div class="i-meta"><b>Nimbus Labs</b> &middot; Champion &middot; decision ~31 Jul</div>
+      </div>
+      <div class="i-amt">$45,000<span class="i-stage">Proposal</span></div>
+    </div>
+  </div>
+
+  <!-- CONNECTIONS: the referral graph -->
+  <h2 class="sec-title">Connections <span class="count">the referral graph</span></h2>
+  <div class="graph">
+    <div class="graph-block">
+      <div class="gb-head"><span class="gb-arrow">&#8600;</span><span class="gb-dir">Sarah came to you through</span></div>
+      <div class="edge">
+        <div class="p-ava">DR</div>
+        <div class="e-main">
+          <div class="e-name">Dana Rios</div>
+          <div class="e-role">Founder, Overland &middot; a past client of yours</div>
+          <div class="e-prov"><span class="sd"></span> per the intro call, 18 Jun 2026</div>
+        </div>
+        <div class="e-status"><span class="statuschip you">Referred you in</span></div>
+      </div>
+    </div>
+    <div class="graph-block">
+      <div class="gb-head"><span class="gb-arrow">&#8599;</span><span class="gb-dir">Warm intros Sarah has made for you</span></div>
+      <div class="edge">
+        <div class="p-ava">PN</div>
+        <div class="e-main">
+          <div class="e-name">Priya Nair</div>
+          <div class="e-role">CEO, Calder &amp; Co &middot; scaling, needs ops help</div>
+          <div class="e-prov"><span class="sd"></span> per Sarah&rsquo;s note, 30 Apr 2026</div>
+        </div>
+        <div class="e-status"><span class="statuschip lead">Now a lead</span></div>
+      </div>
+      <div class="edge">
+        <div class="p-ava">MW</div>
+        <div class="e-main">
+          <div class="e-name">Marcus Webb</div>
+          <div class="e-role">Founder, Brightpath Partners</div>
+          <div class="e-prov"><span class="sd"></span> per Sarah&rsquo;s note, 30 Apr 2026</div>
+        </div>
+        <div class="e-status"><span class="statuschip pending">Intro pending</span></div>
+      </div>
+    </div>
+    <div class="graph-hint">Sarah has <b>referred more pipeline than most</b> — a top connector. Ask Claude to <b>draft a thank-you</b>, or <b>who else she might introduce you to</b>.</div>
+  </div>
+
+  <!-- TIMELINE -->
+  <details class="fold">
+    <summary><span class="caret">&#9654;</span> Everything with Sarah <span class="n">4 entries</span></summary>
+    <div class="timeline">
+      <div class="tl-entry">
+        <div class="tl-ic email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
+        <div class="tl-body">
+          <div class="tl-top"><span class="tl-title">Asked for a 3-month initial term</span><span class="tl-date">10 Jul</span></div>
+          <div class="tl-desc">On the Nimbus deal — price is fine, wants a shorter first commitment so Marcus signs off.</div>
+          <div class="tl-meta"><span class="tl-src"><span class="sd gmail"></span> via Gmail</span></div>
+        </div>
+      </div>
+      <div class="tl-entry">
+        <div class="tl-ic meeting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></div>
+        <div class="tl-body">
+          <div class="tl-top"><span class="tl-title">Discovery call — Nimbus GTM gaps</span><span class="tl-date">25 Jun</span></div>
+          <div class="tl-desc">Mapped their founder-led sales problem; clear fit for a fractional build.</div>
+          <div class="tl-meta"><span class="tl-src"><span class="sd granola"></span> via Granola</span></div>
+        </div>
+      </div>
+      <div class="tl-entry">
+        <div class="tl-ic meeting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></div>
+        <div class="tl-body">
+          <div class="tl-top"><span class="tl-title">Intro call — via Dana Rios</span><span class="tl-date">18 Jun</span></div>
+          <div class="tl-desc">Warm intro from a mutual founder. Prepping for Series A, needs a sales motion.</div>
+          <div class="tl-meta"><span class="tl-src"><span class="sd granola"></span> via Granola</span></div>
+        </div>
+      </div>
+      <div class="tl-entry">
+        <div class="tl-ic note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h13l3 3v13H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></div>
+        <div class="tl-body">
+          <div class="tl-top"><span class="tl-title">Note — introduced two founders</span><span class="tl-date">30 Apr</span></div>
+          <div class="tl-desc">Migrated from Attio. Sarah connected you to Priya (Calder) and Marcus (Brightpath).</div>
+          <div class="tl-meta"><span class="tl-src"><span class="sd at"></span> from Attio</span></div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- FOOTER -->
+  <div class="foot">
+    <div class="fi">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <p>Read-only. To act — <b>draft Sarah a follow-up</b>, log a call, thank her for an intro, or ask
+      <b>who else she could connect you to</b> — just ask Claude in the chat.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  var tbtns=Array.prototype.slice.call(document.querySelectorAll(".themebar button"));
+  function media(){ return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+  function apply(t){ root.setAttribute("data-theme",t);
+    tbtns.forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-set")===t ? "true":"false"); }); }
+  apply(root.getAttribute("data-theme") || media());
+  tbtns.forEach(function(b){ b.addEventListener("click",function(){ apply(b.getAttribute("data-set")); }); });
+})();
+</script>
