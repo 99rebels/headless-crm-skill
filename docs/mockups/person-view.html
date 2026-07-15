@@ -145,6 +145,30 @@
   .tl-src .sd{ width:6px; height:6px; border-radius:999px; }
   .sd.granola{ background:var(--accent); } .sd.gmail{ background:var(--cool); } .sd.at{ background:var(--warn); }
 
+  /* source drill-down (mirrors the deep view): subject + AI summary + record-linked people + open-out */
+  .entry-more{ margin-top:9px; }
+  .entry-more > summary{ list-style:none; cursor:pointer; font:600 11px/1 var(--sans); color:var(--accent); display:inline-flex; align-items:center; gap:6px; padding:2px 0; }
+  .entry-more > summary::-webkit-details-marker{ display:none; }
+  .entry-more > summary:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+  .entry-more > summary .caret{ font-size:9px; color:var(--muted); transition:transform .18s ease; }
+  .entry-more[open] > summary .caret{ transform:rotate(90deg); }
+  .note-body{ margin-top:9px; padding:13px 15px; background:var(--raise); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:10px; font:13px/1.65 var(--sans); color:var(--ink); }
+  .note-body.email{ border-left-color:var(--cool); }
+  .note-body p{ margin:0 0 9px; } .note-body p:last-child{ margin:0; }
+  .src-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:11px; }
+  .src-tag{ display:inline-flex; align-items:center; gap:6px; font:600 10px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .src-tag .sd{ width:7px; height:7px; border-radius:999px; }
+  .src-link{ display:inline-flex; align-items:center; gap:5px; font:600 11px/1 var(--sans); color:var(--accent-ink); background:var(--surface); border:1px solid var(--line-strong); border-radius:999px; padding:6px 11px; text-decoration:none; transition:all .12s ease; white-space:nowrap; }
+  .src-link:hover{ border-color:var(--accent); background:var(--accent-soft); }
+  .src-link:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .mail-hdr{ display:flex; flex-direction:column; gap:3px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--line); font:11.5px/1.4 var(--mono); color:var(--muted); }
+  .mail-hdr b{ color:var(--ink); font-weight:600; font-family:var(--sans); margin-right:4px; }
+  .src-summary{ font:13.5px/1.62 var(--sans); color:var(--ink); margin:0; }
+  .people-on{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:11px; font:11.5px/1.4 var(--sans); color:var(--faint); }
+  .people-on .pchip{ font:600 11px/1 var(--sans); color:var(--accent-ink); background:var(--accent-soft); border-radius:999px; padding:4px 9px; }
+  .src-foot{ font:11px/1.5 var(--sans); color:var(--faint); font-style:italic; margin:13px 0 0; padding-top:11px; border-top:1px solid var(--line); display:flex; align-items:flex-start; gap:7px; }
+  .src-foot .lock{ flex:none; margin-top:1px; }
+
   .foot{ margin-top:34px; background:var(--accent-soft); border-radius:13px; padding:15px 18px; display:flex; align-items:center; gap:12px; }
   .foot .fi{ flex:none; width:30px; height:30px; border-radius:9px; display:grid; place-items:center; background:var(--surface); color:var(--accent); }
   .foot p{ margin:0; font:13px/1.5 var(--sans); color:var(--accent-ink); }
@@ -278,6 +302,16 @@
           <div class="tl-top"><span class="tl-title">Asked for a 3-month initial term</span><span class="tl-date">10 Jul</span></div>
           <div class="tl-desc">On the Nimbus deal — price is fine, wants a shorter first commitment so Marcus signs off.</div>
           <div class="tl-meta"><span class="tl-src"><span class="sd gmail"></span> via Gmail</span></div>
+          <details class="entry-more">
+            <summary><span class="caret">&#9654;</span> Summary &amp; source</summary>
+            <div class="note-body email">
+              <div class="src-head"><span class="src-tag"><span class="sd" style="background:var(--cool)"></span> AI summary &middot; via Gmail</span><a class="src-link" href="https://mail.google.com/" target="_blank" rel="noopener">Open in Gmail &#8599;</a></div>
+              <div class="mail-hdr"><span><b>From</b> Sarah Chen &lt;sarah@nimbus-labs.com&gt;</span><span><b>Subject</b> Re: Nimbus GTM proposal &middot; 10 Jul &middot; inbound</span></div>
+              <p class="src-summary">Sarah is happy with the proposal and the price; her one blocker is the 6-month term — Marcus wants to start smaller. She asked us to re-cut it as a 3-month initial term and get it back so she can secure his sign-off.</p>
+              <div class="people-on"><span>On this thread:</span><span class="pchip">Sarah Chen</span><span class="pchip">You</span></div>
+              <p class="src-foot"><span class="lock">&#128274;</span> The email stays in your inbox — the CRM keeps this summary and a link, not the message.</p>
+            </div>
+          </details>
         </div>
       </div>
       <div class="tl-entry">
@@ -286,6 +320,15 @@
           <div class="tl-top"><span class="tl-title">Discovery call — Nimbus GTM gaps</span><span class="tl-date">25 Jun</span></div>
           <div class="tl-desc">Mapped their founder-led sales problem; clear fit for a fractional build.</div>
           <div class="tl-meta"><span class="tl-src"><span class="sd granola"></span> via Granola</span></div>
+          <details class="entry-more">
+            <summary><span class="caret">&#9654;</span> Summary &amp; source</summary>
+            <div class="note-body">
+              <div class="src-head"><span class="src-tag"><span class="sd" style="background:var(--accent)"></span> AI summary &middot; via Granola &middot; 42 min</span><a class="src-link" href="https://app.granola.ai/" target="_blank" rel="noopener">Open in Granola &#8599;</a></div>
+              <div class="mail-hdr"><span><b>Attendees</b> Sarah Chen (CEO), you</span><span><b>Title</b> Nimbus &lt;&gt; discovery &middot; 25 Jun</span></div>
+              <p class="src-summary">Mapped Nimbus&rsquo;s GTM gaps — all sales founder-led, no ICP or pipeline. They need an investor-ready motion before the A. Sarah flagged that Marcus controls spend and dislikes long commitments.</p>
+              <p class="src-foot"><span class="lock">&#128274;</span> The recording &amp; transcript stay in Granola — the CRM keeps this summary and the link.</p>
+            </div>
+          </details>
         </div>
       </div>
       <div class="tl-entry">
@@ -294,6 +337,15 @@
           <div class="tl-top"><span class="tl-title">Intro call — via Dana Rios</span><span class="tl-date">18 Jun</span></div>
           <div class="tl-desc">Warm intro from a mutual founder. Prepping for Series A, needs a sales motion.</div>
           <div class="tl-meta"><span class="tl-src"><span class="sd granola"></span> via Granola</span></div>
+          <details class="entry-more">
+            <summary><span class="caret">&#9654;</span> Summary &amp; source</summary>
+            <div class="note-body">
+              <div class="src-head"><span class="src-tag"><span class="sd" style="background:var(--accent)"></span> AI summary &middot; via Granola &middot; 25 min</span><a class="src-link" href="https://app.granola.ai/" target="_blank" rel="noopener">Open in Granola &#8599;</a></div>
+              <div class="mail-hdr"><span><b>Attendees</b> Sarah Chen (CEO), you</span><span><b>Title</b> Intro &mdash; Dana Rios connect &middot; 18 Jun</span></div>
+              <p class="src-summary">Warm intro from Dana Rios. Nimbus is prepping a Series A and knows founder-led sales won&rsquo;t scale; Sarah wants to build the motion now. Agreed to a working discovery session (&rarr; 25 Jun).</p>
+              <p class="src-foot"><span class="lock">&#128274;</span> The recording &amp; transcript stay in Granola — the CRM keeps this summary and the link.</p>
+            </div>
+          </details>
         </div>
       </div>
       <div class="tl-entry">
@@ -302,6 +354,14 @@
           <div class="tl-top"><span class="tl-title">Note — introduced two founders</span><span class="tl-date">30 Apr</span></div>
           <div class="tl-desc">Migrated from Attio. Sarah connected you to Priya (Calder) and Marcus (Brightpath).</div>
           <div class="tl-meta"><span class="tl-src"><span class="sd at"></span> from Attio</span></div>
+          <details class="entry-more">
+            <summary><span class="caret">&#9654;</span> Read the note</summary>
+            <div class="note-body">
+              <div class="src-head"><span class="src-tag"><span class="sd" style="background:var(--warn)"></span> Note &middot; migrated from Attio</span></div>
+              <p>Sarah offered to connect us with a couple of founders in her network wrestling with the same GTM problem &mdash; Priya Nair at Calder &amp; Co (scaling fast, needs ops help) and Marcus Webb at Brightpath. Said she&rsquo;d make warm intros this week. Follow up if they don&rsquo;t land.</p>
+              <p class="src-foot"><span class="lock">&#128274;</span> A note you wrote yourself &mdash; kept in full (user-authored notes store their text, unlike ingested email).</p>
+            </div>
+          </details>
         </div>
       </div>
     </div>
