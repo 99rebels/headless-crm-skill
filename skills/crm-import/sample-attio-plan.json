@@ -181,6 +181,46 @@
         "to": "o0",
         "relationship_type": "account"
       }
+    ],
+    "timeline_entries": [
+      {
+        "type": "note",
+        "source": "migration",
+        "external_id": "note_a1",
+        "occurred_at": "2026-05-12",
+        "subject": "Renewal + expansion scoping",
+        "body": "Nimbus wants to add ~40 seats at the Q3 renewal. Priya says the new CFO must sign off on budget before anything is committed — aim to send the expansion proposal by mid-Aug. Champion is still Priya; keep her close.",
+        "links": [
+          {
+            "key": "d3"
+          }
+        ]
+      },
+      {
+        "type": "note",
+        "source": "migration",
+        "external_id": "note_a2",
+        "occurred_at": "2026-04-30",
+        "body": "Prefers async updates over calls. Introduced us to two portfolio founders last quarter — a warm connector worth keeping close.",
+        "links": [
+          {
+            "key": "c0"
+          }
+        ]
+      },
+      {
+        "type": "note",
+        "source": "migration",
+        "external_id": "note_a3",
+        "occurred_at": "2026-06-02",
+        "subject": "Compliance gate",
+        "body": "Procurement needs a signed BAA before any pilot data can flow. Their legal is reviewing it now; Dan Hobbs owns it on their side.",
+        "links": [
+          {
+            "key": "o1"
+          }
+        ]
+      }
     ]
   },
   "digest": {
@@ -191,7 +231,8 @@
       "contacts": 4,
       "organizations": 3,
       "deals": 6,
-      "links": 12
+      "links": 12,
+      "timeline_entries": 3
     },
     "mapping": [
       {
@@ -391,6 +432,32 @@
       "2 people had no email address — deduped by Attio identity, not email (so none were wrongly merged).",
       "Assigned a lifecycle to 4 contact(s) from their deal activity (won → client, open → prospect, otherwise lead) — Attio has no lifecycle field. Adjust any that look off before approving.",
       "Deal stage “Pilot” isn’t in your vocab — kept as a note, stage left blank."
+    ],
+    "timeline": [
+      {
+        "record": "Nimbus expansion",
+        "record_type": "deal",
+        "type": "note",
+        "subject": "Renewal + expansion scoping",
+        "preview": "Nimbus wants to add ~40 seats at the Q3 renewal. Priya says the new CFO must sign off on budget before anything is committed — aim to send the expansion proposal by mid-Aug. Champion is still Priya…",
+        "date": "2026-05-12"
+      },
+      {
+        "record": "James McElroy",
+        "record_type": "person",
+        "type": "note",
+        "subject": "",
+        "preview": "Prefers async updates over calls. Introduced us to two portfolio founders last quarter — a warm connector worth keeping close.",
+        "date": "2026-04-30"
+      },
+      {
+        "record": "Forte Healthcare",
+        "record_type": "company",
+        "type": "note",
+        "subject": "Compliance gate",
+        "preview": "Procurement needs a signed BAA before any pilot data can flow. Their legal is reviewing it now; Dan Hobbs owns it on their side.",
+        "date": "2026-06-02"
+      }
     ]
   }
 }

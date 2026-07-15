@@ -127,13 +127,14 @@ def render_tabs(counts: dict) -> str:
             f"<button class='tab' role='tab' aria-selected='{s}' data-panel='{panel}'>"
             f"{esc(label)} <span class='c'>{n}</span></button>"
         )
-    return (
-        f"<div class='tabs' role='tablist' aria-label='{esc(C['tabs_aria'])}'>"
-        + tab("people", "People", counts.get("contacts", 0), True)
+    tabs = (
+        tab("people", "People", counts.get("contacts", 0), True)
         + tab("companies", "Companies", counts.get("organizations", 0), False)
         + tab("deals", "Deals", counts.get("deals", 0), False)
-        + "</div>"
     )
+    if counts.get("timeline_entries", 0):
+        tabs += tab("notes", "Notes", counts.get("timeline_entries", 0), False)
+    return f"<div class='tabs' role='tablist' aria-label='{esc(C['tabs_aria'])}'>{tabs}</div>"
 
 
 def _more_row(shown: int, total: int, cols: int) -> str:
@@ -228,6 +229,43 @@ def render_deals(digest: dict) -> str:
     )
 
 
+def render_notes(digest: dict) -> str:
+    """The Notes tab — migrated notes / meeting summaries folded into the timeline, each shown with
+    the record it lands on. Only rendered when the source actually brought notes across (e.g. Attio)."""
+    counts = digest.get("counts", {})
+    entries = digest.get("timeline", []) or []
+    total = counts.get("timeline_entries", len(entries))
+    if not total:
+        return ""
+    rows = ""
+    for e in entries:
+        rtype = e.get("record_type", "record")
+        rtype = rtype if rtype in ("person", "company", "deal") else "record"
+        subj = f"<div class='note-subj'>{esc(e.get('subject'))}</div>" if e.get("subject") else ""
+        meta = esc(e.get("type", "note"))
+        if e.get("date"):
+            meta += f" &middot; {esc(e.get('date'))}"
+        rows += (
+            "<div class='noterow'>"
+            "<div class='noterow-hd'>"
+            f"<span class='rectag {rtype}'>{esc(e.get('record'))}</span>"
+            f"<span class='note-meta'>{meta}</span></div>"
+            f"{subj}<div class='note-preview'>{esc(e.get('preview'))}</div>"
+            "</div>"
+        )
+    extra = total - len(entries)
+    if extra > 0:
+        rows += f"<div class='noterow-more'>+{extra} more will be {C['more_verb']}</div>"
+    foot = (
+        f"<div class='tblfoot'><span><b>{total}</b> note{'' if total == 1 else 's'} &rarr; your timeline</span>"
+        "<span>kept in full on each record</span></div>"
+    )
+    return (
+        "<div class='panel' id='notes' role='tabpanel'>"
+        f"<div class='notewrap'>{rows}{foot}</div></div>"
+    )
+
+
 def render_note(notes: list) -> str:
     if not notes:
         return ""
@@ -269,7 +307,7 @@ def render(data: dict) -> str:
             f"<div class='stats'>{render_stats(counts)}</div>"
             + render_mapping(data.get("mapping", []), data.get("skipped_columns", []), data.get("value_aliases", []))
             + render_tabs(counts)
-            + render_people(data) + render_companies(data) + render_deals(data)
+            + render_people(data) + render_companies(data) + render_deals(data) + render_notes(data)
             + render_note(data.get("notes", []) or [])
         )
         approve = (
@@ -409,6 +447,18 @@ TEMPLATE = """<!doctype html>
 
   .tblfoot{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 16px; border-top:1px solid var(--line); background:var(--raise); font:12px/1.4 var(--sans); color:var(--muted); }
   .tblfoot b{ font-family:var(--mono); color:var(--ink); font-variant-numeric:tabular-nums; }
+
+  .notewrap{ background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+  .noterow{ padding:14px 16px; border-top:1px solid var(--line); }
+  .noterow:first-child{ border-top:none; }
+  .noterow-hd{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .rectag{ font:600 12px/1.3 var(--serif); color:var(--accent-ink); background:var(--accent-soft); border-radius:999px; padding:4px 12px; }
+  .rectag.company{ color:var(--ink); background:var(--raise); border:1px solid var(--line-strong); }
+  .rectag.deal{ color:var(--accent-ink); background:transparent; border:1.5px solid var(--accent); }
+  .note-meta{ font:11px/1 var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--faint); white-space:nowrap; }
+  .note-subj{ font-family:var(--serif); font-weight:600; font-size:14px; color:var(--ink); margin-top:9px; }
+  .note-preview{ font:13px/1.55 var(--sans); color:var(--muted); margin-top:6px; white-space:pre-wrap; }
+  .noterow-more{ padding:11px 16px; border-top:1px solid var(--line); color:var(--faint); font-style:italic; font-size:13px; text-align:center; background:var(--raise); }
 
   .note{ margin-top:14px; background:var(--warn-soft); border:1px solid var(--warn-line); border-left:4px solid var(--warn); border-radius:12px; padding:13px 16px; display:flex; gap:11px; align-items:flex-start; }
   .note .ic{ color:var(--warn); font-weight:700; }

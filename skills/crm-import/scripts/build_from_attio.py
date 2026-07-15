@@ -589,6 +589,25 @@ def assemble(people, orgs, deals, links, notes, records_reviewed,
     won_total = sum(d.get("amount") or 0 for d in deal_list if d.get("status") == "won")
     people_with_deal = len({a for (a, b, r) in links if r == "primary_contact"})
 
+    # resolve each note's record key → a display name + type, so the preview can show which
+    # record a migrated note lands on (its Notes tab).
+    name_by_key = {}
+    for k, c in people.items():
+        name_by_key[k] = (c.get("name") or c.get("email") or "—", "person")
+    for k, o in orgs.items():
+        name_by_key[k] = (o.get("name") or o.get("domain") or "—", "company")
+    for k, d in deals.items():
+        name_by_key[k] = (d.get("name") or "(unnamed deal)", "deal")
+
+    def timeline_row(e):
+        key = (e.get("links") or [{}])[0].get("key")
+        nm, rtype = name_by_key.get(key, ("—", "record"))
+        text = (e.get("body") or e.get("subject") or "").strip()
+        preview = text if len(text) <= 200 else text[:197].rstrip() + "…"
+        return {"record": nm, "record_type": rtype, "type": e.get("type", "note"),
+                "subject": e.get("subject") or "", "preview": preview,
+                "date": e.get("occurred_at") or ""}
+
     digest = {
         "rows_reviewed": records_reviewed,
         "source_kind": "attio",
@@ -609,6 +628,7 @@ def assemble(people, orgs, deals, links, notes, records_reviewed,
             "people_with_deal": people_with_deal,
         },
         "notes": sorted(notes),
+        "timeline": [timeline_row(e) for e in timeline_entries[:DISPLAY_CAP]],
     }
     plan = {"contacts": contacts, "organizations": organizations,
             "deals": deal_list, "links": link_list}
